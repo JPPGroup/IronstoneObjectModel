@@ -18,10 +18,10 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
             set
             {
                 _ID = value;
-                if (Label != null)
+                /*if (Label != null)
                 {
                     Label.Text = value;
-                }
+                }*/
             }
         }
 
@@ -39,7 +39,7 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
 
         Shrinkage _shrinkage;
 
-        private TextObject Label;
+        //private TextObject Label;
 
         public NHBCTree() : base()
         {
@@ -100,8 +100,8 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
             text.Position = this.Location;
             text.TextString = ID;
 
-            Label = new TextObject();
-            Label.BaseObject = acBlkTblRec.AppendEntity(text);
+            /*Label = new TextObject();
+            Label.BaseObject = acBlkTblRec.AppendEntity(text);*/
             acTrans.AddNewlyCreatedDBObject(text, true);
         }
 
