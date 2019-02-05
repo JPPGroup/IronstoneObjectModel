@@ -13,7 +13,7 @@ using Jpp.Ironstone.Core.ServiceInterfaces;
 namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
 {
     //TODO: Review class
-    class TreeRingManager : AbstractDrawingObjectManager
+    public class TreeRingManager : AbstractDrawingObjectManager
     {
         public List<NHBCTree> Trees { get; set; }
 
