@@ -37,6 +37,8 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
 
         public TreeType TreeType { get; set; }
 
+        public Phase Phase { get; set; }
+
         Shrinkage _shrinkage;
 
         //private TextObject Label;
@@ -470,5 +472,11 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
     {
         Deciduous,
         Coniferous
+    }
+
+    public enum Phase
+    {
+        Proposed,
+        Existing
     }
 }
