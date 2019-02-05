@@ -5,15 +5,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.ApplicationServices;
+using Jpp.Common;
 
 namespace Jpp.Ironstone.Structures.Objectmodel
 {
-    public class SoilProperties
+    public class SoilProperties : BaseNotify
     {
         public Shrinkage SoilShrinkability
         {
             get { return _soilShrinkability; }
-            set { _soilShrinkability = value; Update(); }
+            set { SetField(ref _soilShrinkability, value, "SoilShrinkability"); }
         }
 
         private Shrinkage _soilShrinkability;
@@ -21,14 +22,14 @@ namespace Jpp.Ironstone.Structures.Objectmodel
         public Boolean Granular
         {
             get { return _granular; }
-            set { _granular = value; Update(); }
+            set { SetField(ref _granular, value, "Granular"); }
         }
         private Boolean _granular;
 
         public float TargetStepSize
         {
             get { return _targetStepSize; }
-            set { _targetStepSize = value; Update(); }
+            set { SetField(ref _targetStepSize, value, "TargetStepSize"); }
         }
         private float _targetStepSize;
 
@@ -40,13 +41,13 @@ namespace Jpp.Ironstone.Structures.Objectmodel
             _targetStepSize = 0.3f;
         }
 
-        private void Update()
+        /*private void Update()
         {
             Document acDoc = Application.DocumentManager.MdiActiveDocument;
 
             // Draws a circle and zooms to the extents or 
             // limits of the drawing
             acDoc.SendStringToExecute("._regen ", false, false, true);
-        }
+        }*/
     }
 }
