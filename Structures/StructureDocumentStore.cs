@@ -8,7 +8,7 @@ using Jpp.Ironstone.Core.Autocad;
 
 namespace Jpp.Ironstone.Structures.Objectmodel
 {
-    class StructureDocumentStore : DocumentStore
+    public class StructureDocumentStore : DocumentStore
     {
         public SoilProperties SoilProperties { get; set; }
 
