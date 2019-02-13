@@ -104,8 +104,8 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
             text.TextString = ID;
 
             /*Label = new TextObject();
-            Label.BaseObject = acBlkTblRec.AppendEntity(text);*/
-            acTrans.AddNewlyCreatedDBObject(text, true);
+            Label.BaseObject = acBlkTblRec.AppendEntity(text);
+            acTrans.AddNewlyCreatedDBObject(text, true);*/
         }
 
         public DBObjectCollection DrawRings(Shrinkage shrinkage, float StartDepth, float Step)
