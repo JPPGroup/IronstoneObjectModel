@@ -15,18 +15,22 @@ namespace Jpp.Ironstone.DocumentManagement.Objectmodel
 
         public ProjectContainer container { get; private set; }
 
+        public LayoutSheetController LayoutSheetController { get; private set; }
+
         public DocumentManagementDocumentStore(Document doc, Type[] ManagerTypes) : base(doc, ManagerTypes)
         {
         }
 
         protected override void Save()
         {
-            
+            SaveBinary("LayoutSheetController", LayoutSheetController);
+            base.Save();
         }
 
         protected override void Load()
         {
-            
+            LayoutSheetController = LoadBinary<LayoutSheetController>("LayoutSheetController");
+            base.Load();
         }
     }
 }

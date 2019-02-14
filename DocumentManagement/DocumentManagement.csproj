@@ -113,6 +113,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DocumentManagementDocumentStore.cs" />
+    <Compile Include="LayoutSheet.cs" />
+    <Compile Include="LayoutSheetController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
