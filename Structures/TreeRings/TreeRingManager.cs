@@ -169,57 +169,59 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
 
         private void GenerateRing(List<DBObjectCollection> existingRings, int ringIndex, int[] ringColors, BlockTableRecord acBlkTblRec, Transaction acTrans)
         {
-            //Determine overlaps
-            List<Curve> currentStep = new List<Curve>();
-
-
-            //Build a collection of the outer rings only
-            foreach (DBObjectCollection col in existingRings)
+            if (existingRings.Count > 0)
             {
-                //Check not stepping beyond
-                if (col.Count > ringIndex)
+                //Determine overlaps
+                List<Curve> currentStep = new List<Curve>();
+
+                //Build a collection of the outer rings only
+                foreach (DBObjectCollection col in existingRings)
                 {
-                    if (col[ringIndex] is Curve)
+                    //Check not stepping beyond
+                    if (col.Count > ringIndex)
                     {
-                        currentStep.Add(col[ringIndex] as Curve);
+                        if (col[ringIndex] is Curve)
+                        {
+                            currentStep.Add(col[ringIndex] as Curve);
+                        }
                     }
                 }
-            }
 
-            List<Region> createdRegions = new List<Region>();
+                List<Region> createdRegions = new List<Region>();
 
-            //Create regions
-            foreach (Curve c in currentStep)
-            {
-                DBObjectCollection temp = new DBObjectCollection();
-                temp.Add(c);
-                DBObjectCollection regions = Region.CreateFromCurves(temp);
-                foreach (Region r in regions)
+                //Create regions
+                foreach (Curve c in currentStep)
                 {
-                    createdRegions.Add(r);
+                    DBObjectCollection temp = new DBObjectCollection();
+                    temp.Add(c);
+                    DBObjectCollection regions = Region.CreateFromCurves(temp);
+                    foreach (Region r in regions)
+                    {
+                        createdRegions.Add(r);
+                    }
                 }
-            }
 
-            Region enclosed = createdRegions[0];
+                Region enclosed = createdRegions[0];
 
-            for (int i = 1; i < createdRegions.Count; i++)
-            {
-                enclosed.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
-            }
+                for (int i = 1; i < createdRegions.Count; i++)
+                {
+                    enclosed.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
+                }
 
-            //Protection for color overflow, loop around
-            if (ringIndex >= ringColors.Length)
-            {
-                int multiple = (int) Math.Floor((double) (ringIndex / ringColors.Length));
-                enclosed.ColorIndex = ringColors[ringIndex - multiple * ringColors.Length];
-            }
-            else
-            {
-                enclosed.ColorIndex = ringColors[ringIndex];
-            }
+                //Protection for color overflow, loop around
+                if (ringIndex >= ringColors.Length)
+                {
+                    int multiple = (int) Math.Floor((double) (ringIndex / ringColors.Length));
+                    enclosed.ColorIndex = ringColors[ringIndex - multiple * ringColors.Length];
+                }
+                else
+                {
+                    enclosed.ColorIndex = ringColors[ringIndex];
+                }
 
-            RingsCollection.Add(acBlkTblRec.AppendEntity(enclosed));
-            acTrans.AddNewlyCreatedDBObject(enclosed, true);
+                RingsCollection.Add(acBlkTblRec.AppendEntity(enclosed));
+                acTrans.AddNewlyCreatedDBObject(enclosed, true);
+            }
         }
 
         public override void AllDirty()
