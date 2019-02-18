@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Structures", "Structures\Structures.csproj", "{ADA84B10-90AB-4AD2-9F7C-FDFD362AC7CA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Structures Objectmodel", "Structures\Structures Objectmodel.csproj", "{ADA84B10-90AB-4AD2-9F7C-FDFD362AC7CA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Highways", "Highways\Highways.csproj", "{D90B155A-A8A5-4BF2-8913-2BA3D3B9976D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Highways Objectmodel", "Highways\Highways Objectmodel.csproj", "{D90B155A-A8A5-4BF2-8913-2BA3D3B9976D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement", "DocumentManagement\DocumentManagement.csproj", "{1DCE2556-069B-45E0-969C-367CA59376E9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagement Objectmodel", "DocumentManagement\DocumentManagement Objectmodel.csproj", "{1DCE2556-069B-45E0-969C-367CA59376E9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StructuresTests", "StructuresTests\StructuresTests.csproj", "{AC8D2081-ACC4-428A-A1CB-DC86084C5275}"
 EndProject

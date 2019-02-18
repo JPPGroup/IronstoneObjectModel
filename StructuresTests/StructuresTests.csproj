@@ -98,9 +98,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Structures\Structures.csproj">
+    <ProjectReference Include="..\Structures\Structures Objectmodel.csproj">
       <Project>{ada84b10-90ab-4ad2-9f7c-fdfd362ac7ca}</Project>
-      <Name>Structures</Name>
+      <Name>Structures Objectmodel</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
