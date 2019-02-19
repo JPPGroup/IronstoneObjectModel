@@ -1,3 +1,0 @@
-_SECURELOAD 0
-_netload "C:\Repos\Ironstone\ironstone-object-model\Tools\TestRunner\CoreConsoleRunner.dll" RunTests
-_SECURELOAD 1
