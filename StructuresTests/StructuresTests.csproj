@@ -56,14 +56,14 @@
       <HintPath>..\packages\AutoCAD.NET.Model.23.0.0\lib\net47\acdbmgdbrep.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="AutoUpdate, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoUpdate.1.0.6\lib\net47\AutoUpdate.dll</HintPath>
+    <Reference Include="AutoUpdate, Version=1.0.8.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoUpdate.1.0.8\lib\net47\AutoUpdate.dll</HintPath>
     </Reference>
     <Reference Include="Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Common.0.1.4\lib\netstandard2.0\Common.dll</HintPath>
     </Reference>
-    <Reference Include="IronstoneCore, Version=0.1.46.68, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Jpp.Ironstone.Core.0.1.46\lib\net472\IronstoneCore.dll</HintPath>
+    <Reference Include="IronstoneCore, Version=0.1.50.73, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\Jpp.Ironstone.Core.0.1.50\lib\net472\IronstoneCore.dll</HintPath>
     </Reference>
     <Reference Include="nunit.framework, Version=3.11.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.11.0\lib\net45\nunit.framework.dll</HintPath>
@@ -84,8 +84,8 @@
     <Reference Include="Unity.Container, Version=5.9.4.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\packages\Unity.5.9.4\lib\net47\Unity.Container.dll</HintPath>
     </Reference>
-    <Reference Include="ZipExtract, Version=1.0.6.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AutoUpdate.1.0.6\lib\net47\ZipExtract.dll</HintPath>
+    <Reference Include="ZipExtract, Version=1.0.8.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoUpdate.1.0.8\lib\net47\ZipExtract.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -102,19 +102,6 @@
       <Name>Structures Objectmodel</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Content Include="dpwin64.dll" />
-    <Content Include="IronstoneCore.xml" />
-    <Content Include="Resources\clock_go.png" />
-    <Content Include="Resources\clock_go1.png" />
-    <Content Include="Resources\clock_go_32.png" />
-    <Content Include="Resources\clock_play.png" />
-    <Content Include="Resources\download.png" />
-    <Content Include="Resources\download1.png" />
-    <Content Include="Resources\download_32.png" />
-    <Content Include="Resources\hand_point.png" />
-    <Content Include="Resources\update.png" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -122,8 +109,6 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\NUnit.3.11.0\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NUnit.3.11.0\build\NUnit.props'))" />
     <Error Condition="!Exists('..\packages\Jpp.Common.Tooling.Signing.0.2.0\build\Jpp.Common.Tooling.Signing.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Jpp.Common.Tooling.Signing.0.2.0\build\Jpp.Common.Tooling.Signing.targets'))" />
-    <Error Condition="!Exists('..\packages\Jpp.Common.Tooling.Protection.0.3.0\build\Jpp.Common.Tooling.Protection.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Jpp.Common.Tooling.Protection.0.3.0\build\Jpp.Common.Tooling.Protection.targets'))" />
   </Target>
   <Import Project="..\packages\Jpp.Common.Tooling.Signing.0.2.0\build\Jpp.Common.Tooling.Signing.targets" Condition="Exists('..\packages\Jpp.Common.Tooling.Signing.0.2.0\build\Jpp.Common.Tooling.Signing.targets')" />
-  <Import Project="..\packages\Jpp.Common.Tooling.Protection.0.3.0\build\Jpp.Common.Tooling.Protection.targets" Condition="Exists('..\packages\Jpp.Common.Tooling.Protection.0.3.0\build\Jpp.Common.Tooling.Protection.targets')" />
 </Project>
