@@ -9,7 +9,7 @@ using Jpp.jHub;
 
 namespace Jpp.Ironstone.DocumentManagement.Objectmodel
 {
-    class DocumentManagementDocumentStore : DocumentStore
+    public class DocumentManagementDocumentStore : DocumentStore
     {
         private string ProjectFileLocation;
 
