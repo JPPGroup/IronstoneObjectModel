@@ -26,6 +26,12 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
             RingsCollection = new PersistentObjectIdCollection();
         }
 
+        public TreeRingManager() : base()
+        {
+            Trees = new List<NHBCTree>();
+            RingsCollection = new PersistentObjectIdCollection();
+        }
+
         public override void UpdateDirty()
         {
             //TODO: Optimise

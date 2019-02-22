@@ -380,30 +380,30 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
         {
             { "EnglishElm",24 },
             { "WheatleyElm",22 },
-            { "WhychElm",18 },
+            { "WHychElm",18 },
             { "Eucalyptus",18 },
             { "Hawthorn",10 },
-            { "EnglishOak",20 },
+            { "ENglishOak",20 },
             { "HolmOak",16 },
             { "RedOak",24 },
             { "TurkeyOak",24 },
             { "HybridBlackPoplar",28 },
             { "LombardyPoplar",25 },
-            { "WhitePoplar",15 },
+            { "WHItePoplar",15 },
             { "CrackWillow",24 },
-            { "WeepingWillow",16 },
-            { "WhiteWillow",24 },
+            { "WEepingWillow",16 },
+            { "WHIteWillow",24 },
         };
 
         public static Dictionary<string, int> DeciduousMedium = new Dictionary<string, int>()
         {
             { "Acacia",18 },
-            { "Alder",18 },
-            { "Apple",10 },
-            { "Ash",23 },
+            { "ALder",18 },
+            { "APple",10 },
+            { "ASh",23 },
             { "BayLaurel",10 },
-            { "Beech",20 },
-            { "Blackthorn",8 },
+            { "BEech",20 },
+            { "BLackthorn",8 },
             { "JapaneseCherry",9 },
             { "LaurelCherry",8 },
             { "OrchardCherry",12 },
@@ -415,12 +415,12 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
             { "NorwayMaple",18 },
             { "MountainAsh",11 },
             { "Pear",12 },
-            { "Plane",26 },
-            { "Plum",10 },
+            { "PLane",26 },
+            { "PLUm",10 },
             { "Sycamore",22 },
             { "TreeOfHeaven",20 },
             { "Walnut",18 },
-            { "Whitebeam",12 },
+            { "WHitebeam",12 },
         };
 
         public static Dictionary<string, int> DeciduousLow = new Dictionary<string, int>()
@@ -429,12 +429,12 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
             { "Elder",10 },
             { "Fig",8 },
             { "Hazel",8 },
-            { "Holly",12 },
-            { "HoneyLocust",14 },
-            { "Hornbeam",17 },
+            { "HOlly",12 },
+            { "HONeyLocust",14 },
+            { "HORnbeam",17 },
             { "Laburnum",12 },
             { "Magnolia",9 },
-            { "Mulberry",9 },
+            { "MUlberry",9 },
             { "TulipTree",20 },
 
         };
@@ -442,7 +442,7 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
         public static Dictionary<string, int> ConiferousHigh = new Dictionary<string, int>()
         {
             { "LawsonsCypress",18 },
-            { "LeylandCypress",20 },
+            { "LEylandCypress",20 },
             { "MontereyCypress",20 },
         };
 

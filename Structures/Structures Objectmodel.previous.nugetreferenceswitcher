@@ -1,0 +1,2 @@
+Ironstone Core	../../ironstone-core/Ironstone%20Core/Ironstone%20Core.csproj	../packages/Jpp.Ironstone.Core.0.1.50/lib/net472/IronstoneCore.dll
+Common	../../../common-code/Common.Code/Common.csproj	../packages/Common.0.1.4/lib/netstandard2.0/Common.dll

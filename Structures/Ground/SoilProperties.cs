@@ -36,7 +36,7 @@ namespace Jpp.Ironstone.Structures.Objectmodel
         public SoilProperties()
         {
             //Init to conservative starting values
-            _soilShrinkability = Shrinkage.High;
+            _soilShrinkability = Shrinkage.Medium;
             _granular = false;
             _targetStepSize = 0.3f;
         }
