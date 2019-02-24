@@ -98,14 +98,15 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
             acBlkTblRec = acTrans.GetObject(acBlkTbl[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
 
             //Draw label
-            DBText text = new DBText();
+            MText text = new MText();
             text.Height = 2;
-            text.Position = this.Location;
-            text.TextString = ID;
+            text.Location = this.Location;
+            text.Contents = $"No. {ID}\\P{Species}\\P{Height}m";
 
             /*Label = new TextObject();
-            Label.BaseObject = acBlkTblRec.AppendEntity(text);
-            acTrans.AddNewlyCreatedDBObject(text, true);*/
+            Label.BaseObject = acBlkTblRec.AppendEntity(text);*/
+            acBlkTblRec.AppendEntity(text);
+             acTrans.AddNewlyCreatedDBObject(text, true);
         }
 
         public DBObjectCollection DrawRings(Shrinkage shrinkage, float StartDepth, float Step)
@@ -132,16 +133,10 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
 
             while (next)
             {
-                float radius = GetRingRadius(currentDepth);
-
-                if (radius > 0)
+                Circle acCirc = DrawRing(currentDepth);
+                if (acCirc != null)
                 {
-                    Circle acCirc = new Circle();
-                    acCirc.Center = new Point3d(Location.X, Location.Y, 0);
-                    acCirc.Radius = radius;
-
                     collection.Add(acCirc);
-
                 }
                 else
                 {
@@ -152,6 +147,23 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
             }
 
             return collection;
+        }
+
+        public Circle DrawRing(float depth)
+        {
+            float radius = GetRingRadius(depth);
+
+            if (radius > 0)
+            {
+                Circle acCirc = new Circle();
+                acCirc.Center = new Point3d(Location.X, Location.Y, 0);
+                acCirc.Radius = radius;
+                return acCirc;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         private float M()

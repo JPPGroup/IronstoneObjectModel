@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.Autocad.DrawingObjects;
@@ -91,7 +92,7 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
             if (sp.Granular)
                 return;
 
-            int[] ringColors = new int[] {10, 200, 20, 180, 40, 160, 60, 140, 80, 120, 100};
+            int[] ringColors = new int[] { 102, 80, 60, 50, 20, 12, 14, 16, 18 };
 
             float StartDepth;
 
@@ -115,7 +116,8 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
                     break;
             }
 
-            int maxSteps = 0;
+            int maxExistingSteps = 0;
+            int maxProposedSteps = 0;
 
             // Get the current document and database
             Document acDoc = Application.DocumentManager.MdiActiveDocument;
@@ -124,6 +126,11 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
             //Why openclose??
             using (Transaction acTrans = acCurDb.TransactionManager.StartTransaction())
             {
+                //Set required layers
+                acCurDb.RegisterLayer(Constants.EXISTING_TREE_LAYER);
+                acCurDb.RegisterLayer(Constants.PROPOSED_TREE_LAYER);
+                acCurDb.RegisterLayer(Constants.PILED_LAYER);
+                acCurDb.RegisterLayer(Constants.HEAVE_LAYER);
 
                 //Delete existing rings
                 foreach (ObjectId obj in RingsCollection.Collection)
@@ -141,34 +148,150 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
 
                 List<DBObjectCollection> existingRings = new List<DBObjectCollection>();
                 List<DBObjectCollection> proposedRings = new List<DBObjectCollection>();
+                DBObjectCollection pillingRings = new DBObjectCollection();
+                DBObjectCollection heaveRings = new DBObjectCollection();
 
                 //Generate the rings for each tree
                 foreach (NHBCTree tree in Trees)
                 {
                     DBObjectCollection collection = tree.DrawRings(sp.SoilShrinkability, StartDepth, sp.TargetStepSize);
-                    if (collection.Count > maxSteps)
-                    {
-                        maxSteps = collection.Count;
-                    }
+                    Circle circ = tree.DrawRing(2.5f);
+                    if(circ != null)
+                        pillingRings.Add(circ);
+
+                    Circle heaveCirc = tree.DrawRing(1.5f);
+                    if (heaveCirc != null)
+                        heaveRings.Add(heaveCirc);
 
                     switch (tree.Phase)
                     {
                         case Phase.Existing:
                             existingRings.Add(collection);
+                            if (collection.Count > maxExistingSteps)
+                                maxExistingSteps = collection.Count;
                             break;
 
                         case Phase.Proposed:
                             proposedRings.Add(collection);
+                            if (collection.Count > maxProposedSteps)
+                                maxProposedSteps = collection.Count;
                             break;
                     }
                 }
 
-                for (int ringIndex = 0; ringIndex < maxSteps; ringIndex++)
+                ObjectId currentLayer = acCurDb.Clayer;
+                for (int ringIndex = 0; ringIndex < maxExistingSteps; ringIndex++)
                 {
+                    acCurDb.Clayer = acCurDb.GetLayer(Constants.EXISTING_TREE_LAYER.LayerId).ObjectId;
                     GenerateRing(existingRings, ringIndex, ringColors, acBlkTblRec, acTrans);
+                }
+                for (int ringIndex = 0; ringIndex < maxProposedSteps; ringIndex++)
+                {
+                    acCurDb.Clayer = acCurDb.GetLayer(Constants.PROPOSED_TREE_LAYER.LayerId).ObjectId;
                     GenerateRing(proposedRings, ringIndex, ringColors, acBlkTblRec, acTrans);
                 }
 
+
+                //Add hatching for piling
+                acCurDb.Clayer = acCurDb.GetLayer(Constants.PILED_LAYER.LayerId).ObjectId;
+                List<Region> createdRegions = new List<Region>(); 
+                foreach (Curve c in pillingRings)
+                {
+                    DBObjectCollection temp = new DBObjectCollection();
+                    temp.Add(c);
+                    DBObjectCollection regions = Region.CreateFromCurves(temp);
+                    foreach (Region r in regions)
+                    {
+                        createdRegions.Add(r);
+                    }
+                }
+
+                if (createdRegions.Count > 0)
+                {
+                    DBObjectCollection intersectedRegions = new DBObjectCollection();
+                    intersectedRegions.Add(createdRegions[0]);
+                    for (int i = 1; i < createdRegions.Count; i++)
+                    {
+                        Region testRegion = createdRegions[i].Clone() as Region;
+
+                        bool united = false;
+                        foreach (Region r in intersectedRegions)
+                        {
+                            Region origin = r.Clone() as Region;
+                            testRegion.BooleanOperation(BooleanOperationType.BoolIntersect, origin);
+                            if (testRegion.Area > 0)
+                            {
+                                r.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
+                                united = true;
+                            }
+                        }
+
+                        if (!united)
+                        {
+                            intersectedRegions.Add(createdRegions[i]);
+                        }
+                    }
+
+
+                    using (Hatch acHatch = new Hatch())
+                    {
+                        RingsCollection.Add(acBlkTblRec.AppendEntity(acHatch));
+                        acTrans.AddNewlyCreatedDBObject(acHatch, true);
+
+                        // Set the properties of the hatch object
+                        // Associative must be set after the hatch object is appended to the 
+                        // block table record and before AppendLoop
+                        acHatch.SetHatchPattern(HatchPatternType.PreDefined, "SOLID");
+                        acHatch.Associative = true;
+
+                        foreach (Entity enclosed in intersectedRegions)
+                        {
+                            ObjectIdCollection boundary = new ObjectIdCollection();
+                            RingsCollection.Add(acBlkTblRec.AppendEntity(enclosed));
+                            acTrans.AddNewlyCreatedDBObject(enclosed, true);
+                            boundary.Add(enclosed.ObjectId);
+                            acHatch.AppendLoop(HatchLoopTypes.Outermost, boundary);
+                        }
+
+                        acHatch.HatchStyle = HatchStyle.Ignore;
+                        acHatch.EvaluateHatch(true);
+
+                        Byte alpha = (Byte) (255 * (100 - 80) / 100);
+                        acHatch.Transparency = new Transparency(alpha);
+
+                        DrawOrderTable dot =
+                            (DrawOrderTable) acTrans.GetObject(acBlkTblRec.DrawOrderTableId, OpenMode.ForWrite);
+                        ObjectIdCollection tempCollection = new ObjectIdCollection();
+                        tempCollection.Add(acHatch.ObjectId);
+                        dot.MoveToBottom(tempCollection);
+                    }
+                }
+
+                //Add heave line
+                acCurDb.Clayer = acCurDb.GetLayer(Constants.HEAVE_LAYER.LayerId).ObjectId;
+                createdRegions = new List<Region>();
+                foreach (Curve c in heaveRings)
+                {
+                    DBObjectCollection temp = new DBObjectCollection();
+                    temp.Add(c);
+                    DBObjectCollection regions = Region.CreateFromCurves(temp);
+                    foreach (Region r in regions)
+                    {
+                        createdRegions.Add(r);
+                    }
+                }
+
+                Region heaveEnclosed = createdRegions[0];
+
+                for (int i = 1; i < createdRegions.Count; i++)
+                {
+                    heaveEnclosed.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
+                }
+
+                RingsCollection.Add(acBlkTblRec.AppendEntity(heaveEnclosed));
+                acTrans.AddNewlyCreatedDBObject(heaveEnclosed, true);
+
+                acCurDb.Clayer = currentLayer;
                 acTrans.Commit();
             }
         }
