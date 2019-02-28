@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices.Core;
@@ -15,6 +16,7 @@ namespace HighwaysTests
     [TestFixture(@"..\..\Drawings\NetworkTests1.dwg", 49, 11, 10, 6, 4 )]
     [TestFixture(@"..\..\Drawings\NetworkTests2.dwg", 102, 10, 11, 3, 8)]
     [TestFixture(@"..\..\Drawings\NetworkTests3.dwg", 131, 30, 41, 15, 26)]
+    [TestFixture(@"..\..\Drawings\NetworkTests4.dwg", 51, 0, 0, 0, 0)]
     public class NetworkTests : BaseNUnitTestFixture
     {
         private readonly int _centreLines;
@@ -62,25 +64,34 @@ namespace HighwaysTests
         
             using (var acTrans = acCurDb.TransactionManager.StartTransaction())
             {
-                var centreLines = GetCentreLinesFromSelection(res.Value);
-                result.CentreLineCount = centreLines.Count;
-
-                network.InitialiseNetworkFromCentreLines(centreLines);
-                result.RoadCount = network.Roads.Count;
-                result.JunctionCount = network.Junctions.Count;
-                var rightCount = 0;
-                var leftCount = 0;
-                foreach (var junction in network.Junctions)
+                try
                 {
-                    if (junction.Turn == TurnTypes.Right) rightCount++;
-                    if (junction.Turn == TurnTypes.Left) leftCount++;
+                    var centreLines = GetCentreLinesFromSelection(res.Value);
+                    result.CentreLineCount = centreLines.Count;
+
+                    network.InitialiseNetworkFromCentreLines(centreLines);
+                    result.RoadCount = network.Roads.Count;
+                    result.JunctionCount = network.Junctions.Count;
+                    var rightCount = 0;
+                    var leftCount = 0;
+                    foreach (var junction in network.Junctions)
+                    {
+                        if (junction.Turn == TurnTypes.Right) rightCount++;
+                        if (junction.Turn == TurnTypes.Left) leftCount++;
+                    }
+
+                    result.JunctionRightCount = leftCount;
+                    result.JunctionLeftCount = rightCount;
+                }
+                catch (Exception)
+                {
+                    // ignored
                 }
 
-                result.JunctionRightCount = leftCount;
-                result.JunctionLeftCount = rightCount;
+                return result;
             }
 
-            return result;
+            
         }
 
         private static ICollection<CentreLine> GetCentreLinesFromSelection(IEnumerable acSSet)
