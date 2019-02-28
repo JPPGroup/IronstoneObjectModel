@@ -102,6 +102,13 @@
     <Compile Include="Response\NetworkProperties.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Drawings\NetworkTests1.dwg" />
+    <None Include="Drawings\NetworkTests2.dwg" />
+    <None Include="Drawings\NetworkTests3.dwg" />
+    <None Include="Drawings\PolylineExTests1.dwg" />
+    <None Include="Drawings\PolylineExTests2.dwg" />
+    <None Include="Drawings\PolylineExTests3.dwg" />
+    <None Include="Drawings\PolylineExTests4.dwg" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -110,9 +117,7 @@
       <Name>Highways Objectmodel</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Drawings\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
