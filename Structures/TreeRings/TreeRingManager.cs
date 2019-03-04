@@ -87,11 +87,7 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
         private void GenerateRings()
         {
             SoilProperties sp = DataService.Current.GetStore<StructureDocumentStore>(HostDocument.Name).SoilProperties;
-
-            //If grnaular soil return immediately as no need to do rings
-            if (sp.Granular)
-                return;
-
+            
             int[] ringColors = new int[] { 102, 80, 60, 50, 20, 12, 14, 16, 18 };
 
             float StartDepth;
@@ -141,6 +137,13 @@ namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
                     }
 
                     RingsCollection.Clear();
+                }
+
+                //If grnaular soil return immediately as no need to do rings
+                if (sp.Granular)
+                {
+                    acTrans.Commit();
+                    return;
                 }
 
                 //Add the merged ring to the drawing
