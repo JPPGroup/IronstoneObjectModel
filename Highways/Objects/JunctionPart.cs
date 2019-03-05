@@ -5,12 +5,11 @@ using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Highways.Objectmodel.Extensions;
 using Jpp.Ironstone.Highways.Objectmodel.Helpers;
 
-namespace Jpp.Ironstone.Highways.Objectmodel
+namespace Jpp.Ironstone.Highways.Objectmodel.Objects
 {
     public class JunctionPart
     {
         public JunctionPartTypes Type { get; set; }
-        public Road Road { get; set; }
         public CentreLine CentreLine { get; set; }
         public Point2d IntersectionPoint { get; set; }
         [XmlIgnore]

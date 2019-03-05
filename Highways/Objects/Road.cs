@@ -5,15 +5,13 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Highways.Objectmodel.Helpers;
 
-namespace Jpp.Ironstone.Highways.Objectmodel
+namespace Jpp.Ironstone.Highways.Objectmodel.Objects
 {
     public class Road
     {
         private readonly List<CentreLine> _centreLines;
         private CarriageWayLeft _carriageWayLeft;
         private CarriageWayRight _carriageWayRight;
-
-        public Network Network { get; set; }
 
         public Point2d StartPoint => _centreLines.First().StartPoint;
         public SegmentType StartType => _centreLines.First().Type;
@@ -31,7 +29,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
                 if (value == null) return;
 
                 _carriageWayLeft = value;
-                ValidCentreLines();
+                IsCentreLineValidForOffsets();
             }
         }
         public CarriageWayRight CarriageWayRight
@@ -42,9 +40,10 @@ namespace Jpp.Ironstone.Highways.Objectmodel
                 if (value == null) return;
 
                 _carriageWayRight = value;
-                ValidCentreLines();
+                IsCentreLineValidForOffsets();
             }
         }
+        public bool Valid => IsValidRoad();
 
         public Road()
         {
@@ -99,6 +98,36 @@ namespace Jpp.Ironstone.Highways.Objectmodel
             return _centreLines.IndexOf(centreLine);
         }
 
+        public ICollection<Junction> CreateJunctions(IEnumerable<Road> roads)
+        {
+            var roadList = roads.ToList();
+            if (!roadList.Any()) return null;
+
+            var junctions = new List<Junction>();
+            var startCentreLine = StartLine;
+            var endCentreLine = EndLine;
+
+            var startConnected = startCentreLine.ConnectingCentreLine(roadList, true);
+            if (startConnected != null)
+            {
+                junctions.Add(new Junction {
+                    PrimaryRoad = new JunctionPart { CentreLine = startConnected, Type = JunctionPartTypes.Mid, IntersectionPoint = startCentreLine.StartPoint },
+                    SecondaryRoad = new JunctionPart { CentreLine = startCentreLine, Type = JunctionPartTypes.Start, IntersectionPoint = startCentreLine.StartPoint }
+                });
+            }
+
+            var endConnected = endCentreLine.ConnectingCentreLine(roadList, false);
+            if (endConnected != null)
+            {
+                junctions.Add(new Junction {
+                    PrimaryRoad = new JunctionPart { CentreLine = endConnected, Type = JunctionPartTypes.Mid, IntersectionPoint = endCentreLine.EndPoint },
+                    SecondaryRoad = new JunctionPart { CentreLine = endCentreLine, Type = JunctionPartTypes.End, IntersectionPoint = endCentreLine.EndPoint }
+                });
+            }
+
+            return junctions.Any() ? junctions : null;
+        }
+
         private bool AddCentreLineInitial(CentreLine centreLine)
         {
             if (_centreLines.Count != 0) return false;
@@ -116,7 +145,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
             var connection = _centreLines.Last();
             var angleBetween = centreLine.StartVector.GetAngleTo(connection.EndVector);
 
-            if (!ValidConnection(centreLine, connection, angleBetween)) return false;
+            if (!IsValidConnection(centreLine, connection, angleBetween)) return false;
 
             centreLine.Road = this;
             _centreLines.Add(centreLine);
@@ -132,7 +161,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
             var connection = _centreLines.Last();
             var angleBetween = centreLine.StartVector.GetAngleTo(connection.EndVector);
 
-            if (!ValidConnection(centreLine, connection, angleBetween)) return false;
+            if (!IsValidConnection(centreLine, connection, angleBetween)) return false;
 
             centreLine.Road = this;
             _centreLines.Add(centreLine);
@@ -147,7 +176,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
             var connection = _centreLines.First();
             var angleBetween = centreLine.EndVector.GetAngleTo(connection.StartVector);
 
-            if (!ValidConnection(centreLine, connection, angleBetween)) return false;
+            if (!IsValidConnection(centreLine, connection, angleBetween)) return false;
 
             centreLine.Road = this;
             _centreLines.Insert(0, centreLine);
@@ -163,7 +192,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
             var connection = _centreLines.First();
             var angleBetween = centreLine.EndVector.GetAngleTo(connection.StartVector);
 
-            if (!ValidConnection(centreLine, connection, angleBetween)) return false;
+            if (!IsValidConnection(centreLine, connection, angleBetween)) return false;
 
             centreLine.Road = this;
             _centreLines.Insert(0, centreLine);
@@ -171,7 +200,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
             return true;
         }
 
-        private static bool ValidConnection(CentreLine centreToAdd, CentreLine centreToConnect, double angleBetween)
+        private static bool IsValidConnection(CentreLine centreToAdd, CentreLine centreToConnect, double angleBetween)
         {
             switch (centreToAdd.Type)
             {
@@ -195,7 +224,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
             return false;
         }
 
-        private void ValidCentreLines()
+        private void IsCentreLineValidForOffsets()
         {
             foreach (var centre in _centreLines)
             {
@@ -203,6 +232,29 @@ namespace Jpp.Ironstone.Highways.Objectmodel
 
                 if (arc.Radius <= CarriageWayLeft?.Distance || arc.Radius <= CarriageWayRight?.Distance)  throw new ArgumentException("Invalid centre line");
             }
+        }
+
+        private bool IsValidRoad()
+        {
+            if (_centreLines.Count == 1) return true;
+
+            for (var i = 1; i < _centreLines.Count - 1; i++)
+            {
+                var previous = _centreLines[i - 1];
+                var current = _centreLines[i];
+                var connected = current.StartPoint.IsEqualTo(previous.EndPoint);
+
+                if (!connected) return false;
+
+                var angleBetween = current.StartVector.GetAngleTo(previous.EndVector);
+                var validConnection = IsValidConnection(current, previous, angleBetween);
+
+                if (!validConnection) return false;
+
+                //Need to check is valid for offsets....
+            }
+
+            return true;
         }
     }
 }

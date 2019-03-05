@@ -3,7 +3,7 @@
 namespace HighwaysTests.Response
 {
     [Serializable]
-    public class NetworkProperties
+    public class HighwayManagerProperties
     {
         public int CentreLineCount { get; set; }
         public int RoadCount { get; set; }

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Jpp.Ironstone.Highways.Objectmodel.Abstact
+﻿namespace Jpp.Ironstone.Highways.Objectmodel.Abstact
 {
     public abstract class CentreLineOffset
     {
