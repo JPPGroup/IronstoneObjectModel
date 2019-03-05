@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Jpp.Ironstone.Structures.Objectmodel</id>
+    <id>Jpp.Ironstone.Structures.ObjectModel</id>
     <version>0.0.0.0</version>
-    <title>Ironstone Structures Objectmodel</title>
+    <title>Ironstone Structures Object Model</title>
     <authors>JPP Consulting</authors>
     <owners>JPP Consulting</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

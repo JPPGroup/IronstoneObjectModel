@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.ApplicationServices;
 using Jpp.Common;
 
-namespace Jpp.Ironstone.Structures.Objectmodel
+namespace Jpp.Ironstone.Structures.ObjectModel
 {
     public class SoilProperties : BaseNotify
     {

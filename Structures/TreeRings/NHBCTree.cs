@@ -9,7 +9,7 @@ using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.Autocad.DrawingObjects.Primitives;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
-namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
+namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 {
     public class NHBCTree : CircleDrawingObject
     {

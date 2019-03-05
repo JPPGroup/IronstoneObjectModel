@@ -1,4 +1,4 @@
-﻿namespace Jpp.Ironstone.Highways.Objectmodel
+﻿namespace Jpp.Ironstone.Highways.ObjectModel
 {
     public enum SidesOfCentre { Left, Right }
     public enum OffsetTypes { CarriageWay, Pavement }

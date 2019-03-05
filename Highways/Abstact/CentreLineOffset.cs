@@ -1,4 +1,4 @@
-﻿namespace Jpp.Ironstone.Highways.Objectmodel.Abstact
+﻿namespace Jpp.Ironstone.Highways.ObjectModel.Abstact
 {
     public abstract class CentreLineOffset
     {

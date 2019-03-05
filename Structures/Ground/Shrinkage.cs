@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jpp.Ironstone.Structures.Objectmodel
+namespace Jpp.Ironstone.Structures.ObjectModel
 {
     //[TypeConverter(typeof(EnumDescriptionTypeConverter))]
     public enum Shrinkage

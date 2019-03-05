@@ -4,10 +4,10 @@ using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.Autocad;
-using Jpp.Ironstone.Highways.Objectmodel.Extensions;
-using Jpp.Ironstone.Highways.Objectmodel.Helpers;
+using Jpp.Ironstone.Highways.ObjectModel.Extensions;
+using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
-namespace Jpp.Ironstone.Highways.Objectmodel
+namespace Jpp.Ironstone.Highways.ObjectModel
 {
     public abstract class Segment2d : DrawingObject
     {        

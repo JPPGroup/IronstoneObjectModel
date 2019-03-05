@@ -7,10 +7,10 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Jpp.Ironstone.Core.ServiceInterfaces;
-using Jpp.Ironstone.Structures.Objectmodel.TreeRings;
+using Jpp.Ironstone.Structures.ObjectModel.TreeRings;
 using NUnit.Framework;
 
-namespace Jpp.Ironstone.Structures.Objectmodel.Test.TreeRings
+namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 {
     
     class TreeRingManagerTests

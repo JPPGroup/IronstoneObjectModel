@@ -4,9 +4,9 @@ using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Jpp.Ironstone.Highways.Objectmodel.Extensions;
+using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 
-namespace Jpp.Ironstone.Highways.Objectmodel.Objects
+namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 {
     public class CentreLine : Segment2d
     {

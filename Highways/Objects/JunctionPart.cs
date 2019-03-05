@@ -2,10 +2,10 @@
 using System.Xml.Serialization;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Jpp.Ironstone.Highways.Objectmodel.Extensions;
-using Jpp.Ironstone.Highways.Objectmodel.Helpers;
+using Jpp.Ironstone.Highways.ObjectModel.Extensions;
+using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
-namespace Jpp.Ironstone.Highways.Objectmodel.Objects
+namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 {
     public class JunctionPart
     {

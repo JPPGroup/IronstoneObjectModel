@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Jpp.Ironstone.Core.Autocad;
 
-namespace Jpp.Ironstone.Structures.Objectmodel
+namespace Jpp.Ironstone.Structures.ObjectModel
 {
     class Constants
     {

@@ -1,6 +1,6 @@
-﻿using Jpp.Ironstone.Highways.Objectmodel.Abstact;
+﻿using Jpp.Ironstone.Highways.ObjectModel.Abstact;
 
-namespace Jpp.Ironstone.Highways.Objectmodel.Objects
+namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 {
     public class CarriageWayLeft : CentreLineOffset
     {

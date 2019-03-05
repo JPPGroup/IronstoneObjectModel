@@ -2,7 +2,7 @@
 using Autodesk.AutoCAD.ApplicationServices;
 using Jpp.Ironstone.Core.Autocad;
 
-namespace Jpp.Ironstone.Highways.Objectmodel
+namespace Jpp.Ironstone.Highways.ObjectModel
 {
     public class HighwaysDocumentStore : DocumentStore
     {

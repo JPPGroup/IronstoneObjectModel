@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Jpp.Ironstone.DocumentManagement.Objectmodel</id>
+    <id>Jpp.Ironstone.DocumentManagement.ObjectModel</id>
     <version>0.0.0.0</version>
-    <title>Ironstone Document Management Objectmodel</title>
+    <title>Ironstone Document Management Object Model</title>
     <authors>JPP Consulting</authors>
     <owners>JPP Consulting</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Jpp.Ironstone.Core.Autocad;
-using Jpp.Ironstone.Structures.Objectmodel.TreeRings;
+using Jpp.Ironstone.Structures.ObjectModel.TreeRings;
 
-namespace Jpp.Ironstone.Structures.Objectmodel
+namespace Jpp.Ironstone.Structures.ObjectModel
 {
     public class StructureDocumentStore : DocumentStore
     {

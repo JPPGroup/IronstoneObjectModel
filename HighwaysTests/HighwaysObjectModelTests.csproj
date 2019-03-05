@@ -1,37 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\NUnit.3.11.0\build\NUnit.props" Condition="Exists('..\packages\NUnit.3.11.0\build\NUnit.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{D90B155A-A8A5-4BF2-8913-2BA3D3B9976D}</ProjectGuid>
+    <ProjectGuid>{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Jpp.Ironstone.Highways.Objectmodel</RootNamespace>
-    <AssemblyName>IronstoneHighwaysObjectmodel</AssemblyName>
+    <RootNamespace>Jpp.Ironstone.Highways.ObjectModel.Tests</RootNamespace>
+    <AssemblyName>HighwaysObjectModelTests</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
     <DebugSymbols>true</DebugSymbols>
@@ -64,6 +47,9 @@
       <HintPath>..\packages\AutoCAD.NET.Model.23.0.0\lib\net47\acdbmgdbrep.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="AcTestFramework, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\AcTestFramework.1.0.16\lib\net472\AcTestFramework.dll</HintPath>
+    </Reference>
     <Reference Include="AutoUpdate, Version=1.0.12.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AutoUpdate.1.0.12\lib\net47\AutoUpdate.dll</HintPath>
     </Reference>
@@ -76,11 +62,25 @@
     <Reference Include="Microsoft.ApplicationInsights, Version=2.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.ApplicationInsights.2.9.1\lib\net46\Microsoft.ApplicationInsights.dll</HintPath>
     </Reference>
+    <Reference Include="nunit.framework, Version=3.11.0.0, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.11.0\lib\net45\nunit.framework.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Diagnostics.DiagnosticSource, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Diagnostics.DiagnosticSource.4.5.0\lib\net46\System.Diagnostics.DiagnosticSource.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Unity.Abstractions, Version=4.1.0.0, Culture=neutral, PublicKeyToken=489b6accfaf20ef0, processorArchitecture=MSIL">
       <HintPath>..\packages\Unity.5.9.7\lib\net47\Unity.Abstractions.dll</HintPath>
@@ -93,35 +93,37 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Abstact\CentreLineOffset.cs" />
-    <Compile Include="Objects\CarriageWayLeft.cs" />
-    <Compile Include="Objects\CarriageWayRight.cs" />
-    <Compile Include="Objects\CentreLine.cs" />
-    <Compile Include="Enums.cs" />
-    <Compile Include="Extensions\ArcExtension.cs" />
-    <Compile Include="Extensions\CurveExtension.cs" />
-    <Compile Include="Extensions\PolylineExtension.cs" />
-    <Compile Include="Helpers\RadiansHelper.cs" />
-    <Compile Include="HighwayManager.cs" />
-    <Compile Include="HighwaysDocumentStore.cs" />
-    <Compile Include="Objects\Junction.cs" />
-    <Compile Include="Objects\JunctionPart.cs" />
+    <Compile Include="ArcExtensionTests.cs" />
+    <Compile Include="PolylineExtensionTests.cs" />
+    <Compile Include="HighwayManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Objects\Road.cs" />
-    <Compile Include="Abstact\Segment2d.cs" />
+    <Compile Include="RadiansHelperTests.cs" />
+    <Compile Include="Response\HighwayManagerProperties.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
-    <None Include="Highways.nuspec" />
+    <None Include="Drawings\NetworkTests1.dwg" />
+    <None Include="Drawings\NetworkTests2.dwg" />
+    <None Include="Drawings\NetworkTests3.dwg" />
+    <None Include="Drawings\PolylineExTests1.dwg" />
+    <None Include="Drawings\PolylineExTests2.dwg" />
+    <None Include="Drawings\PolylineExTests3.dwg" />
+    <None Include="Drawings\PolylineExTests4.dwg" />
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Highways\HighwaysObjectModel.csproj">
+      <Project>{D90B155A-A8A5-4BF2-8913-2BA3D3B9976D}</Project>
+      <Name>HighwaysObjectModel</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <Import Project="..\packages\Jpp.Common.Tooling.Signing.0.2.0\build\Jpp.Common.Tooling.Signing.targets" Condition="Exists('..\packages\Jpp.Common.Tooling.Signing.0.2.0\build\Jpp.Common.Tooling.Signing.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
+    <Error Condition="!Exists('..\packages\NUnit.3.11.0\build\NUnit.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\NUnit.3.11.0\build\NUnit.props'))" />
     <Error Condition="!Exists('..\packages\Jpp.Common.Tooling.Signing.0.2.0\build\Jpp.Common.Tooling.Signing.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Jpp.Common.Tooling.Signing.0.2.0\build\Jpp.Common.Tooling.Signing.targets'))" />
   </Target>
+  <Import Project="..\packages\Jpp.Common.Tooling.Signing.0.2.0\build\Jpp.Common.Tooling.Signing.targets" Condition="Exists('..\packages\Jpp.Common.Tooling.Signing.0.2.0\build\Jpp.Common.Tooling.Signing.targets')" />
 </Project>

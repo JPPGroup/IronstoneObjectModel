@@ -4,9 +4,9 @@ using System.Linq;
 using System.Xml.Serialization;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.Autocad.DrawingObjects;
-using Jpp.Ironstone.Highways.Objectmodel.Objects;
+using Jpp.Ironstone.Highways.ObjectModel.Objects;
 
-namespace Jpp.Ironstone.Highways.Objectmodel
+namespace Jpp.Ironstone.Highways.ObjectModel
 {
     public class HighwayManager : AbstractDrawingObjectManager
     {

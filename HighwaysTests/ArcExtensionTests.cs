@@ -3,10 +3,10 @@ using System.Reflection;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.AcTestFramework;
-using Jpp.Ironstone.Highways.Objectmodel.Extensions;
+using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using NUnit.Framework;
 
-namespace HighwaysTests
+namespace Jpp.Ironstone.Highways.ObjectModel.Tests
 {
     [TestFixture]
 

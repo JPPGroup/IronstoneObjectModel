@@ -1,2 +1,2 @@
-Get-ChildItem -Include *Objectmodel.dll -Exclude *Tests.dll -Recurse | Compress-Archive -Update -DestinationPath ($PSScriptRoot + "\IronstoneObjectmodel")
+Get-ChildItem -Include *ObjectModel.dll -Exclude *Tests.dll -Recurse | Compress-Archive -Update -DestinationPath ($PSScriptRoot + "\IronstoneObjectModel")
 Write-Host "Zip file created"

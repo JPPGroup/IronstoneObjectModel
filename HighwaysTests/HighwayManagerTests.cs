@@ -5,19 +5,18 @@ using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using HighwaysTests.Response;
 using Jpp.AcTestFramework;
-using Jpp.Ironstone.Highways.Objectmodel;
-using Jpp.Ironstone.Highways.Objectmodel.Extensions;
-using Jpp.Ironstone.Highways.Objectmodel.Objects;
+using Jpp.Ironstone.Highways.ObjectModel.Extensions;
+using Jpp.Ironstone.Highways.ObjectModel.Objects;
+using Jpp.Ironstone.Highways.ObjectModel.Tests.Response;
 using NUnit.Framework;
 
-namespace HighwaysTests
+namespace Jpp.Ironstone.Highways.ObjectModel.Tests
 {
-    [TestFixture(@"..\..\Drawings\NetworkTests1.dwg", 49, 11, 10, 6, 4 )]
-    [TestFixture(@"..\..\Drawings\NetworkTests2.dwg", 102, 10, 11, 3, 8)]
-    [TestFixture(@"..\..\Drawings\NetworkTests3.dwg", 131, 30, 41, 15, 26)]
-    [TestFixture(@"..\..\Drawings\NetworkTests4.dwg", 0, 0, 0, 0, 0)]
+    [TestFixture(@"..\..\..\Drawings\NetworkTests1.dwg", 49, 11, 10, 6, 4 )]
+    [TestFixture(@"..\..\..\Drawings\NetworkTests2.dwg", 102, 10, 11, 3, 8)]
+    [TestFixture(@"..\..\..\Drawings\NetworkTests3.dwg", 131, 30, 41, 15, 26)]
+    [TestFixture(@"..\..\..\Drawings\NetworkTests4.dwg", 0, 0, 0, 0, 0)]
     public class HighwayManagerTests : BaseNUnitTestFixture
     {
         private readonly int _centreLines;

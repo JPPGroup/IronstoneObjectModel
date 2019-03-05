@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace HighwaysTests.Response
+namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Response
 {
     [Serializable]
     public class HighwayManagerProperties

@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package >
   <metadata>
-    <id>Jpp.Ironstone.Highways.Objectmodel</id>
+    <id>Jpp.Ironstone.Highways.ObjectModel</id>
     <version>0.0.0.0</version>
-    <title>Ironstone Highways Objectmodel</title>
+    <title>Ironstone Highways Object Model</title>
     <authors>JPP Consulting</authors>
     <owners>JPP Consulting</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>

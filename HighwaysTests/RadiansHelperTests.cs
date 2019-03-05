@@ -1,8 +1,8 @@
 ﻿using System;
-using Jpp.Ironstone.Highways.Objectmodel.Helpers;
+using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 using NUnit.Framework;
 
-namespace HighwaysTests
+namespace Jpp.Ironstone.Highways.ObjectModel.Tests
 {
     [TestFixture]
     public class RadiansHelperTests
