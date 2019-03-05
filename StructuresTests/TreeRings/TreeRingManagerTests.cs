@@ -12,10 +12,16 @@ using NUnit.Framework;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 {
-    
-    class TreeRingManagerTests
+    [TestFixture]
+    public class TreeRingManagerTests
     {
-        
+        [Test]
+        public void ThisShouldPass()
+        {
+            Assert.Pass("This test should pass");
+        }
+
+
         public void AddNewTree()
         {
             /*Document acDoc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
