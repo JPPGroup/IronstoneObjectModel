@@ -7,7 +7,7 @@ using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
-namespace Jpp.Ironstone.Highways.ObjectModel
+namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
 {
     public abstract class Segment2d : DrawingObject
     {        

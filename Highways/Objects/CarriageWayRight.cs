@@ -1,26 +1,24 @@
-﻿using Jpp.Ironstone.Highways.ObjectModel.Abstact;
+﻿using System;
+using System.Collections.Generic;
+using Jpp.Ironstone.Highways.ObjectModel.Abstract;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 {
-    public class CarriageWayRight : CentreLineOffset
+    [Serializable]
+    public class CarriageWayRight : ICentreLineOffset
     {
-        public override SidesOfCentre Side { get; }
-        public override OffsetTypes OffsetType { get; }
-        public override double Distance { get; }
-        //public override List<JunctionIntersection> Intersects { get; }
-        //public override bool Ignore { get; set; }
+        public SidesOfCentre Side { get; }
+        public OffsetTypes OffsetType { get; }
+        public double Distance { get; }
+        public List<OffsetIntersect> Intersection { get; }
+        public bool Ignore { get; set; }
 
         public CarriageWayRight(double distance)
         {
             Distance = distance;
             Side = SidesOfCentre.Right;
             OffsetType = OffsetTypes.CarriageWay;
-            //Intersects = new List<JunctionIntersection>();
+            Intersection = new List<OffsetIntersect>();
         }
-
-        //public CarriageWayRight Copy()
-        //{
-        //    return new CarriageWayRight(Distance);
-        //}
     }
 }

@@ -1,58 +1,142 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Serialization;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Jpp.Ironstone.Highways.ObjectModel.Abstract;
+using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 {
+    [Serializable]
     public class Road
-    {
-        private readonly List<CentreLine> _centreLines;
-        private CarriageWayLeft _carriageWayLeft;
-        private CarriageWayRight _carriageWayRight;
-
-        public Point2d StartPoint => _centreLines.First().StartPoint;
-        public SegmentType StartType => _centreLines.First().Type;
-        public CentreLine StartLine => _centreLines.First();
-        public Point2d EndPoint => _centreLines.Last().EndPoint;
-        public SegmentType EndType => _centreLines.Last().Type;
-        public CentreLine EndLine => _centreLines.Last();
-        public IEnumerable<CentreLine> CentreLines => _centreLines;
-        public CentreLine this[int i] => _centreLines[i];
-        public CarriageWayLeft CarriageWayLeft
-        {
-            get => _carriageWayLeft;
-            set
-            {
-                if (value == null) return;
-
-                _carriageWayLeft = value;
-                IsCentreLineValidForOffsets();
-            }
-        }
-        public CarriageWayRight CarriageWayRight
-        {
-            get => _carriageWayRight;
-            set
-            {
-                if (value == null) return;
-
-                _carriageWayRight = value;
-                IsCentreLineValidForOffsets();
-            }
-        }
-        public bool Valid => IsValidRoad();
-
+    {        
+        public Guid Id { get; }
+        public string Name { get; set; }
+        public List<CentreLine> CentreLines { get; }
+        public double LeftCarriageWay { get; private set; } = Constants.DEFAULT_CARRIAGE_WAY;
+        public double RightCarriageWay { get; private set; } = Constants.DEFAULT_CARRIAGE_WAY;
+        [XmlIgnore] public Point2d StartPoint => CentreLines.First().StartPoint;
+        [XmlIgnore] public SegmentType StartType => CentreLines.First().Type;
+        [XmlIgnore] public CentreLine StartLine => CentreLines.First();
+        [XmlIgnore] public Point2d EndPoint => CentreLines.Last().EndPoint;
+        [XmlIgnore] public SegmentType EndType => CentreLines.Last().Type;
+        [XmlIgnore] public CentreLine EndLine => CentreLines.Last();
+        [XmlIgnore] public CentreLine this[int i] => CentreLines[i];
+        [XmlIgnore] public bool Valid => IsValidRoad();
+ 
         public Road()
         {
-            _centreLines = new List<CentreLine>();
+            Id = Guid.NewGuid();
+            CentreLines = new List<CentreLine>();
         }
+
+        public ICollection<Curve> GenerateCarriageWay()
+        {
+            var curveList = new List<Curve>();
+            if (!Valid) return curveList;
+
+            foreach (var centre in CentreLines)
+            {
+                var lSplits = SplitForOffsetIntersection(centre, SidesOfCentre.Left);
+                if (lSplits != null && lSplits.Count != 0)
+                {
+                    curveList.AddRange(lSplits);
+                }                    
+
+                var rSplits = SplitForOffsetIntersection(centre, SidesOfCentre.Right);
+                if (rSplits != null && rSplits.Count != 0)
+                {
+                    curveList.AddRange(rSplits);
+                }
+            }
+
+            return curveList;
+        }
+
+        private static ICollection<Curve> SplitForOffsetIntersection(CentreLine centre, SidesOfCentre side)
+        {
+            var offsetCurve = centre.GenerateCarriageWayOffset(side);
+            ICentreLineOffset offset;
+            switch (side)
+            {
+                case SidesOfCentre.Left:
+                    offset = centre.CarriageWayLeft;
+                    break;
+                case SidesOfCentre.Right:
+                    offset = centre.CarriageWayRight;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(side), side, null);
+            }
+  
+            var returnCol = new List<Curve>();
+            var wasteCol = new List<Curve>();
+
+            if (offset.Intersection.Count == 0 & offset.Ignore) return returnCol;
+
+            returnCol.Add(offsetCurve);
+
+            foreach (var intersection in offset.Intersection)
+            {
+                var hasIntersected = false;
+
+                foreach (var r in returnCol.ToList())
+                {
+                    var splitSets = r.TrySplit(intersection.Point);
+                    if (splitSets == null) continue;
+
+                    hasIntersected = true;
+                    returnCol.Remove(r);
+
+                    var beforeCurve = splitSets[0] as Curve;
+                    var afterCurve = splitSets[1] as Curve;
+
+                    if (intersection.Before)
+                    {
+                        if (beforeCurve != null) returnCol.Add(beforeCurve);
+                        if (afterCurve != null) wasteCol.Add(afterCurve);
+                    }
+                    else
+                    {
+                        if (beforeCurve != null) wasteCol.Add(beforeCurve);
+                        if (afterCurve != null) returnCol.Add(afterCurve);
+                    }
+                }
+
+                if (hasIntersected) continue;
+
+                foreach (var w in wasteCol.ToList())
+                {
+                    var splitSets = w.TrySplit(intersection.Point);
+                    if (splitSets == null) continue;
+
+                    wasteCol.Remove(w);
+
+                    var beforeCurve = splitSets[0] as Curve;
+                    var afterCurve = splitSets[1] as Curve;
+                    if (intersection.Before)
+                    {
+                        if (beforeCurve != null) returnCol.Add(beforeCurve);
+                        if (afterCurve != null) wasteCol.Add(afterCurve);
+                    }
+                    else
+                    {
+                        if (beforeCurve != null) wasteCol.Add(beforeCurve);
+                        if (afterCurve != null) returnCol.Add(afterCurve);
+                    }
+                }
+            }
+
+            return returnCol;
+        }
+
 
         public bool IsConnected(CentreLine centreLine)
         {
-            if (_centreLines.Count == 0) return true;
+            if (CentreLines.Count == 0) return true;
 
             if (StartPoint == centreLine.EndPoint) return StartType != SegmentType.Line || centreLine.Type != SegmentType.Line;
             if (StartPoint == centreLine.StartPoint) return StartType != SegmentType.Line || centreLine.Type != SegmentType.Line;
@@ -66,8 +150,11 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         public void AddCentreLine(CentreLine centreLine)
         {
             if (!IsConnected(centreLine)) return;          
-            if (_centreLines.Contains(centreLine)) return;
-            
+            if (CentreLines.Contains(centreLine)) return;
+
+            centreLine.CarriageWayLeft = new CarriageWayLeft(LeftCarriageWay);
+            centreLine.CarriageWayRight = new CarriageWayRight(RightCarriageWay);
+
             if (AddCentreLineInitial(centreLine)) return;
             if (AddCentreLineEndToStart(centreLine)) return;
             if (AddCentreLineStartToEnd(centreLine)) return;
@@ -79,7 +166,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 
         public void Highlight()
         {
-            foreach (var centreLine in _centreLines)
+            foreach (var centreLine in CentreLines)
             {
                 centreLine.Highlight();
             }
@@ -87,7 +174,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 
         public void Unhighlight()
         {
-            foreach (var centreLine in _centreLines)
+            foreach (var centreLine in CentreLines)
             {
                 centreLine.Unhighlight();
             }
@@ -95,7 +182,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 
         public int PositionInRoad(CentreLine centreLine)
         {
-            return _centreLines.IndexOf(centreLine);
+            return CentreLines.IndexOf(centreLine);
         }
 
         public ICollection<Junction> CreateJunctions(IEnumerable<Road> roads)
@@ -130,10 +217,10 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 
         private bool AddCentreLineInitial(CentreLine centreLine)
         {
-            if (_centreLines.Count != 0) return false;
+            if (CentreLines.Count != 0) return false;
 
             centreLine.Road = this;
-            _centreLines.Add(centreLine);
+            CentreLines.Add(centreLine);
 
             return true;
         }
@@ -142,13 +229,13 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         {
             if (EndPoint != centreLine.StartPoint) return false;
 
-            var connection = _centreLines.Last();
+            var connection = CentreLines.Last();
             var angleBetween = centreLine.StartVector.GetAngleTo(connection.EndVector);
 
             if (!IsValidConnection(centreLine, connection, angleBetween)) return false;
 
             centreLine.Road = this;
-            _centreLines.Add(centreLine);
+            CentreLines.Add(centreLine);
 
             return true;
         }
@@ -158,13 +245,13 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             if (EndPoint != centreLine.EndPoint) return false;
 
             centreLine.Reverse();
-            var connection = _centreLines.Last();
+            var connection = CentreLines.Last();
             var angleBetween = centreLine.StartVector.GetAngleTo(connection.EndVector);
 
             if (!IsValidConnection(centreLine, connection, angleBetween)) return false;
 
             centreLine.Road = this;
-            _centreLines.Add(centreLine);
+            CentreLines.Add(centreLine);
 
             return true;
         }
@@ -173,13 +260,13 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         {
             if (StartPoint != centreLine.EndPoint) return false;
 
-            var connection = _centreLines.First();
+            var connection = CentreLines.First();
             var angleBetween = centreLine.EndVector.GetAngleTo(connection.StartVector);
 
             if (!IsValidConnection(centreLine, connection, angleBetween)) return false;
 
             centreLine.Road = this;
-            _centreLines.Insert(0, centreLine);
+            CentreLines.Insert(0, centreLine);
 
             return true;
         }
@@ -189,13 +276,13 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             if (StartPoint != centreLine.StartPoint) return false;
 
             centreLine.Reverse();
-            var connection = _centreLines.First();
+            var connection = CentreLines.First();
             var angleBetween = centreLine.EndVector.GetAngleTo(connection.StartVector);
 
             if (!IsValidConnection(centreLine, connection, angleBetween)) return false;
 
             centreLine.Road = this;
-            _centreLines.Insert(0, centreLine);
+            CentreLines.Insert(0, centreLine);
 
             return true;
         }
@@ -224,24 +311,14 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             return false;
         }
 
-        private void IsCentreLineValidForOffsets()
-        {
-            foreach (var centre in _centreLines)
-            {
-                if (!(centre.GetCurve() is Arc arc)) continue;
-
-                if (arc.Radius <= CarriageWayLeft?.Distance || arc.Radius <= CarriageWayRight?.Distance)  throw new ArgumentException("Invalid centre line");
-            }
-        }
-
         private bool IsValidRoad()
         {
-            if (_centreLines.Count == 1) return true;
+            if (CentreLines.Count == 1) return true;
 
-            for (var i = 1; i < _centreLines.Count - 1; i++)
+            for (var i = 1; i < CentreLines.Count - 1; i++)
             {
-                var previous = _centreLines[i - 1];
-                var current = _centreLines[i];
+                var previous = CentreLines[i - 1];
+                var current = CentreLines[i];
                 var connected = current.StartPoint.IsEqualTo(previous.EndPoint);
 
                 if (!connected) return false;
@@ -255,6 +332,31 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             }
 
             return true;
+        }
+
+        public bool SetOffsets(double leftCarriageWay, double rightCarriageWay)
+        {
+            if (LeftCarriageWay == leftCarriageWay && RightCarriageWay == rightCarriageWay) return false;
+
+            LeftCarriageWay = leftCarriageWay;
+            RightCarriageWay = rightCarriageWay;
+
+            foreach (var centreLine in CentreLines)
+            {
+                centreLine.CarriageWayLeft = new CarriageWayLeft(LeftCarriageWay);
+                centreLine.CarriageWayRight = new CarriageWayRight(RightCarriageWay);
+            }
+
+            return true;
+        }
+
+        public void ResetOffsets()
+        {
+            foreach (var centreLine in CentreLines)
+            {
+                centreLine.CarriageWayLeft = new CarriageWayLeft(LeftCarriageWay);
+                centreLine.CarriageWayRight = new CarriageWayRight(RightCarriageWay);
+            }
         }
     }
 }

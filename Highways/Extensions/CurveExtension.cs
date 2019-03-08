@@ -26,6 +26,21 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
             return offset;
         }
 
+        public static DBObjectCollection TrySplit(this Curve curve, Point3d point)
+        {
+            try
+            {
+                if (curve.StartPoint == point || curve.EndPoint == point) return null;
+                var intPts = new Point3dCollection { point };
+
+                return curve.GetSplitCurves(intPts);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
         #region Private methods
         private static Curve CreateLeftOffset(this Curve curve, double offset)
         {
