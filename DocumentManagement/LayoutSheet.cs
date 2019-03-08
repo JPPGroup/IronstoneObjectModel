@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Jpp.Ironstone.DocumentManagement.Objectmodel
+namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 {
     public class LayoutSheet
     {

@@ -3,22 +3,19 @@ using System.Xml.Serialization;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Jpp.Ironstone.Highways.Objectmodel.Helpers;
+using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
-namespace Jpp.Ironstone.Highways.Objectmodel
+namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 {
     public class Junction
     {
         public const string LAYER_NAME_TURNING_HEAD = "JPP_TurningHead";
         public const double DEFAULT_RADIUS_JUNCTION = 6;
         public const double DEFAULT_RADIUS_TURNING = 7.5;
-
-        public Network Network;
-        
+       
         public JunctionPart PrimaryRoad { get; set; }
         public JunctionPart SecondaryRoad { get; set; }
-        [XmlIgnore]
-        public bool TurningHead {
+        [XmlIgnore] public bool TurningHead {
             get
             {
                 var acTrans = Application.DocumentManager.MdiActiveDocument.TransactionManager.TopTransaction;
@@ -28,8 +25,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
                 return pCurve?.Layer == LAYER_NAME_TURNING_HEAD || sCurve?.Layer == LAYER_NAME_TURNING_HEAD;
             }
         }
-        [XmlIgnore]
-        public TurnTypes Turn
+        [XmlIgnore] public TurnTypes Turn
         {
             get
             {
@@ -42,8 +38,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
                 throw new ArgumentOutOfRangeException();
             }  
         }
-        [XmlIgnore]
-        public double Radius => TurningHead ? DEFAULT_RADIUS_TURNING : DEFAULT_RADIUS_JUNCTION;
+        [XmlIgnore] public double Radius => TurningHead ? DEFAULT_RADIUS_TURNING : DEFAULT_RADIUS_JUNCTION;
 
         public void Highlight()
         {

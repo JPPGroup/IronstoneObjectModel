@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
-using Jpp.Ironstone.Highways.Objectmodel.Extensions;
+using Autodesk.AutoCAD.Geometry;
+using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 
-namespace Jpp.Ironstone.Highways.Objectmodel
+namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 {
     public class CentreLine : Segment2d
     {
@@ -93,6 +95,42 @@ namespace Jpp.Ironstone.Highways.Objectmodel
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(side), side, null);
+            }
+
+            return null;
+        }
+
+        public CentreLine ConnectingCentreLine(IEnumerable<Road> roads, bool isStart)
+        {
+            const int dp = 3;
+            var curve = GetCurve();
+            var roadList = roads.ToList();
+
+            if (!roadList.Any()) return null;
+
+            foreach (var road in roadList)
+            {
+                foreach (var rCentreLine in road.CentreLines)
+                {
+                    var next = rCentreLine.Next();
+                    var previous = rCentreLine.Previous();
+
+                    if (next != null && next.Equals(this)) continue;
+                    if (previous != null && previous.Equals(this)) continue;
+
+                    if (rCentreLine.Equals(this)) continue;
+
+                    var pts = new Point3dCollection();
+                    curve.IntersectWith(rCentreLine.GetCurve(), Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
+                    if (pts.Count <= 0) continue;
+
+                    var intPointRounded = new Point2d(Math.Round(pts[0].X, dp), Math.Round(pts[0].Y, dp));
+                    var centrePointRounded = isStart
+                        ? new Point2d(Math.Round(StartPoint.X, dp), Math.Round(StartPoint.Y, dp))
+                        : new Point2d(Math.Round(EndPoint.X, dp), Math.Round(EndPoint.Y, dp));
+
+                    if (intPointRounded == centrePointRounded) return rCentreLine;
+                }
             }
 
             return null;

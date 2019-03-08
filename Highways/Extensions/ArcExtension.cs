@@ -1,7 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 
-namespace Jpp.Ironstone.Highways.Objectmodel.Extensions
+namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
 {
     public static class ArcExtension
     {

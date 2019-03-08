@@ -12,7 +12,7 @@ using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.Autocad.DrawingObjects;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 
-namespace Jpp.Ironstone.Structures.Objectmodel.TreeRings
+namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 {
     //TODO: Review class
     public class TreeRingManager : AbstractDrawingObjectManager

@@ -1,9 +1,9 @@
 ﻿using System;
 
-namespace HighwaysTests.Response
+namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Response
 {
     [Serializable]
-    public class NetworkProperties
+    public class HighwayManagerProperties
     {
         public int CentreLineCount { get; set; }
         public int RoadCount { get; set; }

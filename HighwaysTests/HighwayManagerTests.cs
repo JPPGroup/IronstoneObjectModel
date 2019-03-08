@@ -5,19 +5,19 @@ using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using HighwaysTests.Response;
 using Jpp.AcTestFramework;
-using Jpp.Ironstone.Highways.Objectmodel;
-using Jpp.Ironstone.Highways.Objectmodel.Extensions;
+using Jpp.Ironstone.Highways.ObjectModel.Extensions;
+using Jpp.Ironstone.Highways.ObjectModel.Objects;
+using Jpp.Ironstone.Highways.ObjectModel.Tests.Response;
 using NUnit.Framework;
 
-namespace HighwaysTests
+namespace Jpp.Ironstone.Highways.ObjectModel.Tests
 {
-    [TestFixture(@"..\..\Drawings\NetworkTests1.dwg", 49, 11, 10, 6, 4 )]
-    [TestFixture(@"..\..\Drawings\NetworkTests2.dwg", 102, 10, 11, 3, 8)]
-    [TestFixture(@"..\..\Drawings\NetworkTests3.dwg", 131, 30, 41, 15, 26)]
-    [TestFixture(@"..\..\Drawings\NetworkTests4.dwg", 51, 0, 0, 0, 0)]
-    public class NetworkTests : BaseNUnitTestFixture
+    [TestFixture(@"..\..\..\Drawings\NetworkTests1.dwg", 49, 11, 10, 6, 4 )]
+    [TestFixture(@"..\..\..\Drawings\NetworkTests2.dwg", 102, 10, 11, 3, 8)]
+    [TestFixture(@"..\..\..\Drawings\NetworkTests3.dwg", 131, 30, 41, 15, 26)]
+    [TestFixture(@"..\..\..\Drawings\NetworkTests4.dwg", 0, 0, 0, 0, 0)]
+    public class HighwayManagerTests : BaseNUnitTestFixture
     {
         private readonly int _centreLines;
         private readonly int _roads;
@@ -25,8 +25,8 @@ namespace HighwaysTests
         private readonly int _rightTurn;
         private readonly int _leftTurn;
 
-        public NetworkTests() : base(Assembly.GetExecutingAssembly(), typeof(NetworkTests)) { }
-        public NetworkTests(string drawingFile, int centreLines, int roads, int junctions, int rightTurn, int leftTurn) : base(Assembly.GetExecutingAssembly(), typeof(NetworkTests), drawingFile)
+        public HighwayManagerTests() : base(Assembly.GetExecutingAssembly(), typeof(HighwayManagerTests)) { }
+        public HighwayManagerTests(string drawingFile, int centreLines, int roads, int junctions, int rightTurn, int leftTurn) : base(Assembly.GetExecutingAssembly(), typeof(HighwayManagerTests), drawingFile)
         {
             _centreLines = centreLines;
             _roads = roads;
@@ -36,9 +36,9 @@ namespace HighwaysTests
         }
 
         [Test]
-        public void VerifyInitialiseNetwork()
+        public void VerifyInitialiseHighwayManager()
         {
-            var result = RunTest<NetworkProperties>("VerifyInitialiseNetworkResident");
+            var result = RunTest<HighwayManagerProperties>("VerifyInitialiseHighwayManagerResident");
 
             Assert.Multiple(() =>
             {
@@ -50,10 +50,10 @@ namespace HighwaysTests
             });
         }
 
-        public NetworkProperties VerifyInitialiseNetworkResident()
+        public HighwayManagerProperties VerifyInitialiseHighwayManagerResident()
         {
-            var result = new NetworkProperties();
-            var network = new Network();
+            var result = new HighwayManagerProperties();
+            var highway = new HighwayManager();
             var acDoc = Application.DocumentManager.MdiActiveDocument;
             var acCurDb = acDoc.Database;
             var ed = acDoc.Editor;
@@ -66,15 +66,17 @@ namespace HighwaysTests
             {
                 try
                 {
-                    var centreLines = GetCentreLinesFromSelection(res.Value);
-                    result.CentreLineCount = centreLines.Count;
+                    var centreLines = GetCentreLinesFromSelection(res.Value);                    
 
-                    network.InitialiseNetworkFromCentreLines(centreLines);
-                    result.RoadCount = network.Roads.Count;
-                    result.JunctionCount = network.Junctions.Count;
+                    highway.InitialiseFromCentreLines(centreLines);
+
+                    result.CentreLineCount = highway.CentreLines.Count;
+                    result.RoadCount = highway.Roads.Count;
+                    result.JunctionCount = highway.Junctions.Count;
+
                     var rightCount = 0;
                     var leftCount = 0;
-                    foreach (var junction in network.Junctions)
+                    foreach (var junction in highway.Junctions)
                     {
                         if (junction.Turn == TurnTypes.Right) rightCount++;
                         if (junction.Turn == TurnTypes.Left) leftCount++;

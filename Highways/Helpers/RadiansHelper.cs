@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Jpp.Ironstone.Highways.Objectmodel.Helpers
+namespace Jpp.Ironstone.Highways.ObjectModel.Helpers
 {
     public static class RadiansHelper
     {

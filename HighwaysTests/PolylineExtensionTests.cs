@@ -3,15 +3,15 @@ using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Jpp.AcTestFramework;
-using Jpp.Ironstone.Highways.Objectmodel.Extensions;
+using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using NUnit.Framework;
 
-namespace HighwaysTests
+namespace Jpp.Ironstone.Highways.ObjectModel.Tests
 {
-    [TestFixture(@"..\..\Drawings\PolylineExTests1.dwg", 5)]
-    [TestFixture(@"..\..\Drawings\PolylineExTests2.dwg", 1)]
-    [TestFixture(@"..\..\Drawings\PolylineExTests3.dwg", 2)]
-    [TestFixture(@"..\..\Drawings\PolylineExTests4.dwg", 6)]
+    [TestFixture(@"..\..\..\Drawings\PolylineExTests1.dwg", 5)]
+    [TestFixture(@"..\..\..\Drawings\PolylineExTests2.dwg", 1)]
+    [TestFixture(@"..\..\..\Drawings\PolylineExTests3.dwg", 2)]
+    [TestFixture(@"..\..\..\Drawings\PolylineExTests4.dwg", 6)]
     public class PolylineExtensionTests : BaseNUnitTestFixture
     {
         private readonly int _polyLineSegments;

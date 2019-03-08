@@ -1,7 +1,7 @@
 ﻿using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace Jpp.Ironstone.Highways.Objectmodel.Extensions
+namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
 {
     public static class PolylineExtension
     {

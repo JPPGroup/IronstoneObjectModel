@@ -4,27 +4,24 @@ using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.Autocad;
-using Jpp.Ironstone.Highways.Objectmodel.Extensions;
-using Jpp.Ironstone.Highways.Objectmodel.Helpers;
+using Jpp.Ironstone.Highways.ObjectModel.Extensions;
+using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
-namespace Jpp.Ironstone.Highways.Objectmodel
+namespace Jpp.Ironstone.Highways.ObjectModel
 {
     public abstract class Segment2d : DrawingObject
     {        
-        [XmlIgnore]
-        public override double Rotation
+        [XmlIgnore] public override double Rotation
         {
             get => 0;
             set { return; }
         }
-        [XmlIgnore]
-        public override Point3d Location
+        [XmlIgnore] public override Point3d Location
         {
             get => default(Point3d);
             set { return; }
         } 
-        [XmlIgnore]
-        public SegmentType Type {
+        [XmlIgnore] public SegmentType Type {
             get
             {
                 var acTrans = Application.DocumentManager.MdiActiveDocument.TransactionManager.TopTransaction;
@@ -42,8 +39,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
                 }
             }
         }
-        [XmlIgnore]
-        public Point2d StartPoint
+        [XmlIgnore] public Point2d StartPoint
         {
             get
             {
@@ -56,8 +52,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
                 throw new ArgumentException("Invalid segment type.");
             }
         }
-        [XmlIgnore]
-        public Point2d EndPoint
+        [XmlIgnore] public Point2d EndPoint
         {
             get
             {
@@ -70,8 +65,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
                 throw new ArgumentException("Invalid segment type.");
             }
         }
-        [XmlIgnore]
-        public Vector2d StartVector
+        [XmlIgnore] public Vector2d StartVector
         {
             get
             {
@@ -91,8 +85,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
                 }
             }
         }
-        [XmlIgnore]
-        public Vector2d EndVector
+        [XmlIgnore] public Vector2d EndVector
         {
             get
             {
@@ -112,8 +105,7 @@ namespace Jpp.Ironstone.Highways.Objectmodel
                 }
             }
         }
-        [XmlIgnore]
-        public double Angle
+        [XmlIgnore] public double Angle
         {
             get
             {

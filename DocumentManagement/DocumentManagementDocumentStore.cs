@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.jHub;
 
-namespace Jpp.Ironstone.DocumentManagement.Objectmodel
+namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 {
     public class DocumentManagementDocumentStore : DocumentStore
     {
