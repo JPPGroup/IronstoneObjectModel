@@ -6,10 +6,9 @@ using Jpp.AcTestFramework;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using NUnit.Framework;
 
-namespace Jpp.Ironstone.Highways.ObjectModel.Tests
+namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
 {
     [TestFixture]
-
     public class ArcExtensionTests : BaseNUnitTestFixture
     {
         public ArcExtensionTests() : base(Assembly.GetExecutingAssembly(), typeof(ArcExtensionTests)) { }        

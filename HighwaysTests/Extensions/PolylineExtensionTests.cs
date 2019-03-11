@@ -6,7 +6,7 @@ using Jpp.AcTestFramework;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using NUnit.Framework;
 
-namespace Jpp.Ironstone.Highways.ObjectModel.Tests
+namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
 {
     [TestFixture(@"..\..\..\Drawings\PolylineExTests1.dwg", 5)]
     [TestFixture(@"..\..\..\Drawings\PolylineExTests2.dwg", 1)]

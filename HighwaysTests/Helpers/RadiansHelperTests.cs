@@ -2,7 +2,7 @@
 using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 using NUnit.Framework;
 
-namespace Jpp.Ironstone.Highways.ObjectModel.Tests
+namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Helpers
 {
     [TestFixture]
     public class RadiansHelperTests
