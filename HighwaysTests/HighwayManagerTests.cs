@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Jpp.AcTestFramework;
+using Jpp.Ironstone.Core;
+using Jpp.Ironstone.Core.Mocking;
+using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
 using Jpp.Ironstone.Highways.ObjectModel.Tests.Response;
@@ -13,12 +17,14 @@ using NUnit.Framework;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Tests
 {
-    [TestFixture(@"..\..\..\Drawings\NetworkTests1.dwg", 49, 11, 10, 6, 4 )]
-    [TestFixture(@"..\..\..\Drawings\NetworkTests2.dwg", 102, 10, 11, 3, 8)]
-    [TestFixture(@"..\..\..\Drawings\NetworkTests3.dwg", 131, 30, 41, 15, 26)]
+    [TestFixture(@"..\..\..\Drawings\NetworkTests1.dwg", 49, 11, 10, 4, 6 )]
+    [TestFixture(@"..\..\..\Drawings\NetworkTests2.dwg", 102, 10, 11, 8, 3)]
+    [TestFixture(@"..\..\..\Drawings\NetworkTests3.dwg", 131, 30, 41, 26, 15)]
     [TestFixture(@"..\..\..\Drawings\NetworkTests4.dwg", 0, 0, 0, 0, 0)]
     public class HighwayManagerTests : BaseNUnitTestFixture
     {
+        //public override bool ShowCommandWindow { get; } = true;
+
         private readonly int _centreLines;
         private readonly int _roads;
         private readonly int _junctions;
@@ -33,6 +39,13 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
             _junctions = junctions;
             _rightTurn = rightTurn;
             _leftTurn = leftTurn;
+        }
+
+        public override void Setup()
+        {
+            var config = new Configuration();
+            config.TestSettings();
+            ConfigurationHelper.CreateConfiguration(config);
         }
 
         [Test]
@@ -53,8 +66,8 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
         public HighwayManagerProperties VerifyInitialiseHighwayManagerResident()
         {
             var result = new HighwayManagerProperties();
-            var highway = new HighwayManager();
             var acDoc = Application.DocumentManager.MdiActiveDocument;
+            var highway = DataService.Current.GetStore<HighwaysDocumentStore>(acDoc.Name).GetManager<HighwayManager>();
             var acCurDb = acDoc.Database;
             var ed = acDoc.Editor;
             var res = ed.SelectAll();
@@ -70,7 +83,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
 
                     highway.InitialiseFromCentreLines(centreLines);
 
-                    result.CentreLineCount = highway.CentreLines.Count;
+                    result.CentreLineCount = highway.Roads.Select(r => r.CentreLines.Count).Sum();
                     result.RoadCount = highway.Roads.Count;
                     result.JunctionCount = highway.Junctions.Count;
 
@@ -84,16 +97,16 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
 
                     result.JunctionRightCount = leftCount;
                     result.JunctionLeftCount = rightCount;
+
+                    acTrans.Commit();
                 }
                 catch (Exception)
                 {
-                    // ignored
+                    acTrans.Abort();
                 }
 
                 return result;
-            }
-
-            
+            }           
         }
 
         private static ICollection<CentreLine> GetCentreLinesFromSelection(IEnumerable acSSet)
