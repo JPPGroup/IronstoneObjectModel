@@ -37,15 +37,15 @@
   <ItemGroup>
     <Reference Include="AcCoreMgd, Version=23.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AutoCAD.NET.Core.23.0.0\lib\net47\AcCoreMgd.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="AcDbMgd, Version=23.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AutoCAD.NET.Model.23.0.0\lib\net47\AcDbMgd.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="acdbmgdbrep, Version=23.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AutoCAD.NET.Model.23.0.0\lib\net47\acdbmgdbrep.dll</HintPath>
-      <Private>False</Private>
+      <Private>True</Private>
     </Reference>
     <Reference Include="AcTestFramework, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>..\packages\AcTestFramework.1.0.21\lib\net472\AcTestFramework.dll</HintPath>
@@ -94,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ArcExtensionTests.cs" />
+    <Compile Include="CentreLineOffsetTests.cs" />
     <Compile Include="PolylineExtensionTests.cs" />
     <Compile Include="HighwayManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

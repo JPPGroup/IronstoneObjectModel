@@ -3,7 +3,7 @@ using Jpp.Ironstone.Highways.ObjectModel.Objects;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
 {
-    interface ICentreLineOffset
+    public interface ICentreLineOffset
     {
         SidesOfCentre Side { get; }
         OffsetTypes OffsetType { get; }

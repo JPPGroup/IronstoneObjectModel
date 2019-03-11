@@ -90,7 +90,7 @@
     <Compile Include="HighwayManager.cs" />
     <Compile Include="HighwaysDocumentStore.cs" />
     <Compile Include="Objects\Junction.cs" />
-    <Compile Include="Objects\JunctionOffsetIntersect.cs" />
+    <Compile Include="Objects\OffsetIntersect.cs" />
     <Compile Include="Objects\JunctionPart.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Objects\Road.cs" />
