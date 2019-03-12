@@ -6,9 +6,6 @@ using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using Jpp.AcTestFramework;
-using Jpp.Ironstone.Core;
-using Jpp.Ironstone.Core.Mocking;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
@@ -21,18 +18,16 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
     [TestFixture(@"..\..\..\Drawings\NetworkTests2.dwg", 102, 10, 11, 8, 3)]
     [TestFixture(@"..\..\..\Drawings\NetworkTests3.dwg", 131, 30, 41, 26, 15)]
     [TestFixture(@"..\..\..\Drawings\NetworkTests4.dwg", 0, 0, 0, 0, 0)]
-    public class HighwayManagerTests : BaseNUnitTestFixture
+    public class HighwaysManagerTests : IronstoneTestFixture
     {
-        //public override bool ShowCommandWindow { get; } = true;
-
         private readonly int _centreLines;
         private readonly int _roads;
         private readonly int _junctions;
         private readonly int _rightTurn;
         private readonly int _leftTurn;
 
-        public HighwayManagerTests() : base(Assembly.GetExecutingAssembly(), typeof(HighwayManagerTests)) { }
-        public HighwayManagerTests(string drawingFile, int centreLines, int roads, int junctions, int rightTurn, int leftTurn) : base(Assembly.GetExecutingAssembly(), typeof(HighwayManagerTests), drawingFile)
+        public HighwaysManagerTests() : base(Assembly.GetExecutingAssembly(), typeof(HighwaysManagerTests)) { }
+        public HighwaysManagerTests(string drawingFile, int centreLines, int roads, int junctions, int rightTurn, int leftTurn) : base(Assembly.GetExecutingAssembly(), typeof(HighwaysManagerTests), drawingFile)
         {
             _centreLines = centreLines;
             _roads = roads;
@@ -41,17 +36,10 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
             _leftTurn = leftTurn;
         }
 
-        public override void Setup()
-        {
-            var config = new Configuration();
-            config.TestSettings();
-            ConfigurationHelper.CreateConfiguration(config);
-        }
-
         [Test]
         public void VerifyInitialiseHighwayManager()
         {
-            var result = RunTest<HighwayManagerProperties>("VerifyInitialiseHighwayManagerResident");
+            var result = RunTest<HighwaysManagerProperties>("VerifyInitialiseHighwayManagerResident");
 
             Assert.Multiple(() =>
             {
@@ -63,11 +51,11 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
             });
         }
 
-        public HighwayManagerProperties VerifyInitialiseHighwayManagerResident()
+        public HighwaysManagerProperties VerifyInitialiseHighwayManagerResident()
         {
-            var result = new HighwayManagerProperties();
+            var result = new HighwaysManagerProperties();
             var acDoc = Application.DocumentManager.MdiActiveDocument;
-            var highway = DataService.Current.GetStore<HighwaysDocumentStore>(acDoc.Name).GetManager<HighwayManager>();
+            var highway = DataService.Current.GetStore<HighwaysDocumentStore>(acDoc.Name).GetManager<HighwaysManager>();
             var acCurDb = acDoc.Database;
             var ed = acDoc.Editor;
             var res = ed.SelectAll();

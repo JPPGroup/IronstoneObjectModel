@@ -9,6 +9,19 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Helpers
         public const double DEGREES_90 = Math.PI / 2;
         public const double ANGLE_TOLERANCE = Math.PI / 360;
 
+        public static double AngleForSide(double angle, SidesOfCentre side)
+        {
+            switch (side)
+            {
+                case SidesOfCentre.Right:
+                    return AngleForRightSide(angle);
+                case SidesOfCentre.Left:
+                    return AngleForLeftSide(angle);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(side), side, null);
+            }
+        }
+    
         public static double AngleForRightSide(double angle)
         {
             var output = angle - DEGREES_90;

@@ -3,7 +3,7 @@
 namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Response
 {
     [Serializable]
-    public class HighwayManagerProperties
+    public class HighwaysManagerProperties
     {
         public int CentreLineCount { get; set; }
         public int RoadCount { get; set; }

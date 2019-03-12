@@ -2,16 +2,15 @@
 using System.Reflection;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Jpp.AcTestFramework;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using NUnit.Framework;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
 {
     [TestFixture]
-    public class ArcExtensionTests : BaseNUnitTestFixture
+    public class ArcExtensionTests : IronstoneTestFixture
     {
-        public ArcExtensionTests() : base(Assembly.GetExecutingAssembly(), typeof(ArcExtensionTests)) { }        
+        public ArcExtensionTests() : base(Assembly.GetExecutingAssembly(), typeof(ArcExtensionTests)) { }
 
         [Test]
         public void VerifyAntiClockwiseArc()
