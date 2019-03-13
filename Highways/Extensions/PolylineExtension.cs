@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.ApplicationServices.Core;
+﻿using System;
+using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
@@ -13,6 +14,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
 
             using (var acTrans = acCurDb.TransactionManager.StartTransaction())
             {
+                var actualPolyline = acTrans.GetObject(pLine.ObjectId, OpenMode.ForWrite) as Polyline;
                 var acBlkTbl = acTrans.GetObject(acCurDb.BlockTableId, OpenMode.ForRead) as BlockTable;
 
                 if (acBlkTbl != null)
@@ -21,7 +23,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
 
                     if (acBlkTblRec != null)
                     {
-                        pLine.Explode(acDbObjColl);
+                        actualPolyline?.Explode(acDbObjColl);
 
                         foreach (Entity acEnt in acDbObjColl)
                         {
@@ -29,7 +31,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
                             acTrans.AddNewlyCreatedDBObject(acEnt, true);
                         }
 
-                        pLine.Erase(true);
+                        actualPolyline?.Erase();
                     }
                 }
                 acTrans.Commit();

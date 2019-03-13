@@ -92,7 +92,6 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
         private static double AngleFromCurveToOffsetForSide(this Curve curve, SidesOfCentre side)
         {
             double curveAngle;
-            double returnAngle;
             switch (curve)
             {
                 case Line line:
@@ -108,19 +107,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
                     throw new ArgumentOutOfRangeException(nameof(curve), curve, null);
             }
 
-            switch (side)
-            {
-                case SidesOfCentre.Right:
-                    returnAngle = RadiansHelper.AngleForRightSide(curveAngle);
-                    break;
-                case SidesOfCentre.Left:
-                    returnAngle = RadiansHelper.AngleForLeftSide(curveAngle);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(side), side, null);
-            }
-
-            return returnAngle;
+            return RadiansHelper.AngleForSide(curveAngle, side);
         }
         #endregion
     }

@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Reflection;
 using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 using NUnit.Framework;
 
-namespace Jpp.Ironstone.Highways.ObjectModel.Tests
+namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Helpers
 {
     [TestFixture]
-    public class RadiansHelperTests
+    public class RadiansHelperTests : IronstoneTestFixture
     {
+        public RadiansHelperTests() : base(Assembly.GetExecutingAssembly(), typeof(RadiansHelperTests)) { }
+
         [Test]
         public void Verify360Degrees()
         {
@@ -124,6 +127,45 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
 
             var result = RadiansHelper.AnglesAreEqual(angle1, angle2);
             Assert.False(result, "Angles should not be equal.");
+        }
+
+        [Test]
+        public void VerifyAngleForSideRight()
+        {
+            const double expected = Math.PI / 2;
+            const double initialAngle = Math.PI;
+
+            var result = RadiansHelper.AngleForSide(initialAngle, SidesOfCentre.Right);
+            Assert.AreEqual(expected, result, "Unexpected value for RHS angle.");
+        }
+
+        [Test]
+        public void VerifyAngleForSideLeft()
+        {
+            const double expected = 0;
+            const double initialAngle = Math.PI * 1.5;
+
+            var result = RadiansHelper.AngleForSide(initialAngle, SidesOfCentre.Left);
+            Assert.AreEqual(expected, result, "Unexpected value for LHS angle.");
+        }
+
+        [Test]
+        public void VerifyAngleForInvalidSide()
+        {
+            const double initialAngle = Math.PI * 1.5;
+            bool result;
+
+            try
+            {
+                RadiansHelper.AngleForSide(initialAngle, (SidesOfCentre)999);
+                result = false;
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                result = true;
+            }
+            
+            Assert.IsTrue( result, "Side of centre should be invalid.");
         }
     }
 }

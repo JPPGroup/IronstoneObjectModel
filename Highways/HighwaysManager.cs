@@ -12,19 +12,19 @@ using Jpp.Ironstone.Highways.ObjectModel.Objects;
 namespace Jpp.Ironstone.Highways.ObjectModel
 {
     [Serializable]
-    public class HighwayManager : AbstractDrawingObjectManager
+    public class HighwaysManager : AbstractDrawingObjectManager
     {
         public bool Finalized { get; set; }
         public List<Road> Roads { get; set; }
         public PersistentObjectIdCollection OffsetCollection { get; set; }
         [XmlIgnore] public List<Junction> Junctions { get; set; }
 
-        public HighwayManager(Document document) : base(document) 
+        public HighwaysManager(Document document) : base(document) 
         {
             OffsetCollection = new PersistentObjectIdCollection();
         }
 
-        private HighwayManager() { }
+        private HighwaysManager() { }
 
         public void FinalizeLayout()
         {

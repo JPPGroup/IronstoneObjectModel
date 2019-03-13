@@ -2,22 +2,20 @@
 using System.Reflection;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Jpp.AcTestFramework;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using NUnit.Framework;
 
-namespace Jpp.Ironstone.Highways.ObjectModel.Tests
+namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
 {
     [TestFixture]
-
-    public class ArcExtensionTests : BaseNUnitTestFixture
+    public class ArcExtensionTests : IronstoneTestFixture
     {
-        public ArcExtensionTests() : base(Assembly.GetExecutingAssembly(), typeof(ArcExtensionTests)) { }        
+        public ArcExtensionTests() : base(Assembly.GetExecutingAssembly(), typeof(ArcExtensionTests)) { }
 
         [Test]
         public void VerifyAntiClockwiseArc()
         {
-            var result = RunTest<bool>("VerifyAntiClockwiseArcResident");
+            var result = RunTest<bool>(nameof(VerifyAntiClockwiseArcResident));
             Assert.IsFalse(result, "Arc is not anti clockwise.");
         }
 
@@ -37,7 +35,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
         [Test]
         public void VerifyAntiClockwiseArcReverseCurve()
         {
-            var result = RunTest<bool>("VerifyAntiClockwiseArcReverseCurveResident");
+            var result = RunTest<bool>(nameof(VerifyAntiClockwiseArcReverseCurveResident));
             Assert.IsTrue(result, "Arc is not clockwise.");
         }
 
@@ -58,7 +56,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
         [Test]
         public void VerifyClockwiseArc()
         {
-            var result = RunTest<bool>("VerifyClockwiseArcResident");
+            var result = RunTest<bool>(nameof(VerifyClockwiseArcResident));
             Assert.IsTrue(result, "Arc is not clockwise.");
         }
 
@@ -78,7 +76,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
         [Test]
         public void VerifyClockwiseArcReverseCurve()
         {
-            var result = RunTest<bool>("VerifyClockwiseArcReverseCurveResident");
+            var result = RunTest<bool>(nameof(VerifyClockwiseArcReverseCurveResident));
             Assert.IsFalse(result, "Arc is not anti-clockwise.");
         }
 
