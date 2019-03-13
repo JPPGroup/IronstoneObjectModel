@@ -14,7 +14,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
         [Test]
         public void VerifyStoreLoaded()
         {
-            var result = RunTest<bool>("VerifyStoreLoadedResident");
+            var result = RunTest<bool>(nameof(VerifyStoreLoadedResident));
             Assert.IsTrue(result, "Data store not loaded.");
         }
 
@@ -31,8 +31,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
             catch (Exception)
             {
                 return false;
-            }
-            
+            }            
         }
     }
 }

@@ -1,12 +1,15 @@
 ﻿using System;
+using System.Reflection;
 using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 using NUnit.Framework;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Helpers
 {
     [TestFixture]
-    public class RadiansHelperTests
+    public class RadiansHelperTests : IronstoneTestFixture
     {
+        public RadiansHelperTests() : base(Assembly.GetExecutingAssembly(), typeof(RadiansHelperTests)) { }
+
         [Test]
         public void Verify360Degrees()
         {

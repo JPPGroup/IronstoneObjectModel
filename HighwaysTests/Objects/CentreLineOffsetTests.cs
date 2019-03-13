@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Highways.ObjectModel.Abstract;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
@@ -85,7 +84,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Objects
             const double y = 2;
             const double z = 3;
 
-            var intersect = RunTest<object[]>("VerifyOffsetIntersectBeforeResident", new object[] { before, x, y ,z });
+            var intersect = RunTest<object[]>(nameof(VerifyOffsetIntersectBeforeResident), new object[] { before, x, y ,z });
 
             Assert.AreEqual(before, (bool)intersect[0], "Unexpected value for Before.");
             Assert.AreEqual(x, (double)intersect[1], "Unexpected value for Point X.");
@@ -115,7 +114,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Objects
             const double y = 2;
             const double z = 1;
 
-            var intersect = RunTest<object[]>("VerifyOffsetIntersectAfterResident", new object[] { before, x, y, z });
+            var intersect = RunTest<object[]>(nameof(VerifyOffsetIntersectAfterResident), new object[] { before, x, y, z });
 
             Assert.AreEqual(before, (bool)intersect[0], "Unexpected value for Before.");
             Assert.AreEqual(x, (double)intersect[1], "Unexpected value for Point X.");

@@ -37,9 +37,33 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
         }
 
         [Test]
-        public void VerifyInitialiseHighwayManager()
+        public void VerifyManagerLoaded()
         {
-            var result = RunTest<HighwaysManagerProperties>("VerifyInitialiseHighwayManagerResident");
+            var result = RunTest<bool>(nameof(VerifyManagerLoadedResident));
+            Assert.IsTrue(result, "Manager not loaded.");
+        }
+
+        public bool VerifyManagerLoadedResident()
+        {
+            try
+            {
+                var acDoc = Application.DocumentManager.MdiActiveDocument;
+                var ds = DataService.Current;
+                var store = ds.GetStore<HighwaysDocumentStore>(acDoc.Name);
+                var manager = store.GetManager<HighwaysManager>();
+
+                return manager != null;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        [Test]
+        public void VerifyHighwaysManagerInitialLayout()
+        {
+            var result = RunTest<HighwaysManagerProperties>(nameof(VerifyHighwaysManagerInitialLayoutResident));
 
             Assert.Multiple(() =>
             {
@@ -51,7 +75,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
             });
         }
 
-        public HighwaysManagerProperties VerifyInitialiseHighwayManagerResident()
+        public HighwaysManagerProperties VerifyHighwaysManagerInitialLayoutResident()
         {
             var result = new HighwaysManagerProperties();
             var acDoc = Application.DocumentManager.MdiActiveDocument;
@@ -62,39 +86,37 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
 
             if (res.Status != PromptStatus.OK) return result;
             if (res.Value == null || res.Value.Count == 0) return result;
-        
-            using (var acTrans = acCurDb.TransactionManager.StartTransaction())
+
+            var acTrans = acCurDb.TransactionManager.StartTransaction();
+            try
             {
-                try
+                var centreLines = GetCentreLinesFromSelection(res.Value);                    
+
+                highway.InitialiseFromCentreLines(centreLines);
+
+                result.CentreLineCount = highway.Roads.Select(r => r.CentreLines.Count).Sum();
+                result.RoadCount = highway.Roads.Count;
+                result.JunctionCount = highway.Junctions.Count;
+
+                var rightCount = 0;
+                var leftCount = 0;
+                foreach (var junction in highway.Junctions)
                 {
-                    var centreLines = GetCentreLinesFromSelection(res.Value);                    
-
-                    highway.InitialiseFromCentreLines(centreLines);
-
-                    result.CentreLineCount = highway.Roads.Select(r => r.CentreLines.Count).Sum();
-                    result.RoadCount = highway.Roads.Count;
-                    result.JunctionCount = highway.Junctions.Count;
-
-                    var rightCount = 0;
-                    var leftCount = 0;
-                    foreach (var junction in highway.Junctions)
-                    {
-                        if (junction.Turn == TurnTypes.Right) rightCount++;
-                        if (junction.Turn == TurnTypes.Left) leftCount++;
-                    }
-
-                    result.JunctionRightCount = leftCount;
-                    result.JunctionLeftCount = rightCount;
-
-                    acTrans.Commit();
-                }
-                catch (Exception)
-                {
-                    acTrans.Abort();
+                    if (junction.Turn == TurnTypes.Right) rightCount++;
+                    if (junction.Turn == TurnTypes.Left) leftCount++;
                 }
 
-                return result;
-            }           
+                result.JunctionRightCount = leftCount;
+                result.JunctionLeftCount = rightCount;
+
+                acTrans.Commit();
+            }
+            catch (Exception)
+            {
+                acTrans.Abort();
+            }
+
+            return result;         
         }
 
         private static ICollection<CentreLine> GetCentreLinesFromSelection(IEnumerable acSSet)

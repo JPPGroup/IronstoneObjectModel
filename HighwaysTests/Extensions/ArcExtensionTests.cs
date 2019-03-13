@@ -15,7 +15,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
         [Test]
         public void VerifyAntiClockwiseArc()
         {
-            var result = RunTest<bool>("VerifyAntiClockwiseArcResident");
+            var result = RunTest<bool>(nameof(VerifyAntiClockwiseArcResident));
             Assert.IsFalse(result, "Arc is not anti clockwise.");
         }
 
@@ -35,7 +35,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
         [Test]
         public void VerifyAntiClockwiseArcReverseCurve()
         {
-            var result = RunTest<bool>("VerifyAntiClockwiseArcReverseCurveResident");
+            var result = RunTest<bool>(nameof(VerifyAntiClockwiseArcReverseCurveResident));
             Assert.IsTrue(result, "Arc is not clockwise.");
         }
 
@@ -56,7 +56,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
         [Test]
         public void VerifyClockwiseArc()
         {
-            var result = RunTest<bool>("VerifyClockwiseArcResident");
+            var result = RunTest<bool>(nameof(VerifyClockwiseArcResident));
             Assert.IsTrue(result, "Arc is not clockwise.");
         }
 
@@ -76,7 +76,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
         [Test]
         public void VerifyClockwiseArcReverseCurve()
         {
-            var result = RunTest<bool>("VerifyClockwiseArcReverseCurveResident");
+            var result = RunTest<bool>(nameof(VerifyClockwiseArcReverseCurveResident));
             Assert.IsFalse(result, "Arc is not anti-clockwise.");
         }
 

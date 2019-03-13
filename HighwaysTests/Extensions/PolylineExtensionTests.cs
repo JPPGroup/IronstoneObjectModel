@@ -1,10 +1,7 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using Autodesk.AutoCAD.ApplicationServices;
+﻿using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using NUnit.Framework;
 
@@ -27,7 +24,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
         [Test]
         public void VerifyExplodeAndErase()
         {
-            var result = RunTest<int>("VerifyExplodeAndEraseResident");
+            var result = RunTest<int>(nameof(VerifyExplodeAndEraseResident));
             Assert.AreEqual(_polyLineSegments, result, "Incorrect number of segments from polyline.");
         }
 
@@ -49,10 +46,9 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             var acDoc = Application.DocumentManager.MdiActiveDocument;
             var acCurDb = acDoc.Database;
 
-            using (var acTrans = acCurDb.TransactionManager.StartTransaction())
-            {
-                return (Polyline)acTrans.GetObject(res.Value[0].ObjectId, OpenMode.ForWrite);
-            }
+            var acTrans = acCurDb.TransactionManager.StartTransaction();
+
+            return (Polyline)acTrans.GetObject(res.Value[0].ObjectId, OpenMode.ForWrite);
         }
     }
 }

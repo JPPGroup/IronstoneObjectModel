@@ -15,7 +15,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
         [Test]
         public void VerifyCurveExtensionInvalidOffsetSide()
         {
-            var result = RunTest<bool>("VerifyCurveExtensionInvalidOffsetSideResident");
+            var result = RunTest<bool>(nameof(VerifyCurveExtensionInvalidOffsetSideResident));
 
             Assert.IsTrue(result,"Offset should be invalid.");
         }
@@ -44,7 +44,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             var startPoint = new double[] { 0, 0, 0 };
             var endPoint = new double[] { 10, 0, 0 };
 
-            var result = RunTest<object[]>("VerifyCurveExtensionLineOffsetLeftResident", new object[] {distance, startPoint, endPoint});
+            var result = RunTest<object[]>(nameof(VerifyCurveExtensionLineOffsetLeftResident), new object[] {distance, startPoint, endPoint});
             var returnStart = (double[]) result[0];
             var returnEnd = (double[])result[1];
 
@@ -66,7 +66,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             var startPoint = new double[] { 0, 0, 0 };
             var endPoint = new double[] { 10, 0, 0 };
 
-            var result = RunTest<object[]>("VerifyCurveExtensionLineOffsetRightResident", new object[] { distance, startPoint, endPoint });
+            var result = RunTest<object[]>(nameof(VerifyCurveExtensionLineOffsetRightResident), new object[] { distance, startPoint, endPoint });
             var returnStart = (double[])result[0];
             var returnEnd = (double[])result[1];
 
@@ -88,7 +88,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             var startPoint = new double[] { 10, 0, 0 };
             var endPoint = new double[] { 0, 0, 0 };
 
-            var result = RunTest<object[]>("VerifyCurveExtensionLineOffsetLeftResident", new object[] { distance, startPoint, endPoint });
+            var result = RunTest<object[]>(nameof(VerifyCurveExtensionLineOffsetLeftResident), new object[] { distance, startPoint, endPoint });
             var returnStart = (double[])result[0];
             var returnEnd = (double[])result[1];
 
@@ -110,7 +110,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             var startPoint = new double[] { 10, 0, 0 };
             var endPoint = new double[] { 0, 0, 0 };
 
-            var result = RunTest<object[]>("VerifyCurveExtensionLineOffsetRightResident", new object[] { distance, startPoint, endPoint });
+            var result = RunTest<object[]>(nameof(VerifyCurveExtensionLineOffsetRightResident), new object[] { distance, startPoint, endPoint });
             var returnStart = (double[])result[0];
             var returnEnd = (double[])result[1];
 
@@ -132,7 +132,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             var startPoint = new double[] { 0, 0, 0 };
             var endPoint = new double[] { 0, 10, 0 };
 
-            var result = RunTest<object[]>("VerifyCurveExtensionLineOffsetLeftResident", new object[] { distance, startPoint, endPoint });
+            var result = RunTest<object[]>(nameof(VerifyCurveExtensionLineOffsetLeftResident), new object[] { distance, startPoint, endPoint });
             var returnStart = (double[])result[0];
             var returnEnd = (double[])result[1];
 
@@ -154,7 +154,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             var startPoint = new double[] { 0, 0, 0 };
             var endPoint = new double[] { 0, 10, 0 };
 
-            var result = RunTest<object[]>("VerifyCurveExtensionLineOffsetRightResident", new object[] { distance, startPoint, endPoint });
+            var result = RunTest<object[]>(nameof(VerifyCurveExtensionLineOffsetRightResident), new object[] { distance, startPoint, endPoint });
             var returnStart = (double[])result[0];
             var returnEnd = (double[])result[1];
 
@@ -176,7 +176,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             var startPoint = new double[] { 0, 10, 0 };
             var endPoint = new double[] { 0, 0, 0 };
 
-            var result = RunTest<object[]>("VerifyCurveExtensionLineOffsetLeftResident", new object[] { distance, startPoint, endPoint });
+            var result = RunTest<object[]>(nameof(VerifyCurveExtensionLineOffsetLeftResident), new object[] { distance, startPoint, endPoint });
             var returnStart = (double[])result[0];
             var returnEnd = (double[])result[1];
 
@@ -198,7 +198,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             var startPoint = new double[] { 0, 10, 0 };
             var endPoint = new double[] { 0, 0, 0 };
 
-            var result = RunTest<object[]>("VerifyCurveExtensionLineOffsetRightResident", new object[] { distance, startPoint, endPoint });
+            var result = RunTest<object[]>(nameof(VerifyCurveExtensionLineOffsetRightResident), new object[] { distance, startPoint, endPoint });
             var returnStart = (double[])result[0];
             var returnEnd = (double[])result[1];
 
@@ -261,7 +261,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             const double start = 0;
             const double end = Math.PI / 2;
 
-            var result = RunTest<double[]>("VerifyCurveExtensionArcOffsetLeftResident", new[] { distance, radius, start, end });
+            var result = RunTest<double[]>(nameof(VerifyCurveExtensionArcOffsetLeftResident), new[] { distance, radius, start, end });
 
             Assert.Multiple(() =>
             {
@@ -279,7 +279,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             const double start = 0;
             const double end = Math.PI / 2;
 
-            var result = RunTest<double[]>("VerifyCurveExtensionArcOffsetRightResident", new[] { distance, radius, start, end });
+            var result = RunTest<double[]>(nameof(VerifyCurveExtensionArcOffsetRightResident), new[] { distance, radius, start, end });
 
             Assert.Multiple(() =>
             {
@@ -297,7 +297,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             const double start = Math.PI / 2;
             const double end = 0;
 
-            var result = RunTest<double[]>("VerifyCurveExtensionArcOffsetLeftResident", new[] { distance, radius, start, end });
+            var result = RunTest<double[]>(nameof(VerifyCurveExtensionArcOffsetLeftResident), new[] { distance, radius, start, end });
 
             Assert.Multiple(() =>
             {
@@ -315,7 +315,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             const double start = Math.PI / 2;
             const double end = 0;
 
-            var result = RunTest<double[]>("VerifyCurveExtensionArcOffsetRightResident", new[] { distance, radius, start, end });
+            var result = RunTest<double[]>(nameof(VerifyCurveExtensionArcOffsetRightResident), new[] { distance, radius, start, end });
 
             Assert.Multiple(() =>
             {
@@ -333,7 +333,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             const double start = Math.PI / 2;
             const double end = 0;
 
-            var result = RunTest<bool>("VerifyCurveExtensionArcOffsetLeftValidResident", new[] { distance, radius, start, end });
+            var result = RunTest<bool>(nameof(VerifyCurveExtensionArcOffsetLeftValidResident), new[] { distance, radius, start, end });
 
             Assert.IsTrue(result, "Offset should be valid");
         }
@@ -346,7 +346,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             const double start = Math.PI / 2;
             const double end = 0;
 
-            var result = RunTest<bool>("VerifyCurveExtensionArcOffsetRightValidResident", new[] { distance, radius, start, end });
+            var result = RunTest<bool>(nameof(VerifyCurveExtensionArcOffsetRightValidResident), new[] { distance, radius, start, end });
 
             Assert.IsFalse(result, "Offset should not be valid");
         }
@@ -359,7 +359,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             const double start = 0;
             const double end = Math.PI / 2;
 
-            var result = RunTest<bool>("VerifyCurveExtensionArcOffsetLeftValidResident", new[] { distance, radius, start, end });
+            var result = RunTest<bool>(nameof(VerifyCurveExtensionArcOffsetLeftValidResident), new[] { distance, radius, start, end });
 
             Assert.IsFalse(result, "Offset should not be valid");
         }
@@ -372,7 +372,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             const double start = 0;
             const double end = Math.PI / 2;
 
-            var result = RunTest<bool>("VerifyCurveExtensionArcOffsetRightValidResident", new[] { distance, radius, start, end });
+            var result = RunTest<bool>(nameof(VerifyCurveExtensionArcOffsetRightValidResident), new[] { distance, radius, start, end });
 
             Assert.IsTrue(result, "Offset should be valid");
         }
@@ -436,7 +436,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
         [Test]
         public void VerifyCurveExtensionPolyLineOffsetLeftInvalid()
         {
-            var result = RunTest<bool>("VerifyCurveExtensionPolyLineOffsetLeftInvalidResident");
+            var result = RunTest<bool>(nameof(VerifyCurveExtensionPolyLineOffsetLeftInvalidResident));
 
             Assert.IsTrue(result, "Offset should be invalid");
         }
@@ -444,7 +444,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
         [Test]
         public void VerifyCurveExtensionPolyLineOffsetRightInvalid()
         {
-            var result = RunTest<bool>("VerifyCurveExtensionPolyLineOffsetRightInvalidResident");
+            var result = RunTest<bool>(nameof(VerifyCurveExtensionPolyLineOffsetRightInvalidResident));
 
             Assert.IsTrue(result, "Offset should be invalid");
         }
