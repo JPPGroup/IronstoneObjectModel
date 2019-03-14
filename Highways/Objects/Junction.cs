@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.ApplicationServices.Core;
+using System.Xml.Serialization;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Jpp.Ironstone.Highways.ObjectModel.Extensions;
+using Jpp.Ironstone.Highways.ObjectModel.Factories;
 using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Objects
@@ -11,10 +13,10 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
     {
         public JunctionPart PrimaryRoad { get; set; }
         public JunctionPart SecondaryRoad { get; set; }
-        public bool TurningHead {
+        [XmlIgnore] public bool TurningHead {
             get
             {
-                var acTrans = Application.DocumentManager.MdiActiveDocument.TransactionManager.TopTransaction;
+                var acTrans = TransactionFactory.CreateFromTop();
                 var pCurve = acTrans.GetObject(PrimaryRoad.CentreLine.BaseObject, OpenMode.ForRead) as Curve;
                 var sCurve = acTrans.GetObject(SecondaryRoad.CentreLine.BaseObject, OpenMode.ForRead) as Curve;
 
@@ -65,30 +67,30 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         private Arc CreateCarriageBefore()
         {
             bool reverseArc;
-            SidesOfCentre primaryOffset;
-            SidesOfCentre secondaryOffset;
+            SidesOfCentre primarySide;
+            SidesOfCentre secondarySide;
             
             switch (Turn)
             {
                 case TurnTypes.Right:
                     reverseArc = true;
-                    primaryOffset = SidesOfCentre.Right;
+                    primarySide = SidesOfCentre.Right;
 
                     if (SecondaryRoad.Type == JunctionPartTypes.Start)
-                        secondaryOffset = SidesOfCentre.Right;
+                        secondarySide = SidesOfCentre.Right;
                     else if (SecondaryRoad.Type == JunctionPartTypes.End)
-                        secondaryOffset = SidesOfCentre.Left;
+                        secondarySide = SidesOfCentre.Left;
                     else
                         throw new ArgumentOutOfRangeException();
                     break;
                 case TurnTypes.Left:
                     reverseArc = false;
-                    primaryOffset = SidesOfCentre.Left;
+                    primarySide = SidesOfCentre.Left;
 
                     if (SecondaryRoad.Type == JunctionPartTypes.Start)
-                        secondaryOffset = SidesOfCentre.Left;
+                        secondarySide = SidesOfCentre.Left;
                     else if (SecondaryRoad.Type == JunctionPartTypes.End)
-                        secondaryOffset = SidesOfCentre.Right;
+                        secondarySide = SidesOfCentre.Right;
                     else
                         throw new ArgumentOutOfRangeException();
                     break;
@@ -109,10 +111,10 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                     var pNextCentreLine = pCentreLine.Previous();
                     if (pCentreLine.BaseObject == sNextCentreLine?.BaseObject) break;
   
-                    var arc = CarriageArc(pCentreLine, primaryOffset,true, sCentreLine, secondaryOffset, SecondaryRoad.Type == JunctionPartTypes.End, reverseArc);
+                    var arc = CarriageArc(pCentreLine, primarySide, true, sCentreLine, secondarySide, SecondaryRoad.Type == JunctionPartTypes.End, reverseArc);
                     if (arc != null)
                     {
-                        foreach (var centre in ignoredCentre) centre.SetOffsetIgnored(primaryOffset);
+                        foreach (var centre in ignoredCentre) centre.SetCarriageWayOffsetIgnored(primarySide);
 
                         return arc;
                     }
@@ -121,7 +123,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                     pCentreLine = pNextCentreLine;
                 }
 
-                sCentreLine.SetOffsetIgnored(secondaryOffset);
+                sCentreLine.SetCarriageWayOffsetIgnored(secondarySide);
                 sCentreLine = sNextCentreLine;
             }
 
@@ -131,30 +133,30 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         private Arc CreateCarriageAfter()
         {
             bool reverseArc;
-            SidesOfCentre primaryOffset;
-            SidesOfCentre secondaryOffset;
+            SidesOfCentre primarySide;
+            SidesOfCentre secondarySide;
 
             switch (Turn)
             {
                 case TurnTypes.Right:
                     reverseArc = false;
-                    primaryOffset = SidesOfCentre.Right;
+                    primarySide = SidesOfCentre.Right;
 
                     if (SecondaryRoad.Type == JunctionPartTypes.Start)
-                        secondaryOffset = SidesOfCentre.Left;
+                        secondarySide = SidesOfCentre.Left;
                     else if (SecondaryRoad.Type == JunctionPartTypes.End)
-                        secondaryOffset = SidesOfCentre.Right;
+                        secondarySide = SidesOfCentre.Right;
                     else
                         throw new ArgumentOutOfRangeException();
                     break;
                 case TurnTypes.Left:
                     reverseArc = true;
-                    primaryOffset = SidesOfCentre.Left;
+                    primarySide = SidesOfCentre.Left;
 
                     if (SecondaryRoad.Type == JunctionPartTypes.Start)
-                        secondaryOffset = SidesOfCentre.Right;
+                        secondarySide = SidesOfCentre.Right;
                     else if (SecondaryRoad.Type == JunctionPartTypes.End)
-                        secondaryOffset = SidesOfCentre.Left;
+                        secondarySide = SidesOfCentre.Left;
                     else
                         throw new ArgumentOutOfRangeException();
                     break;
@@ -175,10 +177,10 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                     var pNextCentreLine = pCentreLine.Next();
                     if (pCentreLine.BaseObject == sNextCentreLine?.BaseObject) break;
 
-                    var arc = CarriageArc(pCentreLine, primaryOffset, false, sCentreLine, secondaryOffset, SecondaryRoad.Type == JunctionPartTypes.End, reverseArc);
+                    var arc = CarriageArc(pCentreLine, primarySide, false, sCentreLine, secondarySide, SecondaryRoad.Type == JunctionPartTypes.End, reverseArc);
                     if (arc != null)
                     {
-                        foreach (var centre in ignoredCentre) centre.SetOffsetIgnored(primaryOffset);
+                        foreach (var centre in ignoredCentre) centre.SetCarriageWayOffsetIgnored(primarySide);
 
                         return arc;
                     }
@@ -187,17 +189,19 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                     pCentreLine = pNextCentreLine;
                 }
 
-                sCentreLine.SetOffsetIgnored(secondaryOffset);
+                sCentreLine.SetCarriageWayOffsetIgnored(secondarySide);
                 sCentreLine = sNextCentreLine;
             }
 
             return null;
         }
 
-        private Arc CarriageArc(CentreLine pCentreLine, SidesOfCentre primaryOffset, bool primaryBefore, CentreLine sCentreLine, SidesOfCentre secondaryOffset, bool secondaryBefore, bool reverseArc)
+        private Arc CarriageArc(CentreLine pCentreLine, SidesOfCentre primarySide, bool primaryBefore, CentreLine sCentreLine, SidesOfCentre secondarySide, bool secondaryBefore, bool reverseArc)
         {
-            var pCurve = pCentreLine.GenerateCarriageWayOffset(primaryOffset, Radius);
-            var sCurve = sCentreLine.GenerateCarriageWayOffset(secondaryOffset, Radius);
+            var pDistance = pCentreLine.GetCarriageWayDistance(primarySide);
+            var sDistance = sCentreLine.GetCarriageWayDistance(secondarySide);
+            var pCurve = pCentreLine.GetCurve().CreateOffset(primarySide, pDistance + Radius);
+            var sCurve = sCentreLine.GetCurve().CreateOffset(secondarySide, sDistance + Radius);
 
             if (pCurve == null || sCurve == null) return null;
 
@@ -210,13 +214,13 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             var circle = new Circle(pts[0], Vector3d.ZAxis, Radius);
 
             var pIntersectPt = new Point3dCollection();
-            pCentreLine.GenerateCarriageWayOffset(primaryOffset).IntersectWith(circle, Intersect.OnBothOperands, plane, pIntersectPt, IntPtr.Zero, IntPtr.Zero);
-            pCentreLine.AddCarriageWayIntersection(primaryOffset, pIntersectPt[0], primaryBefore);
+            pCentreLine.GetCurve().CreateOffset(primarySide, pDistance).IntersectWith(circle, Intersect.OnBothOperands, plane, pIntersectPt, IntPtr.Zero, IntPtr.Zero);
+            pCentreLine.AddCarriageWayOffsetIntersectPoint(primarySide, pIntersectPt[0], primaryBefore);
             var startAngle = pts[0].Convert2d(plane).GetVectorTo(pIntersectPt[0].Convert2d(plane)).Angle;
 
             var sIntersectPt = new Point3dCollection();
-            sCentreLine.GenerateCarriageWayOffset(secondaryOffset).IntersectWith(circle, Intersect.OnBothOperands, plane, sIntersectPt, IntPtr.Zero, IntPtr.Zero);
-            sCentreLine.AddCarriageWayIntersection(secondaryOffset, sIntersectPt[0],secondaryBefore);
+            sCentreLine.GetCurve().CreateOffset(secondarySide, sDistance).IntersectWith(circle, Intersect.OnBothOperands, plane, sIntersectPt, IntPtr.Zero, IntPtr.Zero);
+            sCentreLine.AddCarriageWayOffsetIntersectPoint(secondarySide, sIntersectPt[0],secondaryBefore);
             var endAngle = pts[0].Convert2d(plane).GetVectorTo(sIntersectPt[0].Convert2d(plane)).Angle;
 
             return reverseArc

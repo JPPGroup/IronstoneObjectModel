@@ -54,6 +54,7 @@
       <HintPath>..\packages\Common.0.1.4\lib\netstandard2.0\Common.dll</HintPath>
     </Reference>
     <Reference Include="IronstoneCore, Version=0.1.93.130, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Jpp.Ironstone.Core.0.1.93\lib\net472\IronstoneCore.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.ApplicationInsights, Version=2.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -77,10 +78,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Abstact\ICentreLineOffset.cs" />
+    <Compile Include="Abstract\CentreLineOffset.cs" />
+    <Compile Include="Abstract\IParentObject.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="Objects\CarriageWayLeft.cs" />
-    <Compile Include="Objects\CarriageWayRight.cs" />
+    <Compile Include="Exceptions\ObjectException.cs" />
+    <Compile Include="Exceptions\TransactionException.cs" />
+    <Compile Include="Factories\TransactionFactory.cs" />
+    <Compile Include="Objects\Offsets\CarriageWay.cs" />
     <Compile Include="Objects\CentreLine.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Extensions\ArcExtension.cs" />
@@ -92,9 +96,10 @@
     <Compile Include="Objects\Junction.cs" />
     <Compile Include="Objects\OffsetIntersect.cs" />
     <Compile Include="Objects\JunctionPart.cs" />
+    <Compile Include="Objects\Offsets\Pavement.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Objects\Road.cs" />
-    <Compile Include="Abstact\Segment2d.cs" />
+    <Compile Include="Abstract\Segment2d.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

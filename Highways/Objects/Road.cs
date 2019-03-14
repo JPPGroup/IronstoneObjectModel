@@ -5,19 +5,20 @@ using System.Xml.Serialization;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Highways.ObjectModel.Abstract;
-using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 {
     [Serializable]
-    public class Road
+    public class Road : IParentObject
     {        
         public Guid Id { get; }
         public string Name { get; set; }
         public List<CentreLine> CentreLines { get; }
         public double LeftCarriageWay { get; private set; } = Constants.DEFAULT_CARRIAGE_WAY;
         public double RightCarriageWay { get; private set; } = Constants.DEFAULT_CARRIAGE_WAY;
+        public double LeftPavement { get; private set; } = Constants.DEFAULT_PAVEMENT;
+        public double RightPavement { get; private set; } = Constants.DEFAULT_PAVEMENT;
         [XmlIgnore] public Point2d StartPoint => CentreLines.First().StartPoint;
         [XmlIgnore] public SegmentType StartType => CentreLines.First().Type;
         [XmlIgnore] public CentreLine StartLine => CentreLines.First();
@@ -33,106 +34,12 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             CentreLines = new List<CentreLine>();
         }
 
-        public ICollection<Curve> GenerateCarriageWay()
+        public void Generate()
         {
-            var curveList = new List<Curve>();
-            if (!Valid) return curveList;
+            if (!Valid) return;
 
-            foreach (var centre in CentreLines)
-            {
-                var lSplits = SplitForOffsetIntersection(centre, SidesOfCentre.Left);
-                if (lSplits != null && lSplits.Count != 0)
-                {
-                    curveList.AddRange(lSplits);
-                }                    
-
-                var rSplits = SplitForOffsetIntersection(centre, SidesOfCentre.Right);
-                if (rSplits != null && rSplits.Count != 0)
-                {
-                    curveList.AddRange(rSplits);
-                }
-            }
-
-            return curveList;
+            CentreLines.ForEach(c => c.Generate());           
         }
-
-        private static ICollection<Curve> SplitForOffsetIntersection(CentreLine centre, SidesOfCentre side)
-        {
-            var offsetCurve = centre.GenerateCarriageWayOffset(side);
-            ICentreLineOffset offset;
-            switch (side)
-            {
-                case SidesOfCentre.Left:
-                    offset = centre.CarriageWayLeft;
-                    break;
-                case SidesOfCentre.Right:
-                    offset = centre.CarriageWayRight;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(side), side, null);
-            }
-  
-            var returnCol = new List<Curve>();
-            var wasteCol = new List<Curve>();
-
-            if (offset.Intersection.Count == 0 & offset.Ignore) return returnCol;
-
-            returnCol.Add(offsetCurve);
-
-            foreach (var intersection in offset.Intersection)
-            {
-                var hasIntersected = false;
-
-                foreach (var r in returnCol.ToList())
-                {
-                    var splitSets = r.TrySplit(intersection.Point);
-                    if (splitSets == null) continue;
-
-                    hasIntersected = true;
-                    returnCol.Remove(r);
-
-                    var beforeCurve = splitSets[0] as Curve;
-                    var afterCurve = splitSets[1] as Curve;
-
-                    if (intersection.Before)
-                    {
-                        if (beforeCurve != null) returnCol.Add(beforeCurve);
-                        if (afterCurve != null) wasteCol.Add(afterCurve);
-                    }
-                    else
-                    {
-                        if (beforeCurve != null) wasteCol.Add(beforeCurve);
-                        if (afterCurve != null) returnCol.Add(afterCurve);
-                    }
-                }
-
-                if (hasIntersected) continue;
-
-                foreach (var w in wasteCol.ToList())
-                {
-                    var splitSets = w.TrySplit(intersection.Point);
-                    if (splitSets == null) continue;
-
-                    wasteCol.Remove(w);
-
-                    var beforeCurve = splitSets[0] as Curve;
-                    var afterCurve = splitSets[1] as Curve;
-                    if (intersection.Before)
-                    {
-                        if (beforeCurve != null) returnCol.Add(beforeCurve);
-                        if (afterCurve != null) wasteCol.Add(afterCurve);
-                    }
-                    else
-                    {
-                        if (beforeCurve != null) wasteCol.Add(beforeCurve);
-                        if (afterCurve != null) returnCol.Add(afterCurve);
-                    }
-                }
-            }
-
-            return returnCol;
-        }
-
 
         public bool IsConnected(CentreLine centreLine)
         {
@@ -152,8 +59,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             if (!IsConnected(centreLine)) return;          
             if (CentreLines.Contains(centreLine)) return;
 
-            centreLine.CarriageWayLeft = new CarriageWayLeft(LeftCarriageWay);
-            centreLine.CarriageWayRight = new CarriageWayRight(RightCarriageWay);
+            centreLine.SetAllOffsets(LeftCarriageWay, RightCarriageWay, LeftPavement, RightPavement);
 
             if (AddCentreLineInitial(centreLine)) return;
             if (AddCentreLineEndToStart(centreLine)) return;
@@ -313,6 +219,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 
         private bool IsValidRoad()
         {
+            //TODO: Needs reviewing...
             if (CentreLines.Count == 1) return true;
 
             for (var i = 1; i < CentreLines.Count - 1; i++)
@@ -327,36 +234,43 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                 var validConnection = IsValidConnection(current, previous, angleBetween);
 
                 if (!validConnection) return false;
-
-                //Need to check is valid for offsets....
             }
 
             return true;
         }
 
-        public bool SetOffsets(double leftCarriageWay, double rightCarriageWay)
+        public void SetOffsets(double leftCarriageWay, double rightCarriageWay, double leftPavement, double rightPavement)
         {
-            if (LeftCarriageWay == leftCarriageWay && RightCarriageWay == rightCarriageWay) return false;
+            //TODO: Fix floating point precision..
+            if (LeftCarriageWay == leftCarriageWay && RightCarriageWay == rightCarriageWay && LeftPavement == leftPavement && RightPavement == rightPavement) return;
 
             LeftCarriageWay = leftCarriageWay;
             RightCarriageWay = rightCarriageWay;
 
-            foreach (var centreLine in CentreLines)
-            {
-                centreLine.CarriageWayLeft = new CarriageWayLeft(LeftCarriageWay);
-                centreLine.CarriageWayRight = new CarriageWayRight(RightCarriageWay);
-            }
+            LeftPavement = leftPavement;
+            RightPavement = rightPavement;
 
-            return true;
+            CentreLines.ForEach(c => c.SetAllOffsets(leftCarriageWay, rightCarriageWay, leftPavement, rightPavement));            
         }
 
-        public void ResetOffsets()
+        public void Reset()
         {
-            foreach (var centreLine in CentreLines)
-            {
-                centreLine.CarriageWayLeft = new CarriageWayLeft(LeftCarriageWay);
-                centreLine.CarriageWayRight = new CarriageWayRight(RightCarriageWay);
-            }
+            CentreLines.ForEach(c => c.Reset());
         }
+
+        #region IParentObject Members
+
+        void IParentObject.ResolveChildren()
+        {
+            CentreLines.ForEach(delegate(CentreLine centre)
+                {
+                    centre.Road = this;
+                    (centre as IParentObject).ResolveChildren();
+                }
+            );
+        }
+
+        #endregion
+
     }
 }

@@ -6,36 +6,33 @@ using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Highways.ObjectModel.Abstract;
-using Jpp.Ironstone.Highways.ObjectModel.Extensions;
+using Jpp.Ironstone.Highways.ObjectModel.Factories;
+using Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 {
     [Serializable]
-    public class CentreLine : Segment2d
+    public class CentreLine : Segment2d, IParentObject
     {
-        private CarriageWayLeft _carriageWayLeft;
-        private CarriageWayRight _carriageWayRight;
-
-        public CarriageWayLeft CarriageWayLeft
-        {
-            get => _carriageWayLeft;
-            set
-            {
-                if (IsValid(value)) _carriageWayLeft = value;
-            }
-        }
-        public CarriageWayRight CarriageWayRight
-        {
-            get => _carriageWayRight;
-            set
-            {
-                if (IsValid(value)) _carriageWayRight = value;
-            }
-        }
+        public CarriageWay CarriageWayLeft { get; private set; }
+        public CarriageWay CarriageWayRight { get; private set; }
         [XmlIgnore] public Road Road { get; set; }
+
+        public override void Generate()
+        {
+            CarriageWayLeft.Create();
+            CarriageWayRight.Create();
+        }
+
+        public void Reset()
+        {
+            CarriageWayLeft.Clear();
+            CarriageWayRight.Clear();
+        }
 
         public void Reverse()
         {
+            //TODO: Reverse offset or mark as dirty to rebuild layout
             var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
             using (var trans = acCurDb.TransactionManager.StartTransaction())
             {
@@ -49,9 +46,8 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         public Curve GetCurve(bool forWrite = false)
         {
             var mode = forWrite ? OpenMode.ForWrite : OpenMode.ForRead;
-            var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
-            var trans = acCurDb.TransactionManager.TopTransaction;
-            
+            var trans = TransactionFactory.CreateFromTop();
+
             return trans.GetObject(BaseObject, mode) as Curve;            
         }
 
@@ -84,44 +80,11 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         public bool Equals(CentreLine centreLine)
         {
             if (centreLine == null) return false;
+            if (Type != centreLine.Type) return false;
 
-            return StartPoint == centreLine.StartPoint && EndPoint == centreLine.EndPoint;
+            return StartVector == centreLine.StartVector && EndVector == centreLine.EndVector;
         }
-
-        public Curve GenerateCarriageWayOffset(SidesOfCentre side)
-        {
-            switch (side)
-            {
-                case SidesOfCentre.Left:
-                    if (CarriageWayLeft != null) return GetCurve().CreateOffset(side, CarriageWayLeft.Distance);
-                    break;
-                case SidesOfCentre.Right:
-                    if (CarriageWayRight != null) return GetCurve().CreateOffset(side, CarriageWayRight.Distance);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(side), side, null);
-            }
-
-            return null;
-        }
-
-        public Curve GenerateCarriageWayOffset(SidesOfCentre side, double extra)
-        {
-            switch (side)
-            {
-                case SidesOfCentre.Left:
-                    if (CarriageWayLeft != null) return GetCurve().CreateOffset(side, CarriageWayLeft.Distance + extra);
-                    break;
-                case SidesOfCentre.Right:
-                    if (CarriageWayRight != null) return GetCurve().CreateOffset(side, CarriageWayRight.Distance + extra);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(side), side, null);
-            }
-
-            return null;
-        }
-
+      
         public CentreLine ConnectingCentreLine(IEnumerable<Road> roads, bool isStart)
         {
             const int dp = 3;
@@ -158,42 +121,67 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             return null;
         }
 
-        public void SetOffsetIgnored(SidesOfCentre side)
+        public void SetAllOffsets(double leftCarriageWay, double rightCarriageWay, double leftPavement, double rightPavement)
+        {
+            //TODO: Mark as dirty to rebuild layout
+            CarriageWayLeft = new CarriageWay(leftCarriageWay, leftPavement, SidesOfCentre.Left, this);
+            CarriageWayRight = new CarriageWay(rightCarriageWay, rightPavement, SidesOfCentre.Right, this);
+        }
+     
+        public void SetCarriageWayOffsetIgnored(SidesOfCentre side)
         {
             switch (side)
             {
                 case SidesOfCentre.Left:
-                    if (CarriageWayLeft != null) CarriageWayLeft.Ignore = true;
+                    CarriageWayLeft.Ignore = true;
                     break;
                 case SidesOfCentre.Right:
-                    if (CarriageWayRight != null) CarriageWayRight.Ignore = true;
+                    CarriageWayRight.Ignore = true;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(side), side, null);
             }
         }
 
-        public void AddCarriageWayIntersection(SidesOfCentre side, Point3d arcPoint, bool before)
+        public void AddCarriageWayOffsetIntersectPoint(SidesOfCentre side, Point3d arcPoint, bool before)
         {
             switch (side)
             {
                 case SidesOfCentre.Left:
-                    CarriageWayLeft?.Intersection.Add(new OffsetIntersect(arcPoint, before));
+                    CarriageWayLeft.Intersections.Add(new OffsetIntersect(arcPoint, before));
                     break;
                 case SidesOfCentre.Right:
-                    CarriageWayRight?.Intersection.Add(new OffsetIntersect(arcPoint, before));
+                    CarriageWayRight.Intersections.Add(new OffsetIntersect(arcPoint, before));
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(side), side, null);
             }
         }
 
-
-        private bool IsValid(ICentreLineOffset offset)
+        public double GetCarriageWayDistance(SidesOfCentre side)
         {
-            if (!(GetCurve() is Arc arc)) return true;
-
-            return arc.Radius > offset.Distance;
+            switch (side)
+            {
+                case SidesOfCentre.Left:
+                    return CarriageWayLeft.DistanceFromCentre;
+                case SidesOfCentre.Right:
+                    return CarriageWayRight.DistanceFromCentre;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(side), side, null);
+            }
         }
+
+        #region IParentObject Members
+
+        void IParentObject.ResolveChildren()
+        {
+            CarriageWayLeft.CentreLine = this;
+            (CarriageWayLeft as IParentObject).ResolveChildren();
+
+            CarriageWayRight.CentreLine = this;
+            (CarriageWayRight as IParentObject).ResolveChildren();
+        }
+
+        #endregion
     }
 }

@@ -7,5 +7,6 @@
         public const double DEFAULT_RADIUS_JUNCTION = 6;
         public const double DEFAULT_RADIUS_TURNING = 7.5;
         public const double DEFAULT_CARRIAGE_WAY = 2.5;
+        public const double DEFAULT_PAVEMENT = 0.5;
     }
 }
