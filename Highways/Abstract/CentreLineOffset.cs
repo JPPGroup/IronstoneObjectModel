@@ -1,7 +1,5 @@
-﻿using System.Xml.Serialization;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad.DrawingObjects;
-using Jpp.Ironstone.Highways.ObjectModel.Exceptions;
 using Jpp.Ironstone.Highways.ObjectModel.Factories;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
 
@@ -9,33 +7,18 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
 {
     public abstract class CentreLineOffset
     {
-        private CentreLine _centreLine;
-
-        public SidesOfCentre Side { get; }
-        public OffsetTypes OffsetType { get;  }
-        public double DistanceFromCentre { get;  }
+        public SidesOfCentre Side { get; set;  }
+        public OffsetTypes OffsetType { get; set; }
+        public double DistanceFromCentre { get; set; } //TODO: Need to mark as dirty if changed...
         public PersistentObjectIdCollection Curves { get; }
-        [XmlIgnore] public CentreLine CentreLine
-        {
-            get => _centreLine;
-            set
-            {
-                if (!IsValid(value)) throw new ObjectException("Invalid centre line for offset.", value.BaseObject);
 
-                _centreLine = value;              
-            }
-        }
-
-        protected CentreLineOffset(double distance, SidesOfCentre side, OffsetTypes type, CentreLine centreLine)
+        protected CentreLineOffset(double distance, SidesOfCentre side, OffsetTypes type)
         {
             DistanceFromCentre = distance;
             Side = side;
             OffsetType = type;
-            CentreLine = centreLine;
             Curves = new PersistentObjectIdCollection();
         }
-
-        public abstract void Create();
 
         public virtual void Clear()
         {
@@ -51,7 +34,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
             Curves.Clear();
         }
 
-        private bool IsValid(CentreLine centre)
+        protected bool IsValid(RoadCentreLine centre)
         {
             if (!(centre.GetCurve() is Arc arc)) return true;
 

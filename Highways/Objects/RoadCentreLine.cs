@@ -12,16 +12,27 @@ using Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets;
 namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 {
     [Serializable]
-    public class CentreLine : Segment2d, IParentObject
+    public class RoadCentreLine : Segment2d, IRoadCentreLine
     {
-        public CarriageWay CarriageWayLeft { get; private set; }
-        public CarriageWay CarriageWayRight { get; private set; }
-        [XmlIgnore] public Road Road { get; set; }
+        public CarriageWayLeft CarriageWayLeft { get; set; }
+        public CarriageWayRight CarriageWayRight { get; set; }
+        [XmlIgnore] public Road Road { get; internal set; }
+        Road IRoadCentreLine.Road
+        {
+            get => Road;
+            set => Road = value;
+        }
+
+        public RoadCentreLine()
+        {
+            CarriageWayLeft = new CarriageWayLeft();
+            CarriageWayRight = new CarriageWayRight();
+        }
 
         public override void Generate()
         {
-            CarriageWayLeft.Create();
-            CarriageWayRight.Create();
+            CarriageWayLeft.Create(this);
+            CarriageWayRight.Create(this);
         }
 
         public void Reset()
@@ -61,23 +72,23 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             GetCurve().Unhighlight();
         }
 
-        public CentreLine Previous()
+        public RoadCentreLine Previous()
         {
             if (!Road.CentreLines.Contains(this)) return null;
 
-            var prevIdx = Road.PositionInRoad(this) - 1;
-            return prevIdx < 0 ? null : Road[prevIdx];
+            var prevIdx = Road.CentreLines.IndexOf(this) - 1;
+            return prevIdx < 0 ? null : Road.CentreLines[prevIdx];
         }
 
-        public CentreLine Next()
+        public RoadCentreLine Next()
         {
             if (!Road.CentreLines.Contains(this)) return null;
 
-            var nextIdx = Road.PositionInRoad(this) + 1;
-            return nextIdx > Road.CentreLines.Count() - 1 ? null : Road[nextIdx];
+            var nextIdx = Road.CentreLines.IndexOf(this) + 1;
+            return nextIdx > Road.CentreLines.Count() - 1 ? null : Road.CentreLines[nextIdx];
         }
 
-        public bool Equals(CentreLine centreLine)
+        public bool Equals(RoadCentreLine centreLine)
         {
             if (centreLine == null) return false;
             if (Type != centreLine.Type) return false;
@@ -85,7 +96,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             return StartVector == centreLine.StartVector && EndVector == centreLine.EndVector;
         }
       
-        public CentreLine ConnectingCentreLine(IEnumerable<Road> roads, bool isStart)
+        public RoadCentreLine ConnectingCentreLine(IEnumerable<Road> roads, bool isStart)
         {
             const int dp = 3;
             var curve = GetCurve();
@@ -124,8 +135,10 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         public void SetAllOffsets(double leftCarriageWay, double rightCarriageWay, double leftPavement, double rightPavement)
         {
             //TODO: Mark as dirty to rebuild layout
-            CarriageWayLeft = new CarriageWay(leftCarriageWay, leftPavement, SidesOfCentre.Left, this);
-            CarriageWayRight = new CarriageWay(rightCarriageWay, rightPavement, SidesOfCentre.Right, this);
+            CarriageWayLeft.DistanceFromCentre = leftCarriageWay;
+            CarriageWayLeft.Pavement.DistanceFromCentre = leftCarriageWay + leftPavement;
+            CarriageWayRight.DistanceFromCentre = rightCarriageWay;
+            CarriageWayRight.Pavement.DistanceFromCentre = rightCarriageWay +rightPavement;
         }
      
         public void SetCarriageWayOffsetIgnored(SidesOfCentre side)
@@ -170,18 +183,5 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                     throw new ArgumentOutOfRangeException(nameof(side), side, null);
             }
         }
-
-        #region IParentObject Members
-
-        void IParentObject.ResolveChildren()
-        {
-            CarriageWayLeft.CentreLine = this;
-            (CarriageWayLeft as IParentObject).ResolveChildren();
-
-            CarriageWayRight.CentreLine = this;
-            (CarriageWayRight as IParentObject).ResolveChildren();
-        }
-
-        #endregion
     }
 }

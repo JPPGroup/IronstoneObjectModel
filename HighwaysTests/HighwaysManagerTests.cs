@@ -9,7 +9,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
-using Jpp.Ironstone.Highways.ObjectModel.Objects;
 using Jpp.Ironstone.Highways.ObjectModel.Tests.Response;
 using NUnit.Framework;
 
@@ -17,8 +16,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
 {
     [TestFixture(@"..\..\..\Drawings\NetworkTests1.dwg", 49, 11, 10, 4, 6 )]
     [TestFixture(@"..\..\..\Drawings\NetworkTests2.dwg", 102, 10, 11, 8, 3)]
-    //[TestFixture(@"..\..\..\Drawings\NetworkTests3.dwg", 131, 30, 41, 26, 15)] Drawing now invalid due to arc radius...
-    [TestFixture(@"..\..\..\Drawings\NetworkTests3.dwg", 0, 0, 0, 0, 0)]
+    [TestFixture(@"..\..\..\Drawings\NetworkTests3.dwg", 131, 30, 41, 26, 15)] //Layout will fail invalid due to arc radius...
     [TestFixture(@"..\..\..\Drawings\NetworkTests4.dwg", 0, 0, 0, 0, 0)]
     public class HighwaysManagerTests : IronstoneTestFixture
     {
@@ -92,9 +90,9 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
             var acTrans = acCurDb.TransactionManager.StartTransaction();
             try
             {
-                var centreLines = GetCentreLinesFromSelection(res.Value);                    
+                var curves = GetCurvesFromSelection(res.Value);                    
 
-                highway.InitialiseFromCentreLines(centreLines);
+                highway.InitialiseFromCurves(curves);
 
                 result.CentreLineCount = highway.Roads.Select(r => r.CentreLines.Count).Sum();
                 result.RoadCount = highway.Roads.Count;
@@ -121,10 +119,10 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
             return result;         
         }
 
-        private static ICollection<CentreLine> GetCentreLinesFromSelection(IEnumerable acSSet)
+        private static IEnumerable<Curve> GetCurvesFromSelection(IEnumerable acSSet)
         {
             var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
-            var centreLines = new List<CentreLine>();
+            var curveList = new List<Curve>();
             var acTrans = acCurDb.TransactionManager.TopTransaction;
 
             foreach (SelectedObject acSsObj in acSSet)
@@ -140,18 +138,15 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
                     {
                         var acPolyCurve = acTrans.GetObject(polyObjId.Id, OpenMode.ForWrite) as Curve;
                         if (acPolyCurve == null) continue;
-
-                        var centre = new CentreLine {BaseObject = acPolyCurve.Id};
-                        centreLines.Add(centre);
+                        curveList.Add(acPolyCurve);
                     }
                 }
                 else
                 {
-                    var centre = new CentreLine { BaseObject = acCurve.Id };
-                    centreLines.Add(centre);
+                    curveList.Add(acCurve);
                 }
             }
-            return centreLines;
+            return curveList;
         }
     }
 }

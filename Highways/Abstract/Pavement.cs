@@ -1,38 +1,35 @@
-﻿using System;
-using System.Xml.Serialization;
-using Autodesk.AutoCAD.ApplicationServices.Core;
+﻿using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
-using Jpp.Ironstone.Highways.ObjectModel.Abstract;
+using Jpp.Ironstone.Highways.ObjectModel.Exceptions;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using Jpp.Ironstone.Highways.ObjectModel.Factories;
+using Jpp.Ironstone.Highways.ObjectModel.Objects;
 
-namespace Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets
+namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
 {
-    [Serializable]
-    public class Pavement : CentreLineOffset
+    public abstract class Pavement : CentreLineOffset
     {
-        [XmlIgnore] public CarriageWay CarriageWay { get; set; }
+        protected Pavement(double distance, SidesOfCentre side) : base(distance, side, OffsetTypes.Pavement) { }
 
-        public Pavement(double distance, SidesOfCentre side, CarriageWay carriageWay) : base(distance, side, OffsetTypes.Pavement, carriageWay.CentreLine)
+        public void Create(CarriageWay carriageWay, RoadCentreLine centreLine)
         {
-            CarriageWay = carriageWay;
-        }
+            if (!IsValid(centreLine)) throw new ObjectException("Invalid offset for centre line", centreLine.BaseObject);
 
-        public override void Create()
-        {
             base.Clear();
 
             var db = Application.DocumentManager.MdiActiveDocument.Database;
             var acTrans = TransactionFactory.CreateFromTop();
             var blockTable = (BlockTable)acTrans.GetObject(db.BlockTableId, OpenMode.ForRead);
             var blockTableRecord = (BlockTableRecord)acTrans.GetObject(blockTable[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
+            var offsetDist = DistanceFrom(carriageWay);
 
-            foreach (ObjectId obj in CarriageWay.Curves.Collection)
+
+            foreach (ObjectId obj in carriageWay.Curves.Collection)
             {
                 var entity = acTrans.GetObject(obj, OpenMode.ForRead) as Entity;
                 if (entity is Curve curve)
                 {
-                    var curveOffset = curve.CreateOffset(Side, CarriageWay.PavementWidth);
+                    var curveOffset = curve.CreateOffset(Side, offsetDist);
                     if (curveOffset != null)
                     {
                         curveOffset.Layer = Constants.LAYER_DEF_POINTS;
@@ -42,6 +39,11 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets
                     }
                 }                
             }
+        }
+
+        private double DistanceFrom(CentreLineOffset carriageWay)
+        {
+            return DistanceFromCentre - carriageWay.DistanceFromCentre;
         }
     }
 }

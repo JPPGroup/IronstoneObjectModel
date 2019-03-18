@@ -53,10 +53,6 @@
     <Reference Include="Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Common.0.1.4\lib\netstandard2.0\Common.dll</HintPath>
     </Reference>
-    <Reference Include="IronstoneCore, Version=0.1.93.130, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Jpp.Ironstone.Core.0.1.93\lib\net472\IronstoneCore.dll</HintPath>
-    </Reference>
     <Reference Include="Microsoft.ApplicationInsights, Version=2.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.ApplicationInsights.2.9.1\lib\net46\Microsoft.ApplicationInsights.dll</HintPath>
     </Reference>
@@ -79,13 +75,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abstract\CentreLineOffset.cs" />
-    <Compile Include="Abstract\IParentObject.cs" />
+    <Compile Include="Abstract\IRoadCentreLine.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Exceptions\ObjectException.cs" />
     <Compile Include="Exceptions\TransactionException.cs" />
     <Compile Include="Factories\TransactionFactory.cs" />
-    <Compile Include="Objects\Offsets\CarriageWay.cs" />
-    <Compile Include="Objects\CentreLine.cs" />
+    <Compile Include="Abstract\CarriageWay.cs" />
+    <Compile Include="Objects\Offsets\CarriageWayRight.cs" />
+    <Compile Include="Objects\Offsets\CarriageWayLeft.cs" />
+    <Compile Include="Objects\Offsets\PavementLeft.cs" />
+    <Compile Include="Objects\Offsets\PavementRight.cs" />
+    <Compile Include="Objects\RoadCentreLine.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Extensions\ArcExtension.cs" />
     <Compile Include="Extensions\CurveExtension.cs" />
@@ -96,7 +96,8 @@
     <Compile Include="Objects\Junction.cs" />
     <Compile Include="Objects\OffsetIntersect.cs" />
     <Compile Include="Objects\JunctionPart.cs" />
-    <Compile Include="Objects\Offsets\Pavement.cs" />
+    <Compile Include="Abstract\Pavement.cs" />
+    <Compile Include="Objects\RoadCentreLineCollection.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Objects\Road.cs" />
     <Compile Include="Abstract\Segment2d.cs" />
@@ -108,6 +109,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="IronstoneConfig.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ironstone-core\Ironstone Core\Ironstone Core.csproj">
+      <Project>{A3BFA507-A2C4-4C33-943B-6083133EE63C}</Project>
+      <Name>Ironstone Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Jpp.Common.Tooling.Signing.0.2.0\build\Jpp.Common.Tooling.Signing.targets" Condition="Exists('..\packages\Jpp.Common.Tooling.Signing.0.2.0\build\Jpp.Common.Tooling.Signing.targets')" />

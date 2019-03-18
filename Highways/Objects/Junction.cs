@@ -104,7 +104,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                 var sNextCentreLine = SecondaryRoad.Type == JunctionPartTypes.End ? sCentreLine.Previous() : sCentreLine.Next();
 
                 var pCentreLine = PrimaryRoad.CentreLine;
-                var ignoredCentre = new List<CentreLine>();
+                var ignoredCentre = new List<RoadCentreLine>();
 
                 while (pCentreLine != null)
                 {
@@ -170,7 +170,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                 var sNextCentreLine = SecondaryRoad.Type == JunctionPartTypes.End ? sCentreLine.Previous() : sCentreLine.Next();
 
                 var pCentreLine = PrimaryRoad.CentreLine;
-                var ignoredCentre = new List<CentreLine>();
+                var ignoredCentre = new List<RoadCentreLine>();
 
                 while (pCentreLine != null)
                 {
@@ -196,7 +196,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             return null;
         }
 
-        private Arc CarriageArc(CentreLine pCentreLine, SidesOfCentre primarySide, bool primaryBefore, CentreLine sCentreLine, SidesOfCentre secondarySide, bool secondaryBefore, bool reverseArc)
+        private Arc CarriageArc(RoadCentreLine pCentreLine, SidesOfCentre primarySide, bool primaryBefore, RoadCentreLine sCentreLine, SidesOfCentre secondarySide, bool secondaryBefore, bool reverseArc)
         {
             var pDistance = pCentreLine.GetCarriageWayDistance(primarySide);
             var sDistance = sCentreLine.GetCarriageWayDistance(secondarySide);

@@ -10,7 +10,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
     public class JunctionPart
     {
         public JunctionPartTypes Type { get; set; }
-        public CentreLine CentreLine { get; set; }
+        public RoadCentreLine CentreLine { get; set; }
         public Point2d IntersectionPoint { get; set; }
         [XmlIgnore] public double AngleAtIntersection
         {

@@ -9,6 +9,8 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         public Point3d Point { get; }
         public bool Before { get; }
 
+        private OffsetIntersect() { }
+
         public OffsetIntersect(Point3d point, bool before)
         {
             Point = point;

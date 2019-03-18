@@ -1,7 +1,4 @@
-﻿using System.Diagnostics;
-using System.Reflection;
-using Autodesk.AutoCAD.ApplicationServices.Core;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using System.Reflection;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
 using Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets;
@@ -55,24 +52,8 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Objects
 
         public CarriageWayProperties VerifyCarriageWayResident(object[] values)
         {
-            var db = Application.DocumentManager.MdiActiveDocument.Database;
-            CarriageWay carriage;
-            using (var trans = db.TransactionManager.StartTransaction())
-            {
-                var blockTable = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);
-                var blockTableRecord = (BlockTableRecord)trans.GetObject(blockTable[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
+            var carriage = new CarriageWay((double)values[0], (double)values[1], (SidesOfCentre)values[2]);
 
-                var point1 = new Point3d(0, 0, 0);
-                var point2 = new Point3d(10, 0, 0);
-                var line = new Line(point1, point2);
-
-                var objectId = blockTableRecord.AppendEntity(line);
-                trans.AddNewlyCreatedDBObject(line, true);
-
-                var centre = new CentreLine { BaseObject = objectId };
-                carriage = new CarriageWay((double)values[0], (double)values[1], (SidesOfCentre)values[2], centre);
-            }
-     
             return new CarriageWayProperties
             {
                 Side = carriage.Side,
@@ -85,8 +66,6 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Objects
                 PavementDistance = carriage.Pavement.DistanceFromCentre
             };
         }
-
-
 
         [Test]
         public void VerifyOffsetIntersectBefore()

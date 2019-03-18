@@ -1,46 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml.Serialization;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
-using Jpp.Ironstone.Highways.ObjectModel.Abstract;
+using Jpp.Ironstone.Highways.ObjectModel.Exceptions;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using Jpp.Ironstone.Highways.ObjectModel.Factories;
+using Jpp.Ironstone.Highways.ObjectModel.Objects;
 
-namespace Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets
+namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
 {
-    [Serializable]
-    public class CarriageWay : CentreLineOffset, IParentObject
+    public abstract class CarriageWay : CentreLineOffset
     {           
-        [XmlIgnore] public double PavementWidth => GetPavementWidth();
         public List<OffsetIntersect> Intersections { get; private set; }
         public bool Ignore { get; set; }
-        public Pavement Pavement { get; }
 
-        public CarriageWay(double distance, double pavementWidth, SidesOfCentre side, CentreLine centreLine) : base(distance, side, OffsetTypes.CarriageWay, centreLine)
+        protected CarriageWay(SidesOfCentre side) : base(Constants.DEFAULT_CARRIAGE_WAY, side, OffsetTypes.CarriageWay)
+        {            
+            Intersections = new List<OffsetIntersect>();
+            Ignore = false;
+        }
+
+        protected CarriageWay(double distance, SidesOfCentre side) : base(distance, side, OffsetTypes.CarriageWay)
         {
             Intersections = new List<OffsetIntersect>();
             Ignore = false;
-            Pavement = new Pavement(distance + pavementWidth, side, this);
         }
 
-        public override void Clear()
+        public new virtual void Clear()
         {
             base.Clear();
-            Pavement.Clear();
 
             Intersections = new List<OffsetIntersect>();
             Ignore = false;
         }
 
-        public override void Create()
+        public virtual void Create(RoadCentreLine centreLine)
         {
+            if (!IsValid(centreLine)) throw new ObjectException("Invalid offset for centre line.", centreLine.BaseObject);
+
             base.Clear();
 
             var keepList = new List<Curve>();
             var wasteList = new List<Curve>();
-            var offsetCurve = CentreLine.GetCurve().CreateOffset(Side, DistanceFromCentre);
+            var offsetCurve = centreLine.GetCurve().CreateOffset(Side, DistanceFromCentre);
 
             if (Intersections.Count == 0 & Ignore) return;
             keepList.Add(offsetCurve);
@@ -108,23 +110,6 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets
                 Curves.Add(blockTableRecord.AppendEntity(curve));
                 acTrans.AddNewlyCreatedDBObject(curve, true);
             }
-
-            Pavement.Create();
         }
-
-        private double GetPavementWidth()
-        {
-            return Pavement.DistanceFromCentre - DistanceFromCentre;
-        }
-
-        #region IParentObject Members
-
-        void IParentObject.ResolveChildren()
-        {
-            Pavement.CarriageWay = this;
-            Pavement.CentreLine = CentreLine;
-        }
-
-        #endregion
     }
 }
