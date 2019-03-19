@@ -93,7 +93,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel
             var allJunctionArcs = new List<Curve>();
             foreach (var junction in Junctions)
             {
-                var arcs = junction.GenerateCarriageWayArcs();
+                var arcs = junction.Generate();
                 if (arcs == null) continue;
 
                 allJunctionArcs.AddRange(arcs);

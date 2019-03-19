@@ -20,7 +20,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                 var pCurve = acTrans.GetObject(PrimaryRoad.CentreLine.BaseObject, OpenMode.ForRead) as Curve;
                 var sCurve = acTrans.GetObject(SecondaryRoad.CentreLine.BaseObject, OpenMode.ForRead) as Curve;
 
-                return pCurve?.Layer == Constants.LAYER_TURNING_HEAD || sCurve?.Layer == Constants.LAYER_TURNING_HEAD;
+                return pCurve?.Layer == Constants.LAYER_TURNING_HEAD || sCurve?.Layer == Constants.LAYER_TURNING_HEAD;                          
             }
         }
         public TurnTypes Turn
@@ -50,21 +50,21 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             SecondaryRoad.CentreLine.Unhighlight();
         }
        
-        public ICollection<Arc> GenerateCarriageWayArcs()
+        public ICollection<Curve> Generate()
         {
-            var arcList = new List<Arc>();
-            if (!PrimaryRoad.CentreLine.Road.Valid || !SecondaryRoad.CentreLine.Road.Valid) return arcList;
+            var curveList = new List<Curve>();
+            if (!PrimaryRoad.CentreLine.Road.Valid || !SecondaryRoad.CentreLine.Road.Valid) return curveList;
 
-            var afterArc = CreateCarriageAfter();
-            var beforeArc = CreateCarriageBefore();
+            var afterCurves = GenerateAfter();
+            var beforeArc = GenerateBefore();
 
-            if (afterArc != null) arcList.Add(afterArc);
-            if (beforeArc != null) arcList.Add(beforeArc);
+            if (afterCurves != null && afterCurves.Count > 0) curveList.AddRange(afterCurves);
+            if (beforeArc != null && beforeArc.Count > 0) curveList.AddRange(beforeArc);
 
-            return arcList;
+            return curveList;
         }
 
-        private Arc CreateCarriageBefore()
+        private ICollection<Curve> GenerateBefore()
         {
             bool reverseArc;
             SidesOfCentre primarySide;
@@ -116,7 +116,58 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                     {
                         foreach (var centre in ignoredCentre) centre.SetCarriageWayOffsetIgnored(primarySide);
 
-                        return arc;
+                        var junctionCurves = new List<Curve> { arc };
+
+                        var pDist = pCentreLine.GetPavementDistance(primarySide);
+                        var sDist = sCentreLine.GetPavementDistance(secondarySide);
+                        if (pDist > sDist)
+                        {
+                            var pave = arc.GetOffsetCurves(-pDist)[0] as Curve;
+                            if (pave != null)
+                            {
+                                Line close;
+                                if (pCentreLine.IsPavement(primarySide) == sCentreLine.IsPavement(secondarySide))
+                                {
+                                    var lineVector = reverseArc ? pave.StartPoint.GetVectorTo(arc.StartPoint) : pave.EndPoint.GetVectorTo(arc.EndPoint);
+                                    var diff = (pDist - sDist) / pDist;
+                                    var endPoint = reverseArc ? pave.StartPoint + (lineVector * diff) : pave.EndPoint + (lineVector * diff);
+                                    close = reverseArc ? new Line(pave.StartPoint, endPoint) : new Line(pave.EndPoint, endPoint);
+                                }
+                                else
+                                {
+                                    close = reverseArc ? new Line(pave.StartPoint, arc.StartPoint) : new Line(pave.EndPoint, arc.EndPoint);
+                                }
+
+                                junctionCurves.AddRange(new[] { pave, close });
+                            }
+
+                        }
+                        else if (pDist < sDist)
+                        {
+                            var pave = arc.GetOffsetCurves(-sDist)[0] as Curve;
+                            if (pave != null)
+                            {
+                                Line close;
+                                if (pCentreLine.IsPavement(primarySide) == sCentreLine.IsPavement(secondarySide))
+                                {
+                                    var lineVector = reverseArc ? pave.EndPoint.GetVectorTo(arc.EndPoint) : pave.StartPoint.GetVectorTo(arc.StartPoint);
+                                    var diff = (sDist - pDist) / sDist;
+                                    var endPoint = reverseArc ? pave.EndPoint + (lineVector * diff) : pave.StartPoint + (lineVector * diff);
+                                    close = reverseArc ? new Line(pave.EndPoint, endPoint) : new Line(pave.StartPoint, endPoint);
+                                }
+                                else
+                                {
+                                    close = reverseArc ? new Line(pave.EndPoint, arc.EndPoint) : new Line(pave.StartPoint, arc.StartPoint);
+                                }
+                                junctionCurves.AddRange(new[] { pave, close });
+                            }
+                        }
+                        else
+                        {
+                            var pave = arc.GetOffsetCurves(-pDist)[0] as Curve;
+                            junctionCurves.Add(pave);
+                        }
+                        return junctionCurves;
                     }
 
                     ignoredCentre.Add(pCentreLine);
@@ -130,7 +181,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             return null;
         }
 
-        private Arc CreateCarriageAfter()
+        private ICollection<Curve> GenerateAfter()
         {
             bool reverseArc;
             SidesOfCentre primarySide;
@@ -182,7 +233,58 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                     {
                         foreach (var centre in ignoredCentre) centre.SetCarriageWayOffsetIgnored(primarySide);
 
-                        return arc;
+                        var junctionCurves = new List<Curve> {arc};
+
+                        var pDist = pCentreLine.GetPavementDistance(primarySide);
+                        var sDist = sCentreLine.GetPavementDistance(secondarySide);
+                        if (pDist > sDist)
+                        {
+                            var pave = arc.GetOffsetCurves(-pDist)[0] as Curve;
+                            if (pave != null)
+                            {
+                                Line close;
+                                if (pCentreLine.IsPavement(primarySide) == sCentreLine.IsPavement(secondarySide))
+                                {
+                                    var lineVector = reverseArc ? pave.StartPoint.GetVectorTo(arc.StartPoint) : pave.EndPoint.GetVectorTo(arc.EndPoint);
+                                    var diff = (pDist - sDist) / pDist;
+                                    var endPoint = reverseArc ? pave.StartPoint + (lineVector * diff) : pave.EndPoint + (lineVector * diff);
+                                    close = reverseArc ? new Line(pave.StartPoint, endPoint) : new Line(pave.EndPoint, endPoint);
+                                }
+                                else
+                                {
+                                    close = reverseArc ? new Line(pave.StartPoint, arc.StartPoint) : new Line(pave.EndPoint, arc.EndPoint);
+                                }
+                                
+                                junctionCurves.AddRange(new [] {pave, close });
+                            }
+
+                        }
+                        else if (pDist < sDist)
+                        {
+                            var pave = arc.GetOffsetCurves(-sDist)[0] as Curve;
+                            if (pave != null)
+                            {
+                                Line close;
+                                if (pCentreLine.IsPavement(primarySide) == sCentreLine.IsPavement(secondarySide))
+                                {
+                                    var lineVector = reverseArc ? pave.EndPoint.GetVectorTo(arc.EndPoint) : pave.StartPoint.GetVectorTo(arc.StartPoint);
+                                    var diff = (sDist - pDist) / sDist;
+                                    var endPoint = reverseArc ? pave.EndPoint + (lineVector * diff) : pave.StartPoint + (lineVector * diff);
+                                    close = reverseArc ? new Line(pave.EndPoint, endPoint) : new Line(pave.StartPoint, endPoint);
+                                }
+                                else
+                                {
+                                    close = reverseArc ? new Line(pave.EndPoint, arc.EndPoint) : new Line(pave.StartPoint, arc.StartPoint);
+                                }
+                                junctionCurves.AddRange(new[] { pave, close });
+                            }
+                        }
+                        else
+                        {
+                            var pave = arc.GetOffsetCurves(-pDist)[0] as Curve;
+                            junctionCurves.Add(pave);
+                        }
+                        return junctionCurves;
                     }
 
                     ignoredCentre.Add(pCentreLine);
