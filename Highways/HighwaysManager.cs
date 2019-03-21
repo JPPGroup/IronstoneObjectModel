@@ -16,6 +16,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel
     public class HighwaysManager : AbstractDrawingObjectManager
     {
         private bool _finalized;
+        private bool _cleared;
 
         public List<Road> Roads { get; set; }
         public PersistentObjectIdCollection JunctionOffsetCollection { get; private set; }
@@ -68,10 +69,19 @@ namespace Jpp.Ironstone.Highways.ObjectModel
 
         public void GenerateLayout()
         {
-            RemoveOffsets();
-            
+            ResetLayout();
+
             GenerateJunctionsCarriageWay();
             GenerateRoads();
+            _cleared = false;
+        }
+
+        public void ResetLayout()
+        {
+            if (_finalized) return;
+
+            RemoveOffsets();
+            _cleared = true;
         }
        
         private void GenerateRoads()
@@ -203,24 +213,33 @@ namespace Jpp.Ironstone.Highways.ObjectModel
 
         public override void UpdateDirty()
         {
-            throw new NotImplementedException();
+            UpdateAll();
         }
 
         public override void UpdateAll()
         {
-            if (ValidateRoads())
-            {
+            if(_cleared) return;            
 
-            }
-            else
+            if (Junctions == null || Roads == null) return;
+
+            using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                FinalizeLayout();
-            }
+                if (ValidateRoads())
+                {
+                    GenerateLayout();
+                }
+                else
+                {
+                    FinalizeLayout();
+                }
+
+                acTrans.Commit();
+            }            
         }
 
         public override void Clear()
         {
-            if (!_finalized) RemoveOffsets();
+            ResetLayout();
 
             JunctionOffsetCollection = new PersistentObjectIdCollection();
             Junctions = null;
@@ -229,7 +248,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel
 
         public override void AllDirty()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public override void ActivateObjects()

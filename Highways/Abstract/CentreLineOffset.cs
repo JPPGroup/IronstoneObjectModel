@@ -34,11 +34,11 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
             Curves.Clear();
         }
 
-        protected bool IsValid(RoadCentreLine centre)
+        public bool IsValid(RoadCentreLine centre, double distance)
         {
             if (!(centre.GetCurve() is Arc arc)) return true;
 
-            return arc.Radius > DistanceFromCentre;
+            return arc.Radius > distance && distance > 0;
         }
     }
 }

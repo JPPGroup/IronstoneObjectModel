@@ -2,7 +2,6 @@
 using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
-using Jpp.Ironstone.Highways.ObjectModel.Exceptions;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using Jpp.Ironstone.Highways.ObjectModel.Factories;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
@@ -36,10 +35,6 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
 
         public virtual void Create(RoadCentreLine centreLine)
         {
-            if (!IsValid(centreLine)) throw new ObjectException("Invalid offset for centre line.", centreLine.BaseObject);
-
-            base.Clear();
-
             var keepList = new List<Curve>();
             var wasteList = new List<Curve>();
             var offsetCurve = centreLine.GetCurve().CreateOffset(Side, DistanceFromCentre);

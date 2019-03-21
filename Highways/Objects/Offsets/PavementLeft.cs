@@ -10,5 +10,13 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets
 
         public PavementLeft() : base(Constants.DEFAULT_PAVEMENT, SIDES_OF_CENTRE) { }
         public PavementLeft(double distance) : base(distance, SIDES_OF_CENTRE) { }
+
+        public new void Create(CarriageWay carriageWay, RoadCentreLine centreLine)
+        {
+            if (centreLine.Road.LeftPavementActive)
+            {
+                base.Create(carriageWay, centreLine);
+            }
+        }
     }
 }

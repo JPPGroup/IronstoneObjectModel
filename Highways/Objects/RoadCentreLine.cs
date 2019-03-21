@@ -189,17 +189,12 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             switch (side)
             {
                 case SidesOfCentre.Left:
-                    return CarriageWayLeft.Pavement.DistanceFromCentre - CarriageWayLeft.DistanceFromCentre; 
+                    return Road.LeftPavementActive ? CarriageWayLeft.Pavement.DistanceFromCentre - CarriageWayLeft.DistanceFromCentre : 0; 
                 case SidesOfCentre.Right:
-                    return CarriageWayRight.Pavement.DistanceFromCentre - CarriageWayRight.DistanceFromCentre;
+                    return Road.RightPavementActive ? CarriageWayRight.Pavement.DistanceFromCentre - CarriageWayRight.DistanceFromCentre : 0;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(side), side, null);
             }
-        }
-
-        public bool IsPavement(SidesOfCentre side)
-        {
-            return GetPavementDistance(side) >= Constants.MINIMUM_PAVEMENT;
         }
     }
 }

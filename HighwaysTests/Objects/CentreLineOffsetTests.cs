@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Autodesk.AutoCAD.Geometry;
+using Jpp.Ironstone.Highways.ObjectModel.Abstract;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
 using Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets;
 using Jpp.Ironstone.Highways.ObjectModel.Tests.Response;
@@ -12,60 +13,60 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Objects
     {
         public CentreLineOffsetTests() : base(Assembly.GetExecutingAssembly(), typeof(CentreLineOffsetTests)) { }
 
-        [Test]
-        public void VerifyCarriageWayLeft()
-        {
-            const double carriageDistance = 2.5;
-            const double pavementDistance = 0.5;
-            var result = RunTest<CarriageWayProperties>(nameof(VerifyCarriageWayResident), new object[] {carriageDistance, pavementDistance, SidesOfCentre.Left} );
+        //[Test]
+        //public void VerifyCarriageWayLeft()
+        //{
+        //    const double carriageDistance = 2.5;
+        //    const double pavementDistance = 0.5;
+        //    var result = RunTest<CarriageWayProperties>(nameof(VerifyCarriageWayResident), new object[] {carriageDistance, pavementDistance, SidesOfCentre.Left} );
 
-            Assert.Multiple(() =>
-            {
-                Assert.AreEqual(SidesOfCentre.Left, result.Side, "Unexpected value for carriage way side of centre.");
-                Assert.AreEqual(OffsetTypes.CarriageWay, result.Type, "Unexpected value for carriage way offset type.");
-                Assert.AreEqual(carriageDistance, result.CarriageDistance, "Unexpected value for carriage way distance.");
-                Assert.AreEqual(0, result.Intersections, "Unexpected value for carriage way intersections count.");
-                Assert.AreEqual(SidesOfCentre.Left, result.PavementSide, "Unexpected value for pavement side of centre.");
-                Assert.AreEqual(OffsetTypes.Pavement, result.PavementType, "Unexpected value for pavement offset type.");
-                Assert.AreEqual(carriageDistance + pavementDistance, result.PavementDistance, "Unexpected value for pavement distance.");
-            });
-        }
+        //    Assert.Multiple(() =>
+        //    {
+        //        Assert.AreEqual(SidesOfCentre.Left, result.Side, "Unexpected value for carriage way side of centre.");
+        //        Assert.AreEqual(OffsetTypes.CarriageWay, result.Type, "Unexpected value for carriage way offset type.");
+        //        Assert.AreEqual(carriageDistance, result.CarriageDistance, "Unexpected value for carriage way distance.");
+        //        Assert.AreEqual(0, result.Intersections, "Unexpected value for carriage way intersections count.");
+        //        Assert.AreEqual(SidesOfCentre.Left, result.PavementSide, "Unexpected value for pavement side of centre.");
+        //        Assert.AreEqual(OffsetTypes.Pavement, result.PavementType, "Unexpected value for pavement offset type.");
+        //        Assert.AreEqual(carriageDistance + pavementDistance, result.PavementDistance, "Unexpected value for pavement distance.");
+        //    });
+        //}
 
-        [Test]
-        public void VerifyCarriageWayRight()
-        {
-            const double carriageDistance = 2.5;
-            const double pavementDistance = 0.5;
-            var result = RunTest<CarriageWayProperties>(nameof(VerifyCarriageWayResident), new object[] { carriageDistance, pavementDistance, SidesOfCentre.Right });
+        //[Test]
+        //public void VerifyCarriageWayRight()
+        //{
+        //    const double carriageDistance = 2.5;
+        //    const double pavementDistance = 0.5;
+        //    var result = RunTest<CarriageWayProperties>(nameof(VerifyCarriageWayResident), new object[] { carriageDistance, pavementDistance, SidesOfCentre.Right });
 
-            Assert.Multiple(() =>
-            {
-                Assert.AreEqual(SidesOfCentre.Right, result.Side, "Unexpected value for carriage way side of centre.");
-                Assert.AreEqual(OffsetTypes.CarriageWay, result.Type, "Unexpected value for carriage way offset type.");
-                Assert.AreEqual(carriageDistance, result.CarriageDistance, "Unexpected value for carriage way distance.");
-                Assert.AreEqual(0, result.Intersections, "Unexpected value for carriage way intersections count.");
-                Assert.AreEqual(SidesOfCentre.Right, result.PavementSide, "Unexpected value for pavement side of centre.");
-                Assert.AreEqual(OffsetTypes.Pavement, result.PavementType, "Unexpected value for pavement offset type.");
-                Assert.AreEqual(carriageDistance + pavementDistance, result.PavementDistance, "Unexpected value for pavement distance.");
-            });
-        }
+        //    Assert.Multiple(() =>
+        //    {
+        //        Assert.AreEqual(SidesOfCentre.Right, result.Side, "Unexpected value for carriage way side of centre.");
+        //        Assert.AreEqual(OffsetTypes.CarriageWay, result.Type, "Unexpected value for carriage way offset type.");
+        //        Assert.AreEqual(carriageDistance, result.CarriageDistance, "Unexpected value for carriage way distance.");
+        //        Assert.AreEqual(0, result.Intersections, "Unexpected value for carriage way intersections count.");
+        //        Assert.AreEqual(SidesOfCentre.Right, result.PavementSide, "Unexpected value for pavement side of centre.");
+        //        Assert.AreEqual(OffsetTypes.Pavement, result.PavementType, "Unexpected value for pavement offset type.");
+        //        Assert.AreEqual(carriageDistance + pavementDistance, result.PavementDistance, "Unexpected value for pavement distance.");
+        //    });
+        //}
 
-        public CarriageWayProperties VerifyCarriageWayResident(object[] values)
-        {
-            var carriage = new CarriageWay((double)values[0], (double)values[1], (SidesOfCentre)values[2]);
+        //public CarriageWayProperties VerifyCarriageWayResident(object[] values)
+        //{
+        //    var carriage = new CarriageWay((double)values[0], (double)values[1], (SidesOfCentre)values[2]);
 
-            return new CarriageWayProperties
-            {
-                Side = carriage.Side,
-                Type = carriage.OffsetType,
-                CarriageDistance = carriage.DistanceFromCentre,
-                Intersections = carriage.Intersections.Count,
-                Ignored = carriage.Ignore,
-                PavementSide = carriage.Pavement.Side,
-                PavementType = carriage.Pavement.OffsetType,
-                PavementDistance = carriage.Pavement.DistanceFromCentre
-            };
-        }
+        //    return new CarriageWayProperties
+        //    {
+        //        Side = carriage.Side,
+        //        Type = carriage.OffsetType,
+        //        CarriageDistance = carriage.DistanceFromCentre,
+        //        Intersections = carriage.Intersections.Count,
+        //        Ignored = carriage.Ignore,
+        //        PavementSide = carriage.Pavement.Side,
+        //        PavementType = carriage.Pavement.OffsetType,
+        //        PavementDistance = carriage.Pavement.DistanceFromCentre
+        //    };
+        //}
 
         [Test]
         public void VerifyOffsetIntersectBefore()

@@ -1,6 +1,5 @@
 ﻿using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
-using Jpp.Ironstone.Highways.ObjectModel.Exceptions;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using Jpp.Ironstone.Highways.ObjectModel.Factories;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
@@ -11,18 +10,13 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
     {
         protected Pavement(double distance, SidesOfCentre side) : base(distance, side, OffsetTypes.Pavement) { }
 
-        public void Create(CarriageWay carriageWay, RoadCentreLine centreLine)
+        protected virtual void Create(CarriageWay carriageWay, RoadCentreLine centreLine)
         {
-            if (!IsValid(centreLine)) throw new ObjectException("Invalid offset for centre line", centreLine.BaseObject);
-
-            base.Clear();
-
             var db = Application.DocumentManager.MdiActiveDocument.Database;
             var acTrans = TransactionFactory.CreateFromTop();
             var blockTable = (BlockTable)acTrans.GetObject(db.BlockTableId, OpenMode.ForRead);
             var blockTableRecord = (BlockTableRecord)acTrans.GetObject(blockTable[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
             var offsetDist = DistanceFrom(carriageWay);
-
 
             foreach (ObjectId obj in carriageWay.Curves.Collection)
             {

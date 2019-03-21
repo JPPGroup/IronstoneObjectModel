@@ -2,21 +2,114 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
+using Jpp.Ironstone.Highways.ObjectModel.Factories;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 {
     [Serializable]
     public class Road
-    {        
+    {  
+        private double _leftCarriageWay = Constants.DEFAULT_CARRIAGE_WAY;
+        private double _rightCarriageWay = Constants.DEFAULT_CARRIAGE_WAY;
+        private double _leftPavement = Constants.DEFAULT_PAVEMENT - Constants.DEFAULT_CARRIAGE_WAY;
+        private double _rightPavement = Constants.DEFAULT_PAVEMENT - Constants.DEFAULT_CARRIAGE_WAY;
+
         public Guid Id { get; }
         public string Name { get; set; }
         public RoadCentreLineCollection CentreLines { get; }
-        public double LeftCarriageWay { get; set; } = Constants.DEFAULT_CARRIAGE_WAY;
-        public double RightCarriageWay { get; set; } = Constants.DEFAULT_CARRIAGE_WAY;
-        public double LeftPavement { get; set; } = Constants.DEFAULT_PAVEMENT - Constants.DEFAULT_CARRIAGE_WAY;
-        public double RightPavement { get; set; } = Constants.DEFAULT_PAVEMENT - Constants.DEFAULT_CARRIAGE_WAY;
+        public double LeftCarriageWay
+        {
+            get => _leftCarriageWay;
+            set
+            {
+                if (_leftCarriageWay.Equals(value)) return;
+                var centreList = CentreLines.ToList();
+                using (var trans = TransactionFactory.CreateFromNew())
+                {
+                    if (centreList.Any(c => c.CarriageWayLeft.IsValid(c, value) == false || c.CarriageWayLeft.Pavement.IsValid(c, value + _leftPavement) == false))
+                        throw new ArgumentException("Invalid radius for junction.");
+                }
+
+                centreList.ForEach(c =>
+                {
+                    c.CarriageWayLeft.Pavement.DistanceFromCentre = value + _leftPavement;
+                    c.CarriageWayLeft.DistanceFromCentre = value;
+                });
+
+                _leftCarriageWay = value;
+            }
+        } 
+        public double RightCarriageWay
+        {
+            get => _rightCarriageWay;
+            set
+            {
+                if (_rightCarriageWay.Equals(value)) return;
+                var centreList = CentreLines.ToList();
+                using (var trans = TransactionFactory.CreateFromNew())
+                {
+                    if (centreList.Any(c => c.CarriageWayRight.IsValid(c, value) == false || c.CarriageWayRight.Pavement.IsValid(c, value + _leftPavement) == false))
+                        throw new ArgumentException("Invalid radius for junction.");
+                }
+
+                centreList.ForEach(c =>
+                {
+                    c.CarriageWayRight.Pavement.DistanceFromCentre = value +_rightPavement;
+                    c.CarriageWayRight.DistanceFromCentre = value;
+                });
+
+                _rightCarriageWay = value;
+            }
+        }
+        public double LeftPavement
+        {
+            get => _leftPavement;
+            set
+            {
+                if (_leftPavement.Equals(value)) return;
+                var centreList = CentreLines.ToList();
+                using (var trans = TransactionFactory.CreateFromNew())
+                {
+                    if (centreList.Any(c => c.CarriageWayLeft.Pavement.IsValid(c, _leftCarriageWay + value) == false))
+                        throw new ArgumentException("Invalid radius for junction.");
+                }
+
+
+                centreList.ForEach(c =>
+                {
+                    c.CarriageWayLeft.Pavement.DistanceFromCentre = _leftCarriageWay + value;
+                });
+
+                _leftPavement = value;
+            }
+        }
+        [XmlIgnore] public PavementTypes LeftPavementType => PavementType(SidesOfCentre.Left);
+        public bool LeftPavementActive { get; set; } = true;
+        public double RightPavement
+        {
+            get => _rightPavement;
+            set
+            {
+                if (_rightPavement.Equals(value)) return;
+                var centreList = CentreLines.ToList();
+                using (var trans = TransactionFactory.CreateFromNew())
+                {
+                    if (centreList.Any(c => c.CarriageWayRight.Pavement.IsValid(c, _rightCarriageWay + value) == false))
+                        throw new ArgumentException("Invalid radius for junction.");
+                }
+
+                centreList.ForEach(c =>
+                {
+                    c.CarriageWayRight.Pavement.DistanceFromCentre = _rightCarriageWay + value;
+                });
+
+                _rightPavement = value;
+            }
+        }
+        [XmlIgnore] public PavementTypes RightPavementType => PavementType(SidesOfCentre.Right);
+        public bool RightPavementActive { get; set; } = true;
         [XmlIgnore] public bool Valid => CentreLines.Valid;
- 
+        
         public Road()
         {
             Id = Guid.NewGuid();
@@ -76,25 +169,29 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             return junctions.Any() ? junctions : null;
         }
       
-        public void SetOffsets(double leftCarriageWay, double rightCarriageWay, double leftPavement, double rightPavement)
-        {
-            //TODO: Fix floating point precision..
-            if (LeftCarriageWay == leftCarriageWay && RightCarriageWay == rightCarriageWay && LeftPavement == leftPavement && RightPavement == rightPavement) return;
-
-            LeftCarriageWay = leftCarriageWay;
-            RightCarriageWay = rightCarriageWay;
-
-            LeftPavement = leftPavement;
-            RightPavement = rightPavement;
-
-            var centreList = CentreLines.ToList();
-            centreList.ForEach(c => c.SetAllOffsets(leftCarriageWay, rightCarriageWay, leftPavement, rightPavement));            
-        }
-
         public void Reset()
         {
             var centreList = CentreLines.ToList();
             centreList.ForEach(c => c.Reset());
         }
+
+        public double GetPavementDistance(SidesOfCentre side)
+        {
+            switch (side)
+            {
+                case SidesOfCentre.Left:
+                    return LeftPavement;
+                case SidesOfCentre.Right:
+                    return RightPavement;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(side), side, null);
+            }
+        }
+
+        public PavementTypes PavementType(SidesOfCentre side)
+        {
+            return GetPavementDistance(side) >= Constants.MINIMUM_PAVEMENT ? PavementTypes.Footway : PavementTypes.Service;
+        }
+
     }
 }
