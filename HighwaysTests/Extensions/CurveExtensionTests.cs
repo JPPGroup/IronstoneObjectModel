@@ -488,5 +488,64 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
                 return true;
             }
         }
+
+        [Test]
+        public void VerifyCurveExtensionSplitStart()
+        {
+            var start = new double[] { 0, 10, 0 };
+            var end = new double[] { 0, 0, 0 };
+
+            var result = RunTest<bool>(nameof(VerifyCurveExtensionSplitResident), new object[] {start, end, start });
+            Assert.IsFalse(result, "Should not split on start point.");
+
+        }
+
+        [Test]
+        public void VerifyCurveExtensionSplitEnd()
+        {
+            var start = new double[] { 0, 10, 0 };
+            var end = new double[] { 0, 0, 0 };
+
+            var result = RunTest<bool>(nameof(VerifyCurveExtensionSplitResident), new object[] { start, end, end });
+            Assert.IsFalse(result, "Should not split on end point.");
+        }
+
+        [Test]
+        public void VerifyCurveExtensionSplitValid()
+        {
+            var start = new double[] { 0, 10, 0 };
+            var end = new double[] { 0, 0, 0 };
+            var point = new double[] { 0, 5, 0 };
+
+            var result = RunTest<bool>(nameof(VerifyCurveExtensionSplitResident), new object[] { start, end, point });
+            Assert.IsTrue(result, "Should be valid split.");
+        }
+
+        [Test]
+        public void VerifyCurveExtensionSplitInvalid()
+        {
+            var start = new double[] { 0, 10, 0 };
+            var end = new double[] { 0, 0, 0 };
+            var point = new double[] { 5, 5, 5 };
+
+            var result = RunTest<bool>(nameof(VerifyCurveExtensionSplitResident), new object[] { start, end, point });
+            Assert.IsFalse(result, "Should be invalid split.");
+        }
+
+        public bool VerifyCurveExtensionSplitResident(object[] values)
+        {
+            var start = (double[])values[0];
+            var end = (double[])values[1];
+            var split = (double[])values[2];
+
+            var point1 = new Point3d(start[0], start[1], start[2]);
+            var point2 = new Point3d(end[0], end[1], end[2]);
+            var point3 = new Point3d(split[0], split[1], split[2]);
+
+            var line = new Line(point1, point2);
+            var lSplit = line.TrySplit(point3);
+
+            return lSplit?.Count == 2;
+        }
     }
 }

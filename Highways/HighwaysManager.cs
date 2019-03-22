@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.Autocad.DrawingObjects;
+using Jpp.Ironstone.Highways.ObjectModel.Factories;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
 
 namespace Jpp.Ironstone.Highways.ObjectModel
@@ -14,21 +15,26 @@ namespace Jpp.Ironstone.Highways.ObjectModel
     [Serializable]
     public class HighwaysManager : AbstractDrawingObjectManager
     {
-        public bool Finalized { get; set; }
+        private bool _finalized;
+        private bool _cleared;
+
         public List<Road> Roads { get; set; }
-        public PersistentObjectIdCollection OffsetCollection { get; set; }
+        public PersistentObjectIdCollection JunctionOffsetCollection { get; private set; }
         [XmlIgnore] public List<Junction> Junctions { get; set; }
 
         public HighwaysManager(Document document) : base(document) 
         {
-            OffsetCollection = new PersistentObjectIdCollection();
+            JunctionOffsetCollection = new PersistentObjectIdCollection();
         }
 
-        private HighwaysManager() { }
+        private HighwaysManager()
+        {
+            JunctionOffsetCollection = new PersistentObjectIdCollection();
+        }
 
         public void FinalizeLayout()
         {
-            Finalized = true;
+            _finalized = true;
             Clear();
         }
 
@@ -48,72 +54,44 @@ namespace Jpp.Ironstone.Highways.ObjectModel
             }
         }
 
-        public void InitialiseFromCentreLines(IEnumerable<CentreLine> centreLines)
+        public void InitialiseFromCurves(IEnumerable<Curve> curves, bool generateLayout = false)
         {
             Clear();
 
-            var centreList = centreLines.ToList();
-            if (!centreList.Any()) return;
+            var curveList = curves.ToList();
+            if (!curveList.Any()) return;
 
-            Roads = BuildRoadsFromCentreLines(centreList);            
+            Roads = BuildRoadsFromCurves(curveList);            
             Junctions = BuildJunctionsFromRoads(Roads);
 
-            GenerateCarriageWayOffset();
+            if (generateLayout) GenerateLayout();
         }
 
-        public void SetLeftCarriageWayOffset(Guid roadGuid, double left)
+        public void GenerateLayout()
         {
+            ResetLayout();
 
-            var match = Roads.Find(r => r.Id == roadGuid);
-
-            if (match.SetOffsets(left, match.RightCarriageWay)) GenerateCarriageWayOffset();
-        }
-
-        public void SetRightCarriageWayOffset(Guid roadGuid, double right)
-        {
-            var match = Roads.Find(r => r.Id == roadGuid);
-
-            if (match.SetOffsets(match.LeftCarriageWay, right)) GenerateCarriageWayOffset();
-        }
-
-        private void GenerateCarriageWayOffset()
-        {
-            RemoveOffsets();      
             GenerateJunctionsCarriageWay();
-            GenerateRoadsCarriageWay();
+            GenerateRoads();
+            _cleared = false;
+        }
+
+        public void ResetLayout()
+        {
+            if (_finalized) return;
+
+            RemoveOffsets();
+            _cleared = true;
         }
        
-        private void GenerateRoadsCarriageWay()
-        {
+        private void GenerateRoads()
+        {        
             if (Roads == null || Roads.Count == 0) return;
 
-            var allRoadOffset = new List<Curve>();
-            foreach (var road in Roads)
+            using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                var curves = road.GenerateCarriageWay();
-                if (curves == null) continue;
-
-                allRoadOffset.AddRange(curves);
-            }
-
-            if (allRoadOffset.Count == 0) return;
-
-            var doc = Application.DocumentManager.MdiActiveDocument;
-            var db = doc.Database;
-
-            using (var acTrans = db.TransactionManager.StartTransaction())
-            {
-                var blockTable = (BlockTable)acTrans.GetObject(db.BlockTableId, OpenMode.ForRead);
-                var blockTableRecord = (BlockTableRecord)acTrans.GetObject(blockTable[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
-
-                foreach (var curve in allRoadOffset)
-                {
-                    curve.Layer = Constants.LAYER_DEF_POINTS;
-
-                    OffsetCollection.Add(blockTableRecord.AppendEntity(curve));
-                    acTrans.AddNewlyCreatedDBObject(curve, true);
-                }
-
+                foreach (var road in Roads) road.Generate();
+                
                 acTrans.Commit();
             }
         }
@@ -125,7 +103,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel
             var allJunctionArcs = new List<Curve>();
             foreach (var junction in Junctions)
             {
-                var arcs = junction.GenerateCarriageWayArcs();
+                var arcs = junction.Generate();
                 if (arcs == null) continue;
 
                 allJunctionArcs.AddRange(arcs);
@@ -133,10 +111,9 @@ namespace Jpp.Ironstone.Highways.ObjectModel
 
             if (allJunctionArcs.Count == 0) return;
 
-            var doc = Application.DocumentManager.MdiActiveDocument;
-            var db = doc.Database;
+            var db = Application.DocumentManager.MdiActiveDocument.Database;
 
-            using (var acTrans = db.TransactionManager.StartTransaction())
+            using (var acTrans = TransactionFactory.CreateFromNew())
             {
                 var blockTable = (BlockTable)acTrans.GetObject(db.BlockTableId, OpenMode.ForRead);
                 var blockTableRecord = (BlockTableRecord)acTrans.GetObject(blockTable[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
@@ -145,7 +122,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel
                 {
                     arc.Layer = Constants.LAYER_DEF_POINTS;
 
-                    OffsetCollection.Add(blockTableRecord.AppendEntity(arc));
+                    JunctionOffsetCollection.Add(blockTableRecord.AppendEntity(arc));
                     acTrans.AddNewlyCreatedDBObject(arc, true);
                 }
 
@@ -155,12 +132,9 @@ namespace Jpp.Ironstone.Highways.ObjectModel
 
         private void RemoveOffsets()
         {
-            var doc = Application.DocumentManager.MdiActiveDocument;
-            var db = doc.Database;
-
-            using (var acTrans = db.TransactionManager.StartTransaction())
+            using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                foreach (ObjectId obj in OffsetCollection.Collection)
+                foreach (ObjectId obj in JunctionOffsetCollection.Collection)
                 {
                     if (!obj.IsErased)
                     {
@@ -168,43 +142,43 @@ namespace Jpp.Ironstone.Highways.ObjectModel
                     }
                 }
 
-                OffsetCollection.Clear();
+                JunctionOffsetCollection.Clear();
 
-                if (Roads != null && Roads.Count > 0) Roads.ForEach(r => r.ResetOffsets());
+                if (Roads != null && Roads.Count > 0) Roads.ForEach(r => r.Reset());
                 acTrans.Commit();
             }            
         }
 
-        private static List<Road> BuildRoadsFromCentreLines(IEnumerable<CentreLine> centreLines)
+        private static List<Road> BuildRoadsFromCurves(IEnumerable<Curve> curves)
         {
-            var centreList = centreLines.ToList();
-            if (!centreList.Any()) return null;
+            var curveList = curves.ToList();
+            if (!curveList.Any()) return null;
 
             var roads = new List<Road>();
             var road = new Road();
-            var initCentre = centreList.FirstOrDefault();
+            var initCurve = curveList.FirstOrDefault();
             var connection = true;
 
-            road.AddCentreLine(initCentre);
-            centreList.Remove(initCentre);
+            road.CentreLines.Add(initCurve);
+            curveList.Remove(initCurve);
 
             while (connection)
             {
                 connection = false;
-                foreach (var centre in centreList)
+                foreach (var curve in curveList)
                 {
-                    if (!road.IsConnected(centre)) continue;
+                    if (!road.CentreLines.IsConnected(curve)) continue;
 
                     connection = true;
-                    road.AddCentreLine(centre);
-                    centreList.Remove(centre);
+                    road.CentreLines.Add(curve);
+                    curveList.Remove(curve);
 
                     break;
                 }
             }
 
             roads.Add(road);
-            if (centreList.Count != 0) roads.AddRange(BuildRoadsFromCentreLines(centreList));
+            if (curveList.Count != 0) roads.AddRange(BuildRoadsFromCurves(curveList));
 
             var count = 1;
             foreach (var nameRoad in roads)
@@ -239,47 +213,55 @@ namespace Jpp.Ironstone.Highways.ObjectModel
 
         public override void UpdateDirty()
         {
-            throw new NotImplementedException();
+            UpdateAll();
         }
 
         public override void UpdateAll()
         {
-            if (ValidateRoads())
-            {
+            if(_cleared) return;            
 
-            }
-            else
+            if (Junctions == null || Roads == null) return;
+
+            using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                FinalizeLayout();
-            }
+                if (ValidateRoads())
+                {
+                    GenerateLayout();
+                }
+                else
+                {
+                    FinalizeLayout();
+                }
+
+                acTrans.Commit();
+            }            
         }
 
         public override void Clear()
         {
-            if (!Finalized) RemoveOffsets();
+            ResetLayout();
 
-            OffsetCollection = new PersistentObjectIdCollection();
+            JunctionOffsetCollection = new PersistentObjectIdCollection();
             Junctions = null;
             Roads = null;
         }
 
         public override void AllDirty()
         {
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         public override void ActivateObjects()
         {
-            if (Finalized) return;
+            //TODO: Needs reviewing...
+            if (_finalized) return;
 
-            foreach (var road in Roads)
-            {
-                foreach (var centreLine in road.CentreLines)
+            Roads.ForEach(delegate (Road road)
                 {
-                    centreLine.Road = road;
-                    centreLine.CreateActiveObject();
-                }                
-            }
+                    var centreLines = road.CentreLines.ToList();
+                    centreLines.ForEach(c => c.CreateActiveObject());
+                }
+            );
 
             if (ValidateRoads())
             {

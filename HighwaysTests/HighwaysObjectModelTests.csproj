@@ -48,6 +48,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="AcTestFramework, Version=1.0.0.0, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\AcTestFramework.1.0.23\lib\net472\AcTestFramework.dll</HintPath>
     </Reference>
     <Reference Include="AutoUpdate, Version=1.0.14.0, Culture=neutral, processorArchitecture=MSIL">
@@ -56,8 +57,8 @@
     <Reference Include="Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Common.0.1.4\lib\netstandard2.0\Common.dll</HintPath>
     </Reference>
-    <Reference Include="IronstoneCore, Version=0.1.93.130, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Jpp.Ironstone.Core.0.1.93\lib\net472\IronstoneCore.dll</HintPath>
+    <Reference Include="IronstoneCore, Version=0.1.94.136, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\Jpp.Ironstone.Core.0.1.94\lib\net472\IronstoneCore.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.ApplicationInsights, Version=2.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.ApplicationInsights.2.9.1\lib\net46\Microsoft.ApplicationInsights.dll</HintPath>
@@ -93,6 +94,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Factories\TransactionFactoryTests.cs" />
     <Compile Include="HighwaysDocumentStoreTests.cs" />
     <Compile Include="IronstoneTestFixture.cs" />
     <Compile Include="Extensions\ArcExtensionTests.cs" />
@@ -104,6 +106,7 @@
     <Compile Include="HighwaysManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Helpers\RadiansHelperTests.cs" />
+    <Compile Include="Response\CarriageWayProperties.cs" />
     <Compile Include="Response\HighwaysManagerProperties.cs" />
   </ItemGroup>
   <ItemGroup>

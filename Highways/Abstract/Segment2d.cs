@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Xml.Serialization;
-using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
+using Jpp.Ironstone.Highways.ObjectModel.Factories;
 using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
@@ -24,7 +24,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
         [XmlIgnore] public SegmentType Type {
             get
             {
-                var acTrans = Application.DocumentManager.MdiActiveDocument.TransactionManager.TopTransaction;
+                var acTrans = TransactionFactory.CreateFromTop();
                 using (var curve = acTrans.GetObject(BaseObject, OpenMode.ForRead) as Curve)
                 {
                     switch (curve)
@@ -43,7 +43,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
         {
             get
             {
-                var acTrans = Application.DocumentManager.MdiActiveDocument.TransactionManager.TopTransaction;
+                var acTrans = TransactionFactory.CreateFromTop();
                 using (var curve = acTrans.GetObject(BaseObject, OpenMode.ForRead) as Curve)
                 {
                     if (curve != null && (curve is Line || curve is Arc)) return new Point2d(curve.StartPoint.X, curve.StartPoint.Y);
@@ -56,7 +56,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
         {
             get
             {
-                var acTrans = Application.DocumentManager.MdiActiveDocument.TransactionManager.TopTransaction;
+                var acTrans = TransactionFactory.CreateFromTop();
                 using (var curve = acTrans.GetObject(BaseObject, OpenMode.ForRead) as Curve)
                 {
                     if (curve != null && (curve is Line || curve is Arc)) return new Point2d(curve.EndPoint.X, curve.EndPoint.Y);
@@ -69,7 +69,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
         {
             get
             {
-                var acTrans = Application.DocumentManager.MdiActiveDocument.TransactionManager.TopTransaction;
+                var acTrans = TransactionFactory.CreateFromTop();
                 using (var curve = acTrans.GetObject(BaseObject, OpenMode.ForRead) as Curve)
                 {
                     switch (curve)
@@ -89,7 +89,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
         {
             get
             {
-                var acTrans = Application.DocumentManager.MdiActiveDocument.TransactionManager.TopTransaction;
+                var acTrans = TransactionFactory.CreateFromTop();
                 using (var curve = acTrans.GetObject(BaseObject, OpenMode.ForRead) as Curve)
                 {
                     switch (curve)
@@ -109,7 +109,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
         {
             get
             {
-                var acTrans = Application.DocumentManager.MdiActiveDocument.TransactionManager.TopTransaction;
+                var acTrans = TransactionFactory.CreateFromTop();
                 using (var curve = acTrans.GetObject(BaseObject, OpenMode.ForRead) as Curve)
                 {
                     switch (curve)
@@ -124,8 +124,6 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
                 }
             }
         }
-
-        public override void Generate() { }
 
         protected override void ObjectModified(object sender, EventArgs e) { }
         protected override void ObjectErased(object sender, ObjectErasedEventArgs e) { }
