@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Highways.ObjectModel.Abstract;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
@@ -67,6 +68,15 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Objects
         //        PavementDistance = carriage.Pavement.DistanceFromCentre
         //    };
         //}
+
+        [Test]
+        public void VerifyOffsetIntersectConstructor()
+        {
+            var instance = (OffsetIntersect)Activator.CreateInstance(typeof(OffsetIntersect), true);
+
+            Assert.IsTrue(instance != null, "Unable to create instance.");
+        }
+
 
         [Test]
         public void VerifyOffsetIntersectBefore()

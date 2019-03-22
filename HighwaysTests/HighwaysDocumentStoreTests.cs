@@ -24,6 +24,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
             {
                 var acDoc = Application.DocumentManager.MdiActiveDocument;
                 var ds = DataService.Current;
+                ds.InvalidateStoreTypes();
                 var store = ds.GetStore<HighwaysDocumentStore>(acDoc.Name);
 
                 return store != null;

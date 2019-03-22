@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices.Core;
@@ -48,9 +47,8 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
             try
             {
                 var acDoc = Application.DocumentManager.MdiActiveDocument;
-                var ds = DataService.Current;
-                var store = ds.GetStore<HighwaysDocumentStore>(acDoc.Name);
-                var manager = store.GetManager<HighwaysManager>();
+                var ds = GetDataService();
+                var manager = ds.GetStore<HighwaysDocumentStore>(acDoc.Name).GetManager<HighwaysManager>();
 
                 return manager != null;
             }
@@ -79,7 +77,8 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
         {
             var result = new HighwaysManagerProperties();
             var acDoc = Application.DocumentManager.MdiActiveDocument;
-            var highway = DataService.Current.GetStore<HighwaysDocumentStore>(acDoc.Name).GetManager<HighwaysManager>();
+            var ds = GetDataService();
+            var highway = ds.GetStore<HighwaysDocumentStore>(acDoc.Name).GetManager<HighwaysManager>();
             var acCurDb = acDoc.Database;
             var ed = acDoc.Editor;
             var res = ed.SelectAll();
@@ -147,6 +146,13 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
                 }
             }
             return curveList;
+        }
+
+        private static DataService GetDataService()
+        {
+            var ds = DataService.Current;
+            ds.InvalidateStoreTypes();
+            return ds;
         }
     }
 }
