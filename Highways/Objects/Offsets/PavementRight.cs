@@ -9,7 +9,6 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets
         private const SidesOfCentre SIDES_OF_CENTRE = SidesOfCentre.Right;
 
         public PavementRight() : base(Constants.DEFAULT_PAVEMENT, SIDES_OF_CENTRE) { }
-        public PavementRight(double distance) : base(distance, SIDES_OF_CENTRE) { }
 
         public new void Create(CarriageWay carriageWay, RoadCentreLine centreLine)
         {

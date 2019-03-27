@@ -19,12 +19,6 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
             Ignore = false;
         }
 
-        protected CarriageWay(double distance, SidesOfCentre side) : base(distance, side, OffsetTypes.CarriageWay)
-        {
-            Intersections = new List<OffsetIntersect>();
-            Ignore = false;
-        }
-
         public new virtual void Clear()
         {
             base.Clear();
