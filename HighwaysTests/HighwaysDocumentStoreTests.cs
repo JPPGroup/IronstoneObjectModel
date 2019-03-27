@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Jpp.Ironstone.Core.ServiceInterfaces;
@@ -14,17 +15,23 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
         [Test]
         public void VerifyStoreLoaded()
         {
-            var result = RunTest<bool>(nameof(VerifyStoreLoadedResident));
-            Assert.IsTrue(result, "Data store not loaded.");
+            var resultNotLoaded = RunTest<bool>(nameof(VerifyStoreLoadedResident), false);
+            var resultLoaded = RunTest<bool>(nameof(VerifyStoreLoadedResident), true);
+
+            Assert.Multiple(() =>
+            {
+                Assert.IsFalse(resultNotLoaded, "Data store should not be loaded.");
+                Assert.IsTrue(resultLoaded, "Data store should be loaded.");
+            });
         }
 
-        public bool VerifyStoreLoadedResident()
+        public bool VerifyStoreLoadedResident(bool invalidate)
         {
             try
             {
                 var acDoc = Application.DocumentManager.MdiActiveDocument;
                 var ds = DataService.Current;
-                ds.InvalidateStoreTypes();
+                if (invalidate) ds.InvalidateStoreTypes();
                 var store = ds.GetStore<HighwaysDocumentStore>(acDoc.Name);
 
                 return store != null;

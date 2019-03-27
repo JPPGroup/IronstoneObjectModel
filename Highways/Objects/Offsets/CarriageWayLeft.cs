@@ -14,11 +14,6 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets
             Pavement = new PavementLeft();
         }
 
-        public CarriageWayLeft(double distance, double pavementWidth) : base(distance, SIDES_OF_CENTRE)
-        {
-            Pavement = new PavementLeft(distance + pavementWidth);
-        }
-
         public override void Clear()
         {
             Pavement.Clear();
