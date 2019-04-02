@@ -49,11 +49,14 @@
     </Reference>
     <Reference Include="AutoUpdate, Version=1.0.14.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AutoUpdate.1.0.14\lib\net47\AutoUpdate.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Common.0.1.4\lib\netstandard2.0\Common.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="IronstoneCore, Version=0.1.94.136, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Jpp.Ironstone.Core.0.1.94\lib\net472\IronstoneCore.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.ApplicationInsights, Version=2.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -74,6 +77,7 @@
     </Reference>
     <Reference Include="ZipExtract, Version=1.0.14.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AutoUpdate.1.0.14\lib\net47\ZipExtract.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -84,10 +88,13 @@
     <Compile Include="Exceptions\TransactionException.cs" />
     <Compile Include="Factories\TransactionFactory.cs" />
     <Compile Include="Abstract\CarriageWay.cs" />
+    <Compile Include="Abstract\RoadClosure.cs" />
     <Compile Include="Objects\Offsets\CarriageWayRight.cs" />
     <Compile Include="Objects\Offsets\CarriageWayLeft.cs" />
     <Compile Include="Objects\Offsets\PavementLeft.cs" />
     <Compile Include="Objects\Offsets\PavementRight.cs" />
+    <Compile Include="Objects\Offsets\RoadClosureEnd.cs" />
+    <Compile Include="Objects\Offsets\RoadClosureStart.cs" />
     <Compile Include="Objects\RoadCentreLine.cs" />
     <Compile Include="Enums.cs" />
     <Compile Include="Extensions\ArcExtension.cs" />

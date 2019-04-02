@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 using Jpp.Ironstone.Highways.ObjectModel.Factories;
+using Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 {
@@ -109,18 +110,24 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         [XmlIgnore] public PavementTypes RightPavementType => PavementType(SidesOfCentre.Right);
         public bool RightPavementActive { get; set; } = true;
         [XmlIgnore] public bool Valid => CentreLines.Valid;
-        
+        public RoadClosureStart RoadClosureStart { get; set; }
+        public RoadClosureEnd RoadClosureEnd { get; set; }
+
         public Road()
         {
             Id = Guid.NewGuid();
             CentreLines = new RoadCentreLineCollection(this);
+            RoadClosureStart = new RoadClosureStart();
+            RoadClosureEnd = new RoadClosureEnd();
         }
 
         public void Generate()
         {
             if (!Valid) return;
             var centreList = CentreLines.ToList();
-            centreList.ForEach(c => c.Generate());           
+            centreList.ForEach(c => c.Generate());
+            RoadClosureStart.Create(CentreLines.StartLine);
+            RoadClosureEnd.Create(CentreLines.EndLine);
         }        
        
         public void Highlight()
@@ -173,6 +180,8 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         {
             var centreList = CentreLines.ToList();
             centreList.ForEach(c => c.Reset());
+            RoadClosureStart.Clear();
+            RoadClosureEnd.Clear();
         }
 
         public double GetPavementDistance(SidesOfCentre side)
