@@ -16,7 +16,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
             var acTrans = TransactionFactory.CreateFromTop();
             var blockTable = (BlockTable)acTrans.GetObject(db.BlockTableId, OpenMode.ForRead);
             var blockTableRecord = (BlockTableRecord)acTrans.GetObject(blockTable[BlockTableRecord.ModelSpace], OpenMode.ForWrite);
-            var offsetDist = DistanceFrom(carriageWay);
+            var offsetDist = DistanceFromCarriageWay(carriageWay);
 
             foreach (ObjectId obj in carriageWay.Curves.Collection)
             {
@@ -35,7 +35,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
             }
         }
 
-        private double DistanceFrom(CentreLineOffset carriageWay)
+        private double DistanceFromCarriageWay(CarriageWay carriageWay)
         {
             return DistanceFromCentre - carriageWay.DistanceFromCentre;
         }

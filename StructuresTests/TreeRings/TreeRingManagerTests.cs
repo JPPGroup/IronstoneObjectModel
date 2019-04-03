@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
+using System.Reflection;
+using Autodesk.AutoCAD.ApplicationServices.Core;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel.TreeRings;
 using NUnit.Framework;
@@ -13,14 +8,39 @@ using NUnit.Framework;
 namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 {
     [TestFixture]
-    public class TreeRingManagerTests
+    public class TreeRingManagerTests : IronstoneTestFixture
     {
+        public TreeRingManagerTests() : base(Assembly.GetExecutingAssembly(), typeof(TreeRingManagerTests)) { }
+
         [Test]
-        public void ThisShouldPass()
+        public void VerifyManagerLoaded()
         {
-            Assert.Pass("This test should pass");
+            var result = RunTest<bool>(nameof(VerifyManagerLoadedResident));
+            Assert.IsTrue(result, "Manager not loaded.");
         }
 
+        public bool VerifyManagerLoadedResident()
+        {
+            try
+            {
+                var acDoc = Application.DocumentManager.MdiActiveDocument;
+                var ds = GetDataService();
+                var manager = ds.GetStore<StructureDocumentStore>(acDoc.Name).GetManager<TreeRingManager>();
+
+                return manager != null;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private static DataService GetDataService()
+        {
+            var ds = DataService.Current;
+            ds.InvalidateStoreTypes();
+            return ds;
+        }
 
         public void AddNewTree()
         {

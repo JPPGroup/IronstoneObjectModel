@@ -131,15 +131,6 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 
             return null;
         }
-
-        public void SetAllOffsets(double leftCarriageWay, double rightCarriageWay, double leftPavement, double rightPavement)
-        {
-            //TODO: Mark as dirty to rebuild layout
-            CarriageWayLeft.DistanceFromCentre = leftCarriageWay;
-            CarriageWayLeft.Pavement.DistanceFromCentre = leftCarriageWay + leftPavement;
-            CarriageWayRight.DistanceFromCentre = rightCarriageWay;
-            CarriageWayRight.Pavement.DistanceFromCentre = rightCarriageWay +rightPavement;
-        }
      
         public void SetCarriageWayOffsetIgnored(SidesOfCentre side)
         {

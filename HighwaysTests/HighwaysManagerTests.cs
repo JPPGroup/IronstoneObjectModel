@@ -36,6 +36,17 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
         }
 
         [Test]
+        public void VerifyManagerConstructor()
+        {
+            var instance = (HighwaysManager)Activator.CreateInstance(typeof(HighwaysManager), true);
+
+            Assert.IsTrue(instance != null, "Unable to create instance.");
+            Assert.AreEqual(0, instance.JunctionOffsetCollection.Count, "Junction offset count should be 0.");
+            Assert.IsTrue(instance.Junctions == null, "Junctions should be null.");
+            Assert.IsTrue(instance.Roads == null, "Roads should be null.");
+        }
+
+        [Test]
         public void VerifyManagerLoaded()
         {
             var result = RunTest<bool>(nameof(VerifyManagerLoadedResident));
