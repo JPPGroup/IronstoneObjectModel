@@ -4,12 +4,12 @@ using Autodesk.AutoCAD.ApplicationServices.Core;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using NUnit.Framework;
 
-namespace Jpp.Ironstone.Highways.ObjectModel.Tests
+namespace Jpp.Ironstone.Structures.ObjectModel.Test
 {
     [TestFixture]
-    public class HighwaysDocumentStoreTests : IronstoneTestFixture
+    public class StructureDocumentStoreTests : IronstoneTestFixture
     {
-        public HighwaysDocumentStoreTests() : base(Assembly.GetExecutingAssembly(), typeof(HighwaysDocumentStoreTests)) { }
+        public StructureDocumentStoreTests() : base(Assembly.GetExecutingAssembly(), typeof(StructureDocumentStoreTests)) { }
 
         [Test]
         public void VerifyStoreLoaded()
@@ -31,7 +31,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
                 var acDoc = Application.DocumentManager.MdiActiveDocument;
                 var ds = DataService.Current;
                 if (invalidate) ds.InvalidateStoreTypes();
-                var store = ds.GetStore<HighwaysDocumentStore>(acDoc.Name);
+                var store = ds.GetStore<StructureDocumentStore>(acDoc.Name);
 
                 return store != null;
             }
