@@ -57,6 +57,7 @@
     </Reference>
     <Reference Include="IronstoneCore, Version=0.1.96.141, Culture=neutral, processorArchitecture=AMD64">
       <HintPath>..\packages\Jpp.Ironstone.Core.0.1.96\lib\net472\IronstoneCore.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="jHub, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\jHub.0.1.1\lib\netstandard2.0\jHub.dll</HintPath>
