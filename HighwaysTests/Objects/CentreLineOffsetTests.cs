@@ -1001,12 +1001,16 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Objects
         [Test]
         public void VerifyOffsetIntersectConstructor()
         {
-            var instance = (OffsetIntersect)Activator.CreateInstance(typeof(OffsetIntersect), true);
-
-            Assert.IsTrue(instance != null, "Unable to create instance.");
+            var result = RunTest<bool>(nameof(VerifyOffsetIntersectConstructorResident));
+            Assert.IsTrue(result, "Unable to create instance.");
         }
 
-        [Test]
+        public bool VerifyOffsetIntersectConstructorResident()
+        {
+            return Activator.CreateInstance(typeof(OffsetIntersect), true) is OffsetIntersect;
+        }
+
+           [Test]
         public void VerifyOffsetIntersectBefore()
         {
             const bool before = true;

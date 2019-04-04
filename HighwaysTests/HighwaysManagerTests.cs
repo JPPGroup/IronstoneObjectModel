@@ -38,12 +38,13 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
         [Test]
         public void VerifyManagerConstructor()
         {
-            var instance = (HighwaysManager)Activator.CreateInstance(typeof(HighwaysManager), true);
+            var result = RunTest<bool>(nameof(VerifyManagerConstructorResident));
+            Assert.IsTrue(result, "Unable to create instance.");
+        }
 
-            Assert.IsTrue(instance != null, "Unable to create instance.");
-            Assert.AreEqual(0, instance.JunctionOffsetCollection.Count, "Junction offset count should be 0.");
-            Assert.IsTrue(instance.Junctions == null, "Junctions should be null.");
-            Assert.IsTrue(instance.Roads == null, "Roads should be null.");
+        public bool VerifyManagerConstructorResident()
+        {
+            return Activator.CreateInstance(typeof(HighwaysManager), true) is HighwaysManager;
         }
 
         [Test]
