@@ -13,7 +13,7 @@ using Jpp.Ironstone.Core.Autocad;
 
 namespace Jpp.Ironstone.DocumentManagement.Objectmodel.DrawingTypes
 {
-    class CivilXrefDrawingType : AbstractDrawingType
+    public class CivilXrefDrawingType : AbstractDrawingType
     {
         public override void SetDrawing(Document acDoc)
         {
@@ -118,6 +118,8 @@ namespace Jpp.Ironstone.DocumentManagement.Objectmodel.DrawingTypes
                     //Run the cleanup commands
                     acDoc.Database.PurgeAll();
                     acDoc.Database.Audit(true, false);
+
+                    tr.Commit();
                 }
             }
         }
