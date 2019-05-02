@@ -30,8 +30,20 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
 
         public int VerifyExplodeAndEraseResident()
         {
-            var pLine = GetPolylineFromDrawing();
-            return pLine == null ? 0 : pLine.ExplodeAndErase().Count;
+            var acDoc = Application.DocumentManager.MdiActiveDocument;
+            var acCurDb = acDoc.Database;
+            var pLineCount = 0;
+
+            using (var acTrans = acCurDb.TransactionManager.StartTransaction())
+            {
+                var pLine = GetPolylineFromDrawing();
+                if (pLine == null) return pLineCount;
+
+                pLineCount = pLine.ExplodeAndErase().Count;
+                acTrans.Abort();
+            }
+               
+            return pLineCount;
         }
 
         private static Polyline GetPolylineFromDrawing()
@@ -46,9 +58,10 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests.Extensions
             var acDoc = Application.DocumentManager.MdiActiveDocument;
             var acCurDb = acDoc.Database;
 
-            var acTrans = acCurDb.TransactionManager.StartTransaction();
-
-            return (Polyline)acTrans.GetObject(res.Value[0].ObjectId, OpenMode.ForWrite);
+            using (var acTrans = acCurDb.TransactionManager.StartTransaction())
+            {
+                return (Polyline)acTrans.GetObject(res.Value[0].ObjectId, OpenMode.ForWrite);
+            }            
         }
     }
 }
