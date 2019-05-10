@@ -97,6 +97,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="Foundations\FoundationCentreLine.cs" />
+    <Compile Include="Foundations\FoundationManager.cs" />
+    <Compile Include="Foundations\FoundationNode.cs" />
     <Compile Include="Ground\Shrinkage.cs" />
     <Compile Include="Ground\SoilProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -113,6 +116,12 @@
     <Content Include="IronstoneConfig.xml" />
     <Content Include="IronstoneConfigBeta.xml" />
     <Content Include="IronstoneConfigRelease.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\ironstone-core\Ironstone Core\Ironstone Core.csproj">
+      <Project>{A3BFA507-A2C4-4C33-943B-6083133EE63C}</Project>
+      <Name>Ironstone Core</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

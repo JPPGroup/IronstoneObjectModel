@@ -33,6 +33,13 @@ namespace Jpp.Ironstone.Structures.ObjectModel
         }
         private float _targetStepSize;
 
+        public double AllowableGroundBearingPressure
+        {
+            get { return _allowableGroundBearingPressure; }
+            set { SetField(ref _allowableGroundBearingPressure, value, "AllowableGroundBearPressure;"); }
+        }
+        private double _allowableGroundBearingPressure;
+
         public SoilProperties()
         {
             //Init to conservative starting values
