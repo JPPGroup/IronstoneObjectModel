@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StructuresObjectModelTests"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HighwaysObjectModelTests", "HighwaysTests\HighwaysObjectModelTests.csproj", "{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrainageObjectModel", "Drainage\DrainageObjectModel.csproj", "{94D84ABE-06AE-488C-8574-7B2A050FB8F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -39,6 +41,10 @@ Global
 		{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}.Debug|x64.Build.0 = Debug|x64
 		{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}.Release|x64.ActiveCfg = Release|x64
 		{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}.Release|x64.Build.0 = Release|x64
+		{94D84ABE-06AE-488C-8574-7B2A050FB8F4}.Debug|x64.ActiveCfg = Debug|x64
+		{94D84ABE-06AE-488C-8574-7B2A050FB8F4}.Debug|x64.Build.0 = Debug|x64
+		{94D84ABE-06AE-488C-8574-7B2A050FB8F4}.Release|x64.ActiveCfg = Release|x64
+		{94D84ABE-06AE-488C-8574-7B2A050FB8F4}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
