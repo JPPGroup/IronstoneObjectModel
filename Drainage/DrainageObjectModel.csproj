@@ -94,8 +94,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Constants.cs" />
     <Compile Include="DrainageDocumentStore.cs" />
+    <Compile Include="Factories\TransactionFactory.cs" />
+    <Compile Include="Helpers\LeaderHelper.cs" />
     <Compile Include="Managers\DrainageRoutesManager.cs" />
+    <Compile Include="AbstractNotifiableDrawingObjectManagerManager.cs" />
+    <Compile Include="Objects\DrainageRoute.cs" />
+    <Compile Include="Objects\DrainageVertice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
