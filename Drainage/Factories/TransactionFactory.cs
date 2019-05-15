@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace Jpp.Ironstone.Drainage.ObjectModel.Factories
 {
+    //MOVE: To Core...
     public static class TransactionFactory
     {
         public static Transaction CreateFromTop()

@@ -2,8 +2,6 @@
 {
     public class Constants
     {
-        
-
         public const string LAYER_DEF_POINTS_NAME = "Defpoints";
 
         #region JPP Layers

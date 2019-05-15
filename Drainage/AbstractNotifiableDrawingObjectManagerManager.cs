@@ -5,6 +5,7 @@ using Jpp.Ironstone.Core.Autocad;
 
 namespace Jpp.Ironstone.Drainage.ObjectModel
 {
+    //MOVE: To Core...
     public abstract class AbstractNotifiableDrawingObjectManagerManager : AbstractDrawingObjectManager, INotifyPropertyChanged
     {
         public event PropertyChangedEventHandler PropertyChanged;
