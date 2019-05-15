@@ -13,23 +13,56 @@ namespace Jpp.Ironstone.Drainage.ObjectModel.Objects
     [Serializable]
     public class DrainageRoute
     {
+        private double _cover = Constants.DEFAULT_COVER;
+        private double _gradient;
+
         public long LineObjPtr { get; private set; }
         public List<DrainageVertex> Vertices { get; }
-        public double InitialLevel { get; set; } = 10.500;
-        public double Cover { get; set; } = Constants.DEFAULT_COVER;
-        public double Gradient { get; set; } = 150;
+        public double InitialInvert { get; set; }
+        public double Cover
+        {
+            get => _cover;
+            set
+            {
+                Vertices.ForEach(v =>
+                {
+                    if (v.Cover.Equals(_cover)) v.Cover = value;
+                });
+
+                _cover = value;
+            }
+        }
+        public double Gradient
+        {
+            get => _gradient;
+            set
+            {
+                Vertices.ForEach(v =>
+                {
+                    if (v.Gradient.Equals(_gradient)) v.Gradient = value;
+                });
+
+                _gradient = value;
+            }
+        }
         public PersistentObjectIdCollection LeaderCollection { get; }
 
-        public DrainageRoute(List<DrainageVertex> vertices)
+        public DrainageRoute(double initialInvert, double gradient, List<DrainageVertex> vertices)
         {
-            Vertices = vertices;
+            Vertices = new List<DrainageVertex>();
+
+            InitialInvert = initialInvert;
+            Gradient = gradient;
+         
             LeaderCollection = new PersistentObjectIdCollection();
 
-            Vertices.ForEach(v =>
+            vertices.ForEach(v =>
             {
                 v.Cover = Cover;
                 v.Gradient = Gradient;
             });
+
+            Vertices = vertices;
         }
 
         private DrainageRoute()
@@ -129,7 +162,7 @@ namespace Jpp.Ironstone.Drainage.ObjectModel.Objects
                 var lineObj = acCurDb.GetObjectId(false, new Handle(LineObjPtr), 0);
                 var polyLine = (Polyline)acTrans.GetObject(lineObj, OpenMode.ForRead);
 
-                var level = InitialLevel;
+                var level = InitialInvert;
                 for (var i = 0; i < Vertices.Count; i++)
                 {
                     var vertex = Vertices[i];
@@ -211,7 +244,7 @@ namespace Jpp.Ironstone.Drainage.ObjectModel.Objects
                 var initPt = initLine.StartPoint + initLineVector * 0.2;
 
                 var initString = new StringBuilder();
-                initString.Append($"Initial level: {InitialLevel}\n");
+                initString.Append($"Initial invert level: {InitialInvert}\n");
                 initString.Append($"Gradient: 1:{Gradient}");
 
                 LeaderCollection.Add(LeaderHelper.GenerateLeader(initString.ToString(), line.GetPoint3dAt(0),new Point3d(initPt.X, initPt.Y, 0)));

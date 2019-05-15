@@ -2,6 +2,8 @@
 {
     public class Constants
     {
+        
+
         public const string LAYER_DEF_POINTS_NAME = "Defpoints";
 
         #region JPP Layers
@@ -25,12 +27,15 @@
         public const string PROMPT_COVER_LEVEL = "\nPlease enter cover Level (m):";
         public const string PROMPT_COVER = "\nPlease enter cover (m):";
         public const string PROMPT_PIPE = "\nPlease enter pipe diameter (mm):";
+        public const string PROMPT_INITIAL_INVERT_LEVEL = "\nPlease enter initial invert level (m):";
+        public const string PROMPT_GRADIENT = "\nPlease enter gradient (1 in):";
         #endregion
 
         #region Defaults
         public const double DEFAULT_COVER_LEVEL = 100;
         public const double DEFAULT_COVER = 1.2;
         public const double DEFAULT_PIPE_DIAMETER = 150;
+        public const double DEFAULT_GRADIENT = 150;
         #endregion
     }
 }

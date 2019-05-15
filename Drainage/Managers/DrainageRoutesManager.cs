@@ -59,11 +59,11 @@ namespace Jpp.Ironstone.Drainage.ObjectModel.Managers
             throw new NotImplementedException();
         }
 
-        public void BuildNewRoute(List<DrainageVertex> vertices)
+        public void BuildNewRoute(double initialInvert, double gradient, List<DrainageVertex> vertices)
         {
             using (var acTrans = TransactionFactory.CreateFromNew())
             {
-               Routes.Add(new DrainageRoute(vertices));
+                Routes.Add(new DrainageRoute(initialInvert, gradient, vertices));
                 acTrans.Commit();
             }
 
