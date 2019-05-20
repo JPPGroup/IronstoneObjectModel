@@ -3,6 +3,7 @@ using System.Net.NetworkInformation;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Helpers
 {
+    //MOVE: To Core
     public static class RadiansHelper
     {
         public const double DEGREES_360 = 2 * Math.PI;

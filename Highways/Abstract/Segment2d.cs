@@ -9,6 +9,7 @@ using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
 {
+    //MOVE: To Core?
     public abstract class Segment2d : DrawingObject
     {        
         [XmlIgnore] public override double Rotation

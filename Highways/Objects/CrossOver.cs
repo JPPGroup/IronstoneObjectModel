@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Serialization;
+using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
@@ -13,16 +15,20 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
     {
         private const double POINT_TOLERANCE = 0.0001;
 
+        public long LinePtr { get; set; }
         public double BaseAngle { get; set; }
         public double InitialLength { get; set; }
         public Point3d StartPoint { get; set; }
-
-        public ObjectId LineId { get; private set; }
-
-
-        public CrossOver()
+        [XmlIgnore] public ObjectId LineId
         {
-            LineId = new ObjectId();
+            get
+            {
+                if (LinePtr == 0) return ObjectId.Null;
+
+                var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
+                return acCurDb.GetObjectId(false, new Handle(LinePtr), 0);
+            }
+            set => LinePtr = value.Handle.Value;
         }
 
         public void Clear()
@@ -43,8 +49,6 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
 
             return true;
         }
-
-
 
         private static Line DrawLine(Point3d startPoint, double angle, Road road, double initialLength)
         {
@@ -199,6 +203,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                 if (pts.Count > 0) possLines.Add(new Line(splay.StartPoint, pts[0]));
             }
 
+            //TODO: Trim with Junction...
 
             return possLines.Count == 0 ? null : possLines.OrderBy(l => l.Length).First();
         }

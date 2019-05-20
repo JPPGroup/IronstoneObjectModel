@@ -5,6 +5,7 @@ using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
 {
+    //MOVE: To Core
     public static class CurveExtension
     {
         public static Curve CreateOffset(this Curve curve, SidesOfCentre side, double dist)

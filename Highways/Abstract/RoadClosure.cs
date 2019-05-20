@@ -1,7 +1,6 @@
-﻿using System;
+﻿using System.Xml.Serialization;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
-using Jpp.Ironstone.Core.Autocad.DrawingObjects;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using Jpp.Ironstone.Highways.ObjectModel.Factories;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
@@ -10,25 +9,62 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
 {
     public abstract class RoadClosure
     {
+        public long EndCarriageWayLinePtr { get; set; }
+        public long EndPavementLinePtr { get; set; }
+        public long PadPavementLeftLinePtr { get; set; }
+        public long PadPavementRightLinePtr { get; set; }
         public bool Active { get; set; }
         public ClosureTypes Type { get; set; }
-        public ObjectId EndCarriageWayLineId { get; private set; }
-        public ObjectId EndPavementLineId { get; private set; }
-        public ObjectId PadPavementLeftLineId { get; private set; }
-        public ObjectId PadPavementRightLineId { get; private set; }
-
         public double Distance { get; set; }
+        [XmlIgnore] public ObjectId EndCarriageWayLineId
+        {
+            get
+            {
+                if (EndCarriageWayLinePtr == 0) return ObjectId.Null;
+
+                var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
+                return acCurDb.GetObjectId(false, new Handle(EndCarriageWayLinePtr), 0);
+            }
+            set => EndCarriageWayLinePtr = value.Handle.Value;
+        }
+        [XmlIgnore] public ObjectId EndPavementLineId
+        {
+            get
+            {
+                if (EndPavementLinePtr == 0) return ObjectId.Null;
+
+                var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
+                return acCurDb.GetObjectId(false, new Handle(EndPavementLinePtr), 0);
+            }
+            set => EndPavementLinePtr = value.Handle.Value;
+        }
+        [XmlIgnore] public ObjectId PadPavementLeftLineId
+        {
+            get
+            {
+                if (PadPavementLeftLinePtr == 0) return ObjectId.Null;
+
+                var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
+                return acCurDb.GetObjectId(false, new Handle(PadPavementLeftLinePtr), 0);
+            }
+            set => PadPavementLeftLinePtr = value.Handle.Value;
+        }
+        [XmlIgnore] public ObjectId PadPavementRightLineId
+        {
+            get
+            {
+                if (PadPavementRightLinePtr == 0) return ObjectId.Null;
+
+                var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
+                return acCurDb.GetObjectId(false, new Handle(PadPavementRightLinePtr), 0);
+            }
+            set => PadPavementRightLinePtr = value.Handle.Value;
+        }
 
         protected RoadClosure(ClosureTypes type)
         {
             Active = false;
             Type = type;
-            EndCarriageWayLineId = new ObjectId();
-            EndPavementLineId = new ObjectId();
-
-            PadPavementLeftLineId = new ObjectId();
-            PadPavementRightLineId = new ObjectId();
-
             Distance = Constants.DEFAULT_PAVEMENT_WIDTH;
         }
 

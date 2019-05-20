@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
 {
+    //MOVE: To Core
     public static class PolylineExtension
     {
         public static DBObjectCollection ExplodeAndErase(this Polyline pLine)
