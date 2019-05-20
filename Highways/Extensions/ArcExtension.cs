@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
 {
+    //MOVE: To Core
     public static class ArcExtension
     {
         public static bool Clockwise(this Arc arc)

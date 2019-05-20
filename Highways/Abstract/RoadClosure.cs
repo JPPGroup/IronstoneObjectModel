@@ -1,6 +1,6 @@
-﻿using Autodesk.AutoCAD.ApplicationServices.Core;
+﻿using System.Xml.Serialization;
+using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
-using Jpp.Ironstone.Core.Autocad.DrawingObjects;
 using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using Jpp.Ironstone.Highways.ObjectModel.Factories;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
@@ -9,31 +9,78 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
 {
     public abstract class RoadClosure
     {
+        public long EndCarriageWayLinePtr { get; set; }
+        public long EndPavementLinePtr { get; set; }
+        public long PadPavementLeftLinePtr { get; set; }
+        public long PadPavementRightLinePtr { get; set; }
         public bool Active { get; set; }
         public ClosureTypes Type { get; set; }
-        public PersistentObjectIdCollection Curves { get; }
         public double Distance { get; set; }
+        [XmlIgnore] public ObjectId EndCarriageWayLineId
+        {
+            get
+            {
+                if (EndCarriageWayLinePtr == 0) return ObjectId.Null;
+
+                var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
+                return acCurDb.GetObjectId(false, new Handle(EndCarriageWayLinePtr), 0);
+            }
+            set => EndCarriageWayLinePtr = value.Handle.Value;
+        }
+        [XmlIgnore] public ObjectId EndPavementLineId
+        {
+            get
+            {
+                if (EndPavementLinePtr == 0) return ObjectId.Null;
+
+                var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
+                return acCurDb.GetObjectId(false, new Handle(EndPavementLinePtr), 0);
+            }
+            set => EndPavementLinePtr = value.Handle.Value;
+        }
+        [XmlIgnore] public ObjectId PadPavementLeftLineId
+        {
+            get
+            {
+                if (PadPavementLeftLinePtr == 0) return ObjectId.Null;
+
+                var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
+                return acCurDb.GetObjectId(false, new Handle(PadPavementLeftLinePtr), 0);
+            }
+            set => PadPavementLeftLinePtr = value.Handle.Value;
+        }
+        [XmlIgnore] public ObjectId PadPavementRightLineId
+        {
+            get
+            {
+                if (PadPavementRightLinePtr == 0) return ObjectId.Null;
+
+                var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
+                return acCurDb.GetObjectId(false, new Handle(PadPavementRightLinePtr), 0);
+            }
+            set => PadPavementRightLinePtr = value.Handle.Value;
+        }
 
         protected RoadClosure(ClosureTypes type)
         {
             Active = false;
             Type = type;
-            Curves = new PersistentObjectIdCollection();
             Distance = Constants.DEFAULT_PAVEMENT_WIDTH;
         }
 
         public void Clear()
         {
             var acTrans = TransactionFactory.CreateFromTop();
-            foreach (ObjectId obj in Curves.Collection)
-            {
-                if (!obj.IsErased)
-                {
-                    acTrans.GetObject(obj, OpenMode.ForWrite, true).Erase();
-                }
-            }
 
-            Curves.Clear();
+            if (!EndCarriageWayLineId.IsErased) acTrans.GetObject(EndCarriageWayLineId, OpenMode.ForWrite, true).Erase();
+            if (!EndPavementLineId.IsErased) acTrans.GetObject(EndPavementLineId, OpenMode.ForWrite, true).Erase();
+            if (!PadPavementLeftLineId.IsErased) acTrans.GetObject(PadPavementLeftLineId, OpenMode.ForWrite, true).Erase();
+            if (!PadPavementRightLineId.IsErased) acTrans.GetObject(PadPavementRightLineId, OpenMode.ForWrite, true).Erase();
+
+            EndCarriageWayLineId = ObjectId.Null;
+            EndPavementLineId = ObjectId.Null;
+            PadPavementLeftLineId = ObjectId.Null;
+            PadPavementRightLineId = ObjectId.Null;
         }
 
         public void Create(RoadCentreLine centreLine)
@@ -85,16 +132,16 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Abstract
                 extraLeft.Layer = Constants.LAYER_DEF_POINTS;
                 extraRight.Layer = Constants.LAYER_DEF_POINTS;
 
-                Curves.Add(blockTableRecord.AppendEntity(carriageLine));
-                Curves.Add(blockTableRecord.AppendEntity(pavementLine));
-                Curves.Add(blockTableRecord.AppendEntity(extraLeft));
-                Curves.Add(blockTableRecord.AppendEntity(extraRight));
+                EndCarriageWayLineId = blockTableRecord.AppendEntity(carriageLine);
+                EndPavementLineId = blockTableRecord.AppendEntity(pavementLine);
+
+                PadPavementLeftLineId = blockTableRecord.AppendEntity(extraLeft);
+                PadPavementRightLineId = blockTableRecord.AppendEntity(extraRight);
 
                 acTrans.AddNewlyCreatedDBObject(carriageLine, true);
                 acTrans.AddNewlyCreatedDBObject(pavementLine, true);
                 acTrans.AddNewlyCreatedDBObject(extraLeft, true);
                 acTrans.AddNewlyCreatedDBObject(extraRight, true);
-
             }            
         }
     }

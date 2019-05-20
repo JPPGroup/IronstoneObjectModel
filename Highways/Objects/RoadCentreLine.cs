@@ -14,6 +14,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
     [Serializable]
     public class RoadCentreLine : Segment2d, IRoadCentreLine
     {
+        //public List<CrossOver> CrossOvers { get; set; }
         public CarriageWayLeft CarriageWayLeft { get; set; }
         public CarriageWayRight CarriageWayRight { get; set; }
         [XmlIgnore] public Road Road { get; internal set; }
@@ -27,6 +28,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         {
             CarriageWayLeft = new CarriageWayLeft();
             CarriageWayRight = new CarriageWayRight();
+            //CrossOvers = new List<CrossOver>();
         }
 
         public override void Generate()

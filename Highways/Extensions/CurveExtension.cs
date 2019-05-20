@@ -5,6 +5,7 @@ using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
 {
+    //MOVE: To Core
     public static class CurveExtension
     {
         public static Curve CreateOffset(this Curve curve, SidesOfCentre side, double dist)
@@ -39,6 +40,49 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
             {
                 return null;
             }
+        }
+
+        public static double AngleFromCurveToForSide(this Curve curve, SidesOfCentre side)
+        {
+            double curveAngle;
+            switch (curve)
+            {
+                case Line line:
+                    curveAngle = line.Angle;
+                    break;
+                case Arc arc:
+                    var startPoint = new Point2d(arc.StartPoint.X, arc.StartPoint.Y);
+                    var arcCentre = new Point2d(arc.Center.X, arc.Center.Y);
+                    var startVector = arcCentre.GetVectorTo(startPoint);
+                    curveAngle = arc.Clockwise() ? startVector.Angle - RadiansHelper.DEGREES_90 : startVector.Angle + RadiansHelper.DEGREES_90;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(curve), curve, null);
+            }
+
+            return RadiansHelper.AngleForSide(curveAngle, side);
+        }
+
+        public static double AngleFromCurveToForSide(this Curve curve, SidesOfCentre side, Point3d point)
+        {
+            double curveAngle;
+            switch (curve)
+            {
+                case Line line:
+                    curveAngle = line.Angle;
+                    break;
+                case Arc arc:
+                    var p = curve.GetClosestPointTo(point, false);
+                    var startPoint = new Point2d(p.X, p.Y);
+                    var arcCentre = new Point2d(arc.Center.X, arc.Center.Y);
+                    var startVector = arcCentre.GetVectorTo(startPoint);
+                    curveAngle = arc.Clockwise() ? startVector.Angle - RadiansHelper.DEGREES_90 : startVector.Angle + RadiansHelper.DEGREES_90;
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(curve), curve, null);
+            }
+
+            return RadiansHelper.AngleForSide(curveAngle, side);
         }
 
         #region Private methods
@@ -86,29 +130,10 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
             var start = new Point2d(curve.StartPoint.X, curve.StartPoint.Y);
             var offSetVector = start.GetVectorTo(new Point2d(offSet.StartPoint.X, offSet.StartPoint.Y));
 
-            return Math.Abs(curve.AngleFromCurveToOffsetForSide(side) - offSetVector.Angle) < RadiansHelper.ANGLE_TOLERANCE;
+            return Math.Abs(curve.AngleFromCurveToForSide(side) - offSetVector.Angle) < RadiansHelper.ANGLE_TOLERANCE;
         }
 
-        private static double AngleFromCurveToOffsetForSide(this Curve curve, SidesOfCentre side)
-        {
-            double curveAngle;
-            switch (curve)
-            {
-                case Line line:
-                    curveAngle = line.Angle;
-                    break;
-                case Arc arc:
-                    var startPoint = new Point2d(arc.StartPoint.X, arc.StartPoint.Y);
-                    var arcCentre = new Point2d(arc.Center.X, arc.Center.Y);
-                    var startVector = arcCentre.GetVectorTo(startPoint);
-                    curveAngle = arc.Clockwise() ? startVector.Angle - RadiansHelper.DEGREES_90 : startVector.Angle + RadiansHelper.DEGREES_90;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(curve), curve, null);
-            }
 
-            return RadiansHelper.AngleForSide(curveAngle, side);
-        }
         #endregion
     }
 }

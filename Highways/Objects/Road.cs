@@ -18,6 +18,8 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         public Guid Id { get; }
         public string Name { get; set; }
         public RoadCentreLineCollection CentreLines { get; }
+        public bool HasStartJunction { get; private set; }
+        public bool HasEndJunction { get; private set; }
         public double LeftCarriageWay
         {
             get => _leftCarriageWay;
@@ -158,6 +160,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             var startConnected = startCentreLine.ConnectingCentreLine(roadList, true);
             if (startConnected != null)
             {
+                HasStartJunction = true;
                 junctions.Add(new Junction {
                     PrimaryRoad = new JunctionPart { CentreLine = startConnected, Type = JunctionPartTypes.Mid, IntersectionPoint = startCentreLine.StartPoint },
                     SecondaryRoad = new JunctionPart { CentreLine = startCentreLine, Type = JunctionPartTypes.Start, IntersectionPoint = startCentreLine.StartPoint }
@@ -167,6 +170,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             var endConnected = endCentreLine.ConnectingCentreLine(roadList, false);
             if (endConnected != null)
             {
+                HasEndJunction = true;
                 junctions.Add(new Junction {
                     PrimaryRoad = new JunctionPart { CentreLine = endConnected, Type = JunctionPartTypes.Mid, IntersectionPoint = endCentreLine.EndPoint },
                     SecondaryRoad = new JunctionPart { CentreLine = endCentreLine, Type = JunctionPartTypes.End, IntersectionPoint = endCentreLine.EndPoint }
