@@ -7,91 +7,60 @@ using Jpp.Ironstone.Drainage.ObjectModel.Objects;
 namespace Jpp.Ironstone.Drainage.ObjectModel.Managers
 {
     [Serializable]
-    public class DrainageRoutesManager : AbstractNotifiableDrawingObjectManagerManager
+    public class DrainageRoutesManager : AbstractNotifiableDrawingObjectManagerManager<DrainageRoute>
     {
-        public List<DrainageRoute> Routes { get; }
-
-        public DrainageRoutesManager(Document document) : base(document)
-        {
-            Routes = new List<DrainageRoute>();
-        }
-
-        private DrainageRoutesManager() : base()
-        {
-            Routes = new List<DrainageRoute>();
-        }
+        public DrainageRoutesManager(Document document) : base(document) { }
+        private DrainageRoutesManager() : base() { }
 
         public override void UpdateDirty()
         {
             UpdateAll();
+
+            OnPropertyChanged("ManagedObjects");
         }
 
         public override void UpdateAll()
         {
+            base.UpdateAll();
+
             using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                Routes.ForEach(r => r.Generate());
+                ManagedObjects.ForEach(r => r.Generate());
                 acTrans.Commit();
             }
-        }
 
-        public override void Clear()
-        {
-            using (var acTrans = TransactionFactory.CreateFromNew())
-            {
-                Routes.ForEach(r =>
-                {
-                    r.Clear();
-                    Routes.Remove(r);
-                });
-
-                acTrans.Commit();
-            }
-        }
-
-        public override void AllDirty()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void ActivateObjects()
-        {
-            throw new NotImplementedException();
+            OnPropertyChanged("ManagedObjects");
         }
 
         public void BuildNewRoute(double initialInvert, double gradient, List<DrainageVertex> vertices)
         {
             using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                Routes.Add(new DrainageRoute(initialInvert, gradient, vertices));
+                var route = new DrainageRoute(initialInvert, gradient, vertices);
+                route.CreateActiveObject();
+                ManagedObjects.Add(route);
                 acTrans.Commit();
             }
 
             UpdateAll();
-
-            OnPropertyChanged("Routes");
         }
 
-        public void HighlightRoute(DrainageRoute selectedRouteModel)
-        {
-            foreach (var route in Routes)
-            {
-                if (selectedRouteModel != null && route.Equals(selectedRouteModel)) route.Highlight();
-                else route.Unhighlight();
-            }
-        }
-
-        public void RemoveRoute(DrainageRoute selectedRouteModel)
+        public void RemoveRoute(DrainageRoute route)
         {
             using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                selectedRouteModel.Clear();
-                Routes.Remove(selectedRouteModel);
-
+                route.Erase();
                 acTrans.Commit();
             }
+        }
 
-            OnPropertyChanged("Routes");
+        public void HighlightRoute(DrainageRoute route)
+        {
+            foreach (var managedObject in ManagedObjects)
+            {
+                if (route != null && managedObject.Equals(route)) managedObject.Highlight();
+                else managedObject.Unhighlight();
+            }
         }
     }
 }

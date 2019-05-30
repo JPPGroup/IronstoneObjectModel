@@ -4,19 +4,18 @@ using System.Text;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Jpp.Ironstone.Core.Autocad.DrawingObjects;
+using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Drainage.ObjectModel.Factories;
 using Jpp.Ironstone.Drainage.ObjectModel.Helpers;
 
 namespace Jpp.Ironstone.Drainage.ObjectModel.Objects
 {
     [Serializable]
-    public class DrainageRoute
+    public class DrainageRoute : DrawingObject
     {
         private double _cover = Constants.DEFAULT_COVER;
         private double _gradient;
 
-        public long LineObjPtr { get; private set; }
         public List<DrainageVertex> Vertices { get; }
         public double InitialInvert { get; set; }
         public double Cover
@@ -73,65 +72,26 @@ namespace Jpp.Ironstone.Drainage.ObjectModel.Objects
 
         public void Highlight()
         {
-            var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
-            var lineObj = acCurDb.GetObjectId(false, new Handle(LineObjPtr), 0);
-            using (var acTrans =TransactionFactory.CreateFromNew())
+            using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                var line = (Polyline)acTrans.GetObject(lineObj, OpenMode.ForRead);
+                var line = (Polyline)acTrans.GetObject(BaseObject, OpenMode.ForRead);
                 line.Highlight();
             }
         }
 
         public void Unhighlight()
         {
-            var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
-            var lineObj = acCurDb.GetObjectId(false, new Handle(LineObjPtr), 0);
             using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                var line = (Polyline)acTrans.GetObject(lineObj, OpenMode.ForRead);
+                var line = (Polyline)acTrans.GetObject(BaseObject, OpenMode.ForRead);
                 line.Unhighlight();
             }
         }
 
-        public void Generate()
-        {
-            if (LineObjPtr != 0)
-            {
-                var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
-                var lineObj = acCurDb.GetObjectId(false, new Handle(LineObjPtr), 0);
-                if (lineObj.IsValid) CheckLine(lineObj);
-            }
-            
-            Clear();
-
-            GenerateLine();
-            GenerateStartLabel();
-            GenerateCoverLabels();
-        }
-
-        private void CheckLine(ObjectId lineObj)
+        protected override void GenerateBase()
         {
             var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
-            using (var acTrans = acCurDb.TransactionManager.StartTransaction())
-            {
-                var line = (Polyline) acTrans.GetObject(lineObj, OpenMode.ForRead);
-
-                if (line.NumberOfVertices - 1 != Vertices.Count) return;
-
-                for (var i = 0; i < Vertices.Count; i++)
-                {
-                    Vertices[i].StartPoint = line.GetLineSegment2dAt(i).StartPoint;
-                    Vertices[i].EndPoint = line.GetLineSegment2dAt(i).EndPoint;
-                }
-            }
-        }
-
-        private void GenerateLine()
-        {
-            var acDoc = Application.DocumentManager.MdiActiveDocument;
-            var acCurDb = acDoc.Database;
-
-            using (var acTrans = acCurDb.TransactionManager.StartTransaction())
+            using (var acTrans = TransactionFactory.CreateFromNew())
             {
                 var acBlkTbl = acTrans.GetObject(acCurDb.BlockTableId, OpenMode.ForRead) as BlockTable;
                 if (acBlkTbl != null)
@@ -144,7 +104,7 @@ namespace Jpp.Ironstone.Drainage.ObjectModel.Objects
                             acPoly.AddVertexAt(acPoly.NumberOfVertices, Vertices[0].StartPoint, 0, 0, 0);
                             Vertices.ForEach(p => acPoly.AddVertexAt(acPoly.NumberOfVertices, p.EndPoint, 0, 0, 0));
                             acPoly.Layer = Constants.LAYER_DEF_POINTS_NAME;
-                            LineObjPtr = acBlkTblRec.AppendEntity(acPoly).Handle.Value;
+                            BaseObjectPtr = acBlkTblRec.AppendEntity(acPoly).Handle.Value;
                             acTrans.AddNewlyCreatedDBObject(acPoly, true);
                         }
                     }
@@ -154,13 +114,55 @@ namespace Jpp.Ironstone.Drainage.ObjectModel.Objects
             }
         }
 
+        protected override void ObjectModified(object sender, EventArgs e) { }
+        protected override void ObjectErased(object sender, ObjectErasedEventArgs e)
+        {
+            ClearLeaders();
+        }
+
+        public override void Generate()
+        {
+            CheckBasePolyline();
+
+            ClearLeaders();
+
+            GenerateStartLabel();
+            GenerateCoverLabels();
+        }
+
+        public override void Erase()
+        {
+            ClearLeaders();
+
+            var acTrans = TransactionFactory.CreateFromTop();
+            if (!BaseObject.IsErased) acTrans.GetObject(BaseObject, OpenMode.ForWrite, true).Erase();
+            BaseObjectPtr = 0;
+        }
+
+        public override Point3d Location { get; set; }
+        public override double Rotation { get; set; }
+
+        private void CheckBasePolyline()
+        {
+            using (var acTrans = TransactionFactory.CreateFromNew())
+            {
+                var line = (Polyline) acTrans.GetObject(BaseObject, OpenMode.ForRead);
+
+                if (line.NumberOfVertices - 1 != Vertices.Count) return;
+
+                for (var i = 0; i < Vertices.Count; i++)
+                {
+                    Vertices[i].StartPoint = line.GetLineSegment2dAt(i).StartPoint;
+                    Vertices[i].EndPoint = line.GetLineSegment2dAt(i).EndPoint;
+                }
+            }
+        }
+
         private void GenerateCoverLabels()
         {
-            var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
-            using (var acTrans = acCurDb.TransactionManager.StartTransaction())
+            using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                var lineObj = acCurDb.GetObjectId(false, new Handle(LineObjPtr), 0);
-                var polyLine = (Polyline)acTrans.GetObject(lineObj, OpenMode.ForRead);
+                var polyLine = (Polyline)acTrans.GetObject(BaseObject, OpenMode.ForRead);
 
                 var level = InitialInvert;
                 for (var i = 0; i < Vertices.Count; i++)
@@ -222,7 +224,8 @@ namespace Jpp.Ironstone.Drainage.ObjectModel.Objects
                         coverString.Append($"Invert level: {Math.Round(level, 3)} ({pipeDia} {((char)216).ToString()})");
                     }
 
-                    LeaderCollection.Add(LeaderHelper.GenerateLeader(coverString.ToString(), polyLine.GetPoint3dAt(i+1), new Point3d(textPt.X, textPt.Y, 0)));
+                    var leader = LeaderHelper.GenerateLeader(coverString.ToString(), polyLine.GetPoint3dAt(i + 1),new Point3d(textPt.X, textPt.Y, 0));
+                    LeaderCollection.Add(leader);
                 }
 
                 acTrans.Commit();
@@ -231,12 +234,9 @@ namespace Jpp.Ironstone.Drainage.ObjectModel.Objects
 
         private void GenerateStartLabel()
         {
-            var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
-            using (var acTrans = acCurDb.TransactionManager.StartTransaction())
+            using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                var lineObj = acCurDb.GetObjectId(false, new Handle(LineObjPtr), 0);
-                var line = (Polyline)acTrans.GetObject(lineObj, OpenMode.ForRead);
-
+                var line = (Polyline)acTrans.GetObject(BaseObject, OpenMode.ForRead);
                 var initLine = line.GetLineSegment2dAt(0);
 
                 initLine.TransformBy(Matrix2d.Rotation(Math.PI * 1.5, initLine.StartPoint));
@@ -247,31 +247,25 @@ namespace Jpp.Ironstone.Drainage.ObjectModel.Objects
                 initString.Append($"Initial invert level: {InitialInvert}\n");
                 initString.Append($"Gradient: 1:{Gradient}");
 
-                LeaderCollection.Add(LeaderHelper.GenerateLeader(initString.ToString(), line.GetPoint3dAt(0),new Point3d(initPt.X, initPt.Y, 0)));
+                var leader = LeaderHelper.GenerateLeader(initString.ToString(), line.GetPoint3dAt(0), new Point3d(initPt.X, initPt.Y, 0));
+                LeaderCollection.Add(leader);
 
                 acTrans.Commit();
             }
         }
 
-        public void Clear()
+        private void ClearLeaders()
         {
-            var acTrans = TransactionFactory.CreateFromTop();
-            foreach (ObjectId obj in LeaderCollection.Collection)
+            using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                if (!obj.IsErased)
+                foreach (ObjectId obj in LeaderCollection.Collection)
                 {
-                    acTrans.GetObject(obj, OpenMode.ForWrite, true).Erase();
+                    if (!obj.IsErased) acTrans.GetObject(obj, OpenMode.ForWrite, true).Erase();
                 }
+                LeaderCollection.Clear();
+
+                acTrans.Commit();
             }
-            LeaderCollection.Clear();
-
-            if (LineObjPtr == 0) return;
-            var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
-            var lineObj = acCurDb.GetObjectId(false, new Handle(LineObjPtr), 0);
-            if (!lineObj.IsValid) return;
-
-            if (!lineObj.IsErased) acTrans.GetObject(lineObj, OpenMode.ForWrite, true).Erase();
-            LineObjPtr = 0;
         }
 
         private static double GetPolylineShape(LineSegment3d l1, LineSegment3d l2, Vector3d normal)

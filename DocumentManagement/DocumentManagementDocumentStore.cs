@@ -1,23 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autodesk.AutoCAD.ApplicationServices;
 using Jpp.Ironstone.Core.Autocad;
+using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.jHub;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 {
     public class DocumentManagementDocumentStore : DocumentStore
     {
-        private string ProjectFileLocation;
+        private string _projectFileLocation;
 
-        public ProjectContainer container { get; private set; }
+        public ProjectContainer Container { get; private set; }
 
         public LayoutSheetController LayoutSheetController { get; private set; }
 
-        public DocumentManagementDocumentStore(Document doc, Type[] ManagerTypes) : base(doc, ManagerTypes)
+        public DocumentManagementDocumentStore(Document doc, Type[] managerTypes, ILogger log) : base(doc, managerTypes, log)
         {
         }
 

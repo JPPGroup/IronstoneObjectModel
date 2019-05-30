@@ -1,87 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
-using Jpp.Ironstone.Core.Autocad.DrawingObjects;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 {
     //TODO: Review class
-    public class TreeRingManager : AbstractDrawingObjectManager
+    public class TreeRingManager : AbstractDrawingObjectManager<NHBCTree>
     {
-        public List<NHBCTree> Trees { get; set; }
-
         public PersistentObjectIdCollection RingsCollection { get; set; }
 
         public TreeRingManager(Document document) : base(document)
         {
-            Trees = new List<NHBCTree>();
             RingsCollection = new PersistentObjectIdCollection();
         }
 
         public TreeRingManager() : base()
         {
-            Trees = new List<NHBCTree>();
             RingsCollection = new PersistentObjectIdCollection();
         }
 
         public override void UpdateDirty()
         {
             //TODO: Optimise
-            RemoveErased();
+            base.UpdateDirty();
             UpdateAll();
         }
 
         public override void UpdateAll()
         {
-            RemoveErased();
+            base.UpdateAll();
             GenerateRings();
-        }
-
-        public override void Clear()
-        {
-            throw new NotImplementedException();
         }
 
         public void AddTree(NHBCTree tree)
         {
-            Trees.Add(tree);
+            ManagedObjects.Add(tree);
             tree.DirtyAdded = true;
             //TODO: Move into base
             //DrawingObjectManagerCollection.Current.FlagDirty();
-        }
-
-        public override void ActivateObjects()
-        {
-            // Get the current document and database
-            Database acCurDb = HostDocument.Database;
-
-            using (Transaction acTrans = acCurDb.TransactionManager.StartTransaction())
-            {
-                foreach (NHBCTree nhbcTree in Trees)
-                {
-                    nhbcTree.CreateActiveObject();
-                }
-            }
-        }
-
-        private void RemoveErased()
-        {
-            for (int i = Trees.Count - 1; i >= 0; i--)
-            {
-                if (Trees[i].DirtyRemoved)
-                {
-                    Trees.RemoveAt(i);
-                }
-            }
         }
 
         private void GenerateRings()
@@ -155,7 +116,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 DBObjectCollection heaveRings = new DBObjectCollection();
 
                 //Generate the rings for each tree
-                foreach (NHBCTree tree in Trees)
+                foreach (NHBCTree tree in ManagedObjects)
                 {
                     DBObjectCollection collection = tree.DrawRings(sp.SoilShrinkability, StartDepth, sp.TargetStepSize);
                     Circle circ = tree.DrawRing(2.5f);
@@ -353,14 +314,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 
                 RingsCollection.Add(acBlkTblRec.AppendEntity(enclosed));
                 acTrans.AddNewlyCreatedDBObject(enclosed, true);
-            }
-        }
-
-        public override void AllDirty()
-        {
-            foreach (NHBCTree tree in Trees)
-            {
-                tree.DirtyModified = true;
             }
         }
     }
