@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Jpp.Ironstone.Core.Autocad.DrawingObjects.Primitives;
+using Jpp.Ironstone.Core.Autocad;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
@@ -52,6 +52,11 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
         public override void Generate()
         {
 
+        }
+
+        public override void Erase()
+        {
+            throw new NotImplementedException();
         }
 
         protected override void GenerateBase()

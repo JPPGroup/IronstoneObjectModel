@@ -6,7 +6,7 @@ using Jpp.Ironstone.Core.Autocad;
 namespace Jpp.Ironstone.Drainage.ObjectModel
 {
     //MOVE: To Core...
-    public abstract class AbstractNotifiableDrawingObjectManagerManager : AbstractDrawingObjectManager, INotifyPropertyChanged
+    public abstract class AbstractNotifiableDrawingObjectManagerManager<T> : AbstractDrawingObjectManager<T>, INotifyPropertyChanged where T : DrawingObject
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -19,9 +19,9 @@ namespace Jpp.Ironstone.Drainage.ObjectModel
             handler?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        protected bool SetField<T>(ref T field, T value, string propertyName)
+        protected bool SetField<TF>(ref TF field, TF value, string propertyName)
         {
-            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            if (EqualityComparer<TF>.Default.Equals(field, value)) return false;
             field = value;
             OnPropertyChanged(propertyName);
             return true;

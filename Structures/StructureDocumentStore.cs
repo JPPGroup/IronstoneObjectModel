@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Jpp.Ironstone.Core.Autocad;
+using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel.TreeRings;
 
 namespace Jpp.Ironstone.Structures.ObjectModel
@@ -15,9 +12,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel
     {
         public SoilProperties SoilProperties { get; set; }
 
-        public StructureDocumentStore(Document doc, Type[] ManagerTypes) : base(doc, ManagerTypes)
-        {
-        }
+        public StructureDocumentStore(Document doc, Type[] managerTypes, ILogger log) : base(doc, managerTypes, log) { }
 
         protected override void Save()
         {

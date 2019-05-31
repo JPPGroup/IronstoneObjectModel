@@ -37,6 +37,11 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             CarriageWayRight.Create(this);
         }
 
+        public override void Erase()
+        {
+            throw new NotImplementedException();
+        }
+
         public void Reset()
         {
             CarriageWayLeft.Clear();
