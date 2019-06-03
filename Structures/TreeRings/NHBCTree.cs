@@ -133,7 +133,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             acBlkTblRec = acTrans.GetObject(acBlkTbl[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
 
             bool next = true;
-            float currentDepth = StartDepth;
+            double currentDepth = StartDepth;
             _shrinkage = shrinkage;
 
             while (next)
@@ -154,9 +154,9 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             return collection;
         }
 
-        public Circle DrawRing(float depth)
+        public Circle DrawRing(double depth)
         {
-            float radius = GetRingRadius(depth);
+            double radius = GetRingRadius(depth);
 
             if (radius > 0)
             {
@@ -375,11 +375,15 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             return 0f;
         }
 
-        private float GetRingRadius(float foundationDepth)
+        private double GetRingRadius(double foundationDepth)
         {
-            float dh = M() * foundationDepth + C();
+            double dh = M() * foundationDepth + C();
 
-            return dh * Height;
+            double actualRadius = dh * Height;
+
+            double roundedRadius = Math.Ceiling(actualRadius * 100) / 100;
+
+            return roundedRadius;
         }
 
         protected override void ObjectModified(object sender, EventArgs e)
