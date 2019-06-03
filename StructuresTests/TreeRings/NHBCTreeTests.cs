@@ -37,8 +37,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 
         public double ConfirmRingRadiusResident(RingTestData rtd)
         {
-            Debugger.Launch();
-
             Document acDoc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
             Database acCurDb = acDoc.Database;
 
@@ -52,7 +50,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                 newTree.Location = new Autodesk.AutoCAD.Geometry.Point3d(0, 0, 0);
 
                 bool found = false;
-                float startDepth = 0;
+                double startDepth = 0;
 
                 if (NHBCTree.DeciduousHigh.ContainsKey(rtd.Tree))
                 {
@@ -60,7 +58,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                     newTree.TreeType = TreeType.Deciduous;
                     newTree.WaterDemand = WaterDemand.High;
                     found = true;
-                    startDepth = 1f;
+                    startDepth = 1;
                 }
 
                 if (NHBCTree.DeciduousMedium.ContainsKey(rtd.Tree))
@@ -69,7 +67,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                     newTree.TreeType = TreeType.Deciduous;
                     newTree.WaterDemand = WaterDemand.Medium;
                     found = true;
-                    startDepth = 0.9f;
+                    startDepth = 0.9;
                 }
 
                 if (NHBCTree.DeciduousLow.ContainsKey(rtd.Tree))
@@ -78,7 +76,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                     newTree.TreeType = TreeType.Deciduous;
                     newTree.WaterDemand = WaterDemand.Low;
                     found = true;
-                    startDepth = 0.75f;
+                    startDepth = 0.75;
                 }
 
                 if (NHBCTree.ConiferousHigh.ContainsKey(rtd.Tree))
@@ -87,7 +85,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                     newTree.TreeType = TreeType.Coniferous;
                     newTree.WaterDemand = WaterDemand.High;
                     found = true;
-                    startDepth = 1f;
+                    startDepth = 1;
                 }
 
                 if (NHBCTree.ConiferousMedium.ContainsKey(rtd.Tree))
@@ -96,7 +94,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                     newTree.TreeType = TreeType.Coniferous;
                     newTree.WaterDemand = WaterDemand.Medium;
                     found = true;
-                    startDepth = 0.9f;
+                    startDepth = 0.9;
                 }
 
                 if (!found)

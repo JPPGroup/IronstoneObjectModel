@@ -114,7 +114,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
              acTrans.AddNewlyCreatedDBObject(text, true);
         }
 
-        public DBObjectCollection DrawRings(Shrinkage shrinkage, float StartDepth, float Step)
+        public DBObjectCollection DrawRings(Shrinkage shrinkage, double StartDepth, float Step)
         {
             DBObjectCollection collection = new DBObjectCollection();
 
