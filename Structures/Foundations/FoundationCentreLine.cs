@@ -109,8 +109,13 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
                 nodes.Add(Node2);
             }
 
-            double startAngle = Math.Atan((EndPoint.X - StartPoint.X) / (EndPoint.Y - StartPoint.X)) * 180 / Math.PI;
-            double endAngle = Math.Atan((StartPoint.X - EndPoint.X) / (StartPoint.Y - EndPoint.X)) * 180 / Math.PI;
+            /*double startAngle = Math.Atan((EndPoint.X - StartPoint.X) / (EndPoint.Y - StartPoint.Y)) * 180 / Math.PI;
+            double endAngle = Math.Atan((StartPoint.X - EndPoint.X) / (StartPoint.Y - EndPoint.Y)) * 180 / Math.PI;*/
+
+            Vector3d startVector = StartPoint.GetVectorTo(EndPoint);
+            double startAngle = startVector.GetAngleTo(Vector3d.YAxis, Vector3d.ZAxis) * 180 / Math.PI;
+            Vector3d endVector = EndPoint.GetVectorTo(StartPoint);
+            double endAngle = endVector.GetAngleTo(Vector3d.YAxis, Vector3d.ZAxis) * 180 / Math.PI;
 
             Node1.AddFoundation(this, startAngle);
             Node2.AddFoundation(this, endAngle);

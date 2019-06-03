@@ -42,64 +42,68 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
 
         public void TrimFoundations()
         {
-            IOrderedEnumerable<FoundationConnection> sortedConnections = _connected.OrderBy(fc => fc.Bearing);
-            for (int i = 0; i < sortedConnections.Count(); i++)
-            {
-                FoundationCentreLine currentCentreLine = sortedConnections.ElementAt(i).Foundation;
-                ConnectionPoint cp = sortedConnections.ElementAt(i).ConnectionPoint;
-
-                FoundationConnection nextConnection = Next(i, sortedConnections);
-                FoundationCentreLine nextCentreLine = nextConnection.Foundation;
-                FoundationConnection previouConnection = Previous(i, sortedConnections);
-                FoundationCentreLine previousCentreLine = previouConnection.Foundation;
-
-                Curve nextSubject, previousSubject;
-                switch (cp)
+            if(_connected.Count > 1)
+            { 
+            var sortedConnections = _connected.OrderBy(fc => fc.Bearing).ToArray();
+                for (int i = 0; i < sortedConnections.Count(); i++)
                 {
-                    case ConnectionPoint.Start:
-                        nextSubject = currentCentreLine.RightOffset as Curve;
-                        previousSubject = currentCentreLine.LeftOffset as Curve;
-                        break;
+                    FoundationCentreLine currentCentreLine = sortedConnections.ElementAt(i).Foundation;
+                    ConnectionPoint cp = sortedConnections.ElementAt(i).ConnectionPoint;
 
-                    case ConnectionPoint.End:
-                        nextSubject = currentCentreLine.LeftOffset as Curve;
-                        previousSubject = currentCentreLine.RightOffset as Curve;
-                        break;
+                    FoundationConnection nextConnection = Next(i, sortedConnections);
+                    FoundationCentreLine nextCentreLine = nextConnection.Foundation;
+                    FoundationConnection previouConnection = Previous(i, sortedConnections);
+                    FoundationCentreLine previousCentreLine = previouConnection.Foundation;
 
-                    default:
-                        throw new ArgumentOutOfRangeException();
+                    Curve nextSubject, previousSubject;
+                    switch (cp)
+                    {
+                        case ConnectionPoint.Start:
+                            nextSubject = currentCentreLine.RightOffset as Curve;
+                            previousSubject = currentCentreLine.LeftOffset as Curve;
+                            break;
+
+                        case ConnectionPoint.End:
+                            nextSubject = currentCentreLine.LeftOffset as Curve;
+                            previousSubject = currentCentreLine.RightOffset as Curve;
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    Curve nextTarget, previousTarget;
+                    switch (nextConnection.ConnectionPoint)
+                    {
+                        case ConnectionPoint.Start:
+                            nextTarget = nextCentreLine.LeftOffset as Curve;
+                            break;
+
+                        case ConnectionPoint.End:
+                            nextTarget = nextCentreLine.RightOffset as Curve;
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    switch (previouConnection.ConnectionPoint)
+                    {
+                        case ConnectionPoint.Start:
+                            previousTarget = previousCentreLine.RightOffset as Curve;
+                            break;
+
+                        case ConnectionPoint.End:
+                            previousTarget = previousCentreLine.LeftOffset as Curve;
+                            break;
+
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+
+                    TrimToIntersect(nextSubject, nextTarget, cp);
+                    TrimToIntersect(previousSubject, previousTarget, cp);
                 }
-
-                Curve nextTarget, previousTarget;
-                switch (nextConnection.ConnectionPoint)
-                {
-                    case ConnectionPoint.Start:
-                        nextTarget = nextCentreLine.LeftOffset as Curve;
-                        break;
-
-                    case ConnectionPoint.End:
-                        nextTarget = nextCentreLine.RightOffset as Curve;
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-                switch (previouConnection.ConnectionPoint)
-                {
-                    case ConnectionPoint.Start:
-                        previousTarget = previousCentreLine.RightOffset as Curve;
-                        break;
-
-                    case ConnectionPoint.End:
-                        previousTarget = previousCentreLine.LeftOffset as Curve;
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-
-                TrimToIntersect(nextSubject, nextTarget, cp);
-                TrimToIntersect(previousSubject, previousTarget, cp);
             }
         }
 
@@ -156,7 +160,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
             }
         }
 
-        private FoundationConnection Next(int i, IOrderedEnumerable<FoundationConnection> list)
+        private FoundationConnection Next(int i, IEnumerable<FoundationConnection> list)
         {
             if (i + 1 < list.Count())
             {
@@ -168,7 +172,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
             }
         }
 
-        private FoundationConnection Previous(int i, IOrderedEnumerable<FoundationConnection> list)
+        private FoundationConnection Previous(int i, IEnumerable<FoundationConnection> list)
         {
             if (i - 1 >= 0)
             {

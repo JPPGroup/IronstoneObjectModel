@@ -176,6 +176,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
         {
             Guid id = Guid.NewGuid();
             //TODO: Add optimisation partition code here
+            _partitionIds.Clear();
             _partitionIds.Add(id);
 
             foreach(FoundationCentreLine fcl in Foundations)
@@ -197,10 +198,11 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
             foreach (FoundationCentreLine fcl in updateSet)
             {
                 fcl.Generate();
-                if (fcl.LeftOffset == null || fcl.RightOffset == null)
+                //Removed as should never be triggere
+                /*if (fcl.LeftOffset == null || fcl.RightOffset == null)
                 {
                     fcl.Generate();
-                }
+                }*/
             }
 
             IEnumerable<FoundationNode> nodeUpdateSet =
