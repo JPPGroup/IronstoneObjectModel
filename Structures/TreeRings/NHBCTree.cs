@@ -114,7 +114,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
              acTrans.AddNewlyCreatedDBObject(text, true);
         }
 
-        public DBObjectCollection DrawRings(Shrinkage shrinkage, float StartDepth, float Step)
+        public DBObjectCollection DrawRings(Shrinkage shrinkage, double StartDepth, double Step)
         {
             DBObjectCollection collection = new DBObjectCollection();
 
@@ -133,7 +133,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             acBlkTblRec = acTrans.GetObject(acBlkTbl[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
 
             bool next = true;
-            float currentDepth = StartDepth;
+            double currentDepth = StartDepth;
             _shrinkage = shrinkage;
 
             while (next)
@@ -154,9 +154,9 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             return collection;
         }
 
-        public Circle DrawRing(float depth)
+        public Circle DrawRing(double depth)
         {
-            float radius = GetRingRadius(depth);
+            double radius = GetRingRadius(depth);
 
             if (radius > 0)
             {
@@ -171,7 +171,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             }
         }
 
-        private float M()
+        private double M()
         {
             switch (TreeType)
             {
@@ -182,10 +182,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             switch (WaterDemand)
                             {
                                 case WaterDemand.High:
-                                    return -0.25f;
+                                    return -0.25;
 
                                 case WaterDemand.Medium:
-                                    return -0.25f;
+                                    return -0.25;
 
                                 case WaterDemand.Low:
                                     throw new NotImplementedException();
@@ -196,10 +196,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             switch (WaterDemand)
                             {
                                 case WaterDemand.High:
-                                    return -0.2869f;
+                                    return -0.2869;
 
                                 case WaterDemand.Medium:
-                                    return -0.3107f;
+                                    return -0.3107;
 
                                 case WaterDemand.Low:
                                     throw new NotImplementedException();
@@ -210,10 +210,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             switch (WaterDemand)
                             {
                                 case WaterDemand.High:
-                                    return -0.3432f;
+                                    return -0.3432;
 
                                 case WaterDemand.Medium:
-                                    return -0.4127f;
+                                    return -0.4127;
 
                                 case WaterDemand.Low:
                                     throw new NotImplementedException();
@@ -229,13 +229,13 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             switch (WaterDemand)
                             {
                                 case WaterDemand.High:
-                                    return -0.5f;
+                                    return -0.5;
 
                                 case WaterDemand.Medium:
-                                    return -0.542f;
+                                    return -0.542;
 
                                 case WaterDemand.Low:
-                                    return -0.625f;
+                                    return -0.625;
                             }
                             break;
 
@@ -243,13 +243,13 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             switch (WaterDemand)
                             {
                                 case WaterDemand.High:
-                                    return -0.5907f;
+                                    return -0.5907;
 
                                 case WaterDemand.Medium:
-                                    return -0.6837f;
+                                    return -0.6837;
 
                                 case WaterDemand.Low:
-                                    return -0.8333f;
+                                    return -0.8333;
                             }
                             break;
 
@@ -257,23 +257,23 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             switch (WaterDemand)
                             {
                                 case WaterDemand.High:
-                                    return -0.7204f;
+                                    return -0.7204;
 
                                 case WaterDemand.Medium:
-                                    return -0.8625f;
+                                    return -0.8625;
 
                                 case WaterDemand.Low:
-                                    return -1.1111f;
+                                    return -1.1111;
                             }
                             break;
                     }
                     break;
             }
 
-            return 0f;
+            return 0;
         }
 
-        private float C()
+        private double C()
         {
             switch (TreeType)
             {
@@ -284,10 +284,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             switch (WaterDemand)
                             {
                                 case WaterDemand.High:
-                                    return 0.85f;
+                                    return 0.85;
 
                                 case WaterDemand.Medium:
-                                    return 0.6f;
+                                    return 0.6;
 
                                 case WaterDemand.Low:
                                     throw new NotImplementedException();
@@ -298,10 +298,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             switch (WaterDemand)
                             {
                                 case WaterDemand.High:
-                                    return 0.8586f;
+                                    return 0.8586;
 
                                 case WaterDemand.Medium:
-                                    return 0.6401f;
+                                    return 0.6401;
 
                                 case WaterDemand.Low:
                                     throw new NotImplementedException();
@@ -312,10 +312,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             switch (WaterDemand)
                             {
                                 case WaterDemand.High:
-                                    return 0.8601f;
+                                    return 0.8601;
 
                                 case WaterDemand.Medium:
-                                    return 0.6608f;
+                                    return 0.6608;
 
                                 case WaterDemand.Low:
                                     throw new NotImplementedException();
@@ -331,13 +331,13 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             switch (WaterDemand)
                             {
                                 case WaterDemand.High:
-                                    return 1.75f;
+                                    return 1.75;
 
                                 case WaterDemand.Medium:
-                                    return 1.29f;
+                                    return 1.29;
 
                                 case WaterDemand.Low:
-                                    return 1.125f;
+                                    return 1.125;
                             }
                             break;
 
@@ -345,13 +345,13 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             switch (WaterDemand)
                             {
                                 case WaterDemand.High:
-                                    return 1.7783f;
+                                    return 1.7783;
 
                                 case WaterDemand.Medium:
-                                    return 1.3643f;
+                                    return 1.3643;
 
                                 case WaterDemand.Low:
-                                    return 1.25f;
+                                    return 1.25;
                             }
                             break;
 
@@ -359,27 +359,31 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             switch (WaterDemand)
                             {
                                 case WaterDemand.High:
-                                    return 1.7912f;
+                                    return 1.7912;
 
                                 case WaterDemand.Medium:
-                                    return 1.4109f;
+                                    return 1.4109;
 
                                 case WaterDemand.Low:
-                                    return 1.3333f;
+                                    return 1.3333;
                             }
                             break;
                     }
                     break;
             }
 
-            return 0f;
+            return 0;
         }
 
-        private float GetRingRadius(float foundationDepth)
+        private double GetRingRadius(double foundationDepth)
         {
-            float dh = M() * foundationDepth + C();
+            double dh = M() * foundationDepth + C();
 
-            return dh * Height;
+            double actualRadius = dh * Height;
+
+            double roundedRadius = Math.Ceiling(actualRadius * 100) / 100;
+
+            return roundedRadius;
         }
 
         protected override void ObjectModified(object sender, EventArgs e)
