@@ -32,7 +32,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 
             double calculated = RunTest<double>(nameof(ConfirmRingRadiusResident), rtd);
 
-            Assert.AreEqual(rtd.ExpectedRadius, calculated, 0.001d);
+            Assert.AreEqual(rtd.ExpectedRadius, calculated, 0);
         }
 
         public double ConfirmRingRadiusResident(RingTestData rtd)
@@ -42,8 +42,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 
             using (Transaction acTrans = acDoc.TransactionManager.StartTransaction())
             {
-                /*TreeRingManager treeRingManager = DataService.Current.GetStore<StructureDocumentStore>(acDoc.Name)
-                    .GetManager<TreeRingManager>();*/
                 NHBCTree newTree = new NHBCTree();
                 newTree.Phase = Phase.Existing;
                 newTree.Species = rtd.Tree;
@@ -100,7 +98,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                 if (!found)
                     return -1;
 
-                var rings = newTree.DrawRings(Shrinkage.High, startDepth, 0.3f);
+                var rings = newTree.DrawRings(Shrinkage.High, startDepth, 0.3);
                 Circle c = rings[rtd.ExpectedIndex] as Circle;
                 
                 return c.Radius;
