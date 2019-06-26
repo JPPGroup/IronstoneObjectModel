@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -103,6 +104,53 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                 
                 return c.Radius;
             }
+        }
+
+        [TestCaseSource(typeof(KeywordsArrayTestDataSource))]
+        public void VerifyTreeKeywords(string[] keywords)
+        {
+            var result = RunTest<bool>(nameof(VerifyKeywordsResident), keywords);
+            Assert.IsTrue(result);
+        }
+
+        public bool VerifyKeywordsResident(string[] words)
+        {
+            var listUppers = new List<string>();
+            foreach (var word in words)
+            {
+                var ch = word.First(char.IsUpper);
+                if (ch == 0) continue;
+
+                var uppers = string.Concat(ch);
+                var idx = word.IndexOf(ch);
+                for (var i = idx + 1; i < word.Length; i++)
+                {
+                    if (!char.IsUpper(word[i])) break;
+                    uppers = string.Concat(uppers, word[i]);
+                }
+
+                if (listUppers.Contains(uppers)) return false;
+
+                listUppers.Add(uppers);
+
+            }
+
+            return listUppers.Count == words.Length;
+        }
+    }
+
+    public class KeywordsArrayTestDataSource : IEnumerable
+    {
+        public IEnumerator GetEnumerator()
+        {
+            yield return NHBCTree.ConiferousMedium.Keys.ToArray();
+            yield return NHBCTree.ConiferousHigh.Keys.ToArray();
+            yield return NHBCTree.DeciduousLow.Keys.ToArray();
+            yield return NHBCTree.DeciduousMedium.Keys.ToArray();
+            yield return NHBCTree.DeciduousHigh.Keys.ToArray();
+            yield return Enum.GetNames(typeof(WaterDemand)).ToArray();
+            yield return Enum.GetNames(typeof(TreeType)).ToArray();
+            yield return Enum.GetNames(typeof(Phase)).ToArray();
         }
     }
 

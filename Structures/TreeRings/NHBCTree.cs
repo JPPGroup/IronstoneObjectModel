@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -11,6 +12,7 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 {
+    [XmlInclude(typeof(NhbcHedgeRow))]
     public class NHBCTree : CircleDrawingObject
     {
         public string ID
@@ -39,9 +41,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
         public TreeType TreeType { get; set; }
 
         public Phase Phase { get; set; }
-
-        Shrinkage _shrinkage;
-
+        
         //private TextObject Label;
 
         public NHBCTree() : base()
@@ -82,8 +82,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             // Add the new object to the block table record and the transaction
             this.BaseObject = acBlkTblRec.AppendEntity(trunk);
             acTrans.AddNewlyCreatedDBObject(trunk, true);
-
-
         }
 
         public void AddLabel()
@@ -103,10 +101,12 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             acBlkTblRec = acTrans.GetObject(acBlkTbl[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
 
             //Draw label
-            MText text = new MText();
-            text.Height = 2;
-            text.Location = this.Location;
-            text.Contents = $"No. {ID}\\P{Species}\\P{Height}m";
+            MText text = new MText
+            {
+                Height = 2, 
+                Location = Location, 
+                Contents = $"No. {ID}\\P{Species}\\P{Height}m"
+            };
 
             /*Label = new TextObject();
             Label.BaseObject = acBlkTblRec.AppendEntity(text);*/
@@ -114,31 +114,16 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
              acTrans.AddNewlyCreatedDBObject(text, true);
         }
 
-        public DBObjectCollection DrawRings(Shrinkage shrinkage, double StartDepth, double Step)
+        public virtual DBObjectCollection DrawRings(Shrinkage shrinkage, double StartDepth, double Step)
         {
             DBObjectCollection collection = new DBObjectCollection();
 
-            // Get the current document and database
-            Document acDoc = Application.DocumentManager.MdiActiveDocument;
-            Database acCurDb = acDoc.Database;
-
-            Transaction acTrans = acCurDb.TransactionManager.TopTransaction;
-
-            // Open the Block table for read
-            BlockTable acBlkTbl;
-            acBlkTbl = acTrans.GetObject(acCurDb.BlockTableId, OpenMode.ForRead) as BlockTable;
-
-            // Open the Block table record Model space for write
-            BlockTableRecord acBlkTblRec;
-            acBlkTblRec = acTrans.GetObject(acBlkTbl[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
-
             bool next = true;
             double currentDepth = StartDepth;
-            _shrinkage = shrinkage;
 
             while (next)
             {
-                Circle acCirc = DrawRing(currentDepth);
+                Circle acCirc = DrawShape(currentDepth, shrinkage) as Circle;
                 if (acCirc != null)
                 {
                     collection.Add(acCirc);
@@ -154,32 +139,32 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             return collection;
         }
 
-        public Circle DrawRing(double depth)
+        public virtual Curve DrawShape(double depth, Shrinkage shrinkage)
         {
-            double radius = GetRingRadius(depth);
-
-            if (radius > 0)
-            {
-                Circle acCirc = new Circle();
-                acCirc.Center = new Point3d(Location.X, Location.Y, 0);
-                acCirc.Radius = radius;
-                return acCirc;
-            }
-            else
-            {
-                return null;
-            }
+            return DrawRing(depth, shrinkage, Location);
         }
 
-        private double M()
+        protected Circle DrawRing(double depth, Shrinkage shrinkage, Point3d location)
         {
-            switch (TreeType)
+            var radius = GetRingRadius(depth, shrinkage);
+
+            if (radius <= 0) return null;
+
+            return new Circle
+            {
+                Center = new Point3d(location.X, location.Y, 0), 
+                Radius = radius
+            };
+        }
+        public static double M(TreeType type, Shrinkage shrinkage, WaterDemand waterDemand)
+        {
+            switch (type)
             {
                 case TreeType.Coniferous:
-                    switch (_shrinkage)
+                    switch (shrinkage)
                     {
                         case Shrinkage.High:
-                            switch (WaterDemand)
+                            switch (waterDemand)
                             {
                                 case WaterDemand.High:
                                     return -0.25;
@@ -193,7 +178,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Medium:
-                            switch (WaterDemand)
+                            switch (waterDemand)
                             {
                                 case WaterDemand.High:
                                     return -0.2869;
@@ -207,7 +192,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Low:
-                            switch (WaterDemand)
+                            switch (waterDemand)
                             {
                                 case WaterDemand.High:
                                     return -0.3432;
@@ -223,10 +208,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     break;
 
                 case TreeType.Deciduous:
-                    switch (_shrinkage)
+                    switch (shrinkage)
                     {
                         case Shrinkage.High:
-                            switch (WaterDemand)
+                            switch (waterDemand)
                             {
                                 case WaterDemand.High:
                                     return -0.5;
@@ -240,7 +225,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Medium:
-                            switch (WaterDemand)
+                            switch (waterDemand)
                             {
                                 case WaterDemand.High:
                                     return -0.5907;
@@ -254,7 +239,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Low:
-                            switch (WaterDemand)
+                            switch (waterDemand)
                             {
                                 case WaterDemand.High:
                                     return -0.7204;
@@ -273,15 +258,15 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             return 0;
         }
 
-        private double C()
+        public static double C(TreeType type, Shrinkage shrinkage, WaterDemand waterDemand)
         {
-            switch (TreeType)
+            switch (type)
             {
                 case TreeType.Coniferous:
-                    switch (_shrinkage)
+                    switch (shrinkage)
                     {
                         case Shrinkage.High:
-                            switch (WaterDemand)
+                            switch (waterDemand)
                             {
                                 case WaterDemand.High:
                                     return 0.85;
@@ -295,7 +280,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Medium:
-                            switch (WaterDemand)
+                            switch (waterDemand)
                             {
                                 case WaterDemand.High:
                                     return 0.8586;
@@ -309,7 +294,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Low:
-                            switch (WaterDemand)
+                            switch (waterDemand)
                             {
                                 case WaterDemand.High:
                                     return 0.8601;
@@ -325,10 +310,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     break;
 
                 case TreeType.Deciduous:
-                    switch (_shrinkage)
+                    switch (shrinkage)
                     {
                         case Shrinkage.High:
-                            switch (WaterDemand)
+                            switch (waterDemand)
                             {
                                 case WaterDemand.High:
                                     return 1.75;
@@ -342,7 +327,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Medium:
-                            switch (WaterDemand)
+                            switch (waterDemand)
                             {
                                 case WaterDemand.High:
                                     return 1.7783;
@@ -356,7 +341,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Low:
-                            switch (WaterDemand)
+                            switch (waterDemand)
                             {
                                 case WaterDemand.High:
                                     return 1.7912;
@@ -375,12 +360,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             return 0;
         }
 
-        private double GetRingRadius(double foundationDepth)
+        protected double GetRingRadius(double foundationDepth, Shrinkage shrinkage)
         {
-            double dh = M() * foundationDepth + C();
-
+            double dh = M(TreeType, shrinkage, WaterDemand) * foundationDepth + C(TreeType, shrinkage, WaterDemand);
             double actualRadius = dh * Height;
-
             double roundedRadius = Math.Ceiling(actualRadius * 100) / 100;
 
             return roundedRadius;
@@ -402,23 +385,23 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             { "EnglishElm",24 },
             { "WheatleyElm",22 },
             { "WHychElm",18 },
-            { "Eucalyptus",18 },
+            { "EUcalyptus",18 },
             { "Hawthorn",10 },
             { "ENglishOak",20 },
-            { "HolmOak",16 },
+            { "HOlmOak",16 },
             { "RedOak",24 },
             { "TurkeyOak",24 },
-            { "HybridBlackPoplar",28 },
+            { "HYbridBlackPoplar",28 },
             { "LombardyPoplar",25 },
             { "WHItePoplar",15 },
             { "CrackWillow",24 },
             { "WEepingWillow",16 },
-            { "WHIteWillow",24 },
+            { "WHITeWillow",24 },
         };
 
         public static Dictionary<string, int> DeciduousMedium = new Dictionary<string, int>()
         {
-            { "Acacia",18 },
+            { "Acacia",18 }, 
             { "ALder",18 },
             { "APple",10 },
             { "ASh",23 },
@@ -431,17 +414,17 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             { "WildCherry",17 },
             { "HorseChestnut",20 },
             { "SweetChestnut",24 },
-            { "Lime",22 },
-            { "JapaneseMaple",8 },
+            { "LIme",22 },
+            { "JApaneseMaple",8 },
             { "NorwayMaple",18 },
             { "MountainAsh",11 },
             { "Pear",12 },
             { "PLane",26 },
             { "PLUm",10 },
-            { "Sycamore",22 },
+            { "SYcamore",22 },
             { "TreeOfHeaven",20 },
-            { "Walnut",18 },
-            { "WHitebeam",12 },
+            { "WAlnut",18 },
+            { "WHitebeam",12 }
         };
 
         public static Dictionary<string, int> DeciduousLow = new Dictionary<string, int>()
