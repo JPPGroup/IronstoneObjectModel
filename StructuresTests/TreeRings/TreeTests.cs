@@ -16,9 +16,9 @@ using NUnit.Framework;
 namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 {
     [TestFixture]
-    class NHBCTreeTests : IronstoneTestFixture
+    class TreeTests : IronstoneTestFixture
     {
-        public NHBCTreeTests() : base(Assembly.GetExecutingAssembly(), typeof(NHBCTreeTests)) { }
+        public TreeTests() : base(Assembly.GetExecutingAssembly(), typeof(TreeTests)) { }
 
         [TestCase("EnglishElm", 22.8, 2)]
         //TODO: Add more test case for other soil types
@@ -43,7 +43,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 
             using (Transaction acTrans = acDoc.TransactionManager.StartTransaction())
             {
-                NHBCTree newTree = new NHBCTree();
+                Tree newTree = new Tree();
                 newTree.Phase = Phase.Existing;
                 newTree.Species = rtd.Tree;
                 newTree.Location = new Autodesk.AutoCAD.Geometry.Point3d(0, 0, 0);
@@ -51,45 +51,45 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                 bool found = false;
                 double startDepth = 0;
 
-                if (NHBCTree.DeciduousHigh.ContainsKey(rtd.Tree))
+                if (Tree.DeciduousHigh.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = NHBCTree.DeciduousHigh[rtd.Tree];
+                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Deciduous;
                     newTree.WaterDemand = WaterDemand.High;
                     found = true;
                     startDepth = 1;
                 }
 
-                if (NHBCTree.DeciduousMedium.ContainsKey(rtd.Tree))
+                if (Tree.DeciduousMedium.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = NHBCTree.DeciduousHigh[rtd.Tree];
+                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Deciduous;
                     newTree.WaterDemand = WaterDemand.Medium;
                     found = true;
                     startDepth = 0.9;
                 }
 
-                if (NHBCTree.DeciduousLow.ContainsKey(rtd.Tree))
+                if (Tree.DeciduousLow.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = NHBCTree.DeciduousHigh[rtd.Tree];
+                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Deciduous;
                     newTree.WaterDemand = WaterDemand.Low;
                     found = true;
                     startDepth = 0.75;
                 }
 
-                if (NHBCTree.ConiferousHigh.ContainsKey(rtd.Tree))
+                if (Tree.ConiferousHigh.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = NHBCTree.DeciduousHigh[rtd.Tree];
+                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Coniferous;
                     newTree.WaterDemand = WaterDemand.High;
                     found = true;
                     startDepth = 1;
                 }
 
-                if (NHBCTree.ConiferousMedium.ContainsKey(rtd.Tree))
+                if (Tree.ConiferousMedium.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = NHBCTree.DeciduousHigh[rtd.Tree];
+                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Coniferous;
                     newTree.WaterDemand = WaterDemand.Medium;
                     found = true;
@@ -143,11 +143,11 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
     {
         public IEnumerator GetEnumerator()
         {
-            yield return NHBCTree.ConiferousMedium.Keys.ToArray();
-            yield return NHBCTree.ConiferousHigh.Keys.ToArray();
-            yield return NHBCTree.DeciduousLow.Keys.ToArray();
-            yield return NHBCTree.DeciduousMedium.Keys.ToArray();
-            yield return NHBCTree.DeciduousHigh.Keys.ToArray();
+            yield return Tree.ConiferousMedium.Keys.ToArray();
+            yield return Tree.ConiferousHigh.Keys.ToArray();
+            yield return Tree.DeciduousLow.Keys.ToArray();
+            yield return Tree.DeciduousMedium.Keys.ToArray();
+            yield return Tree.DeciduousHigh.Keys.ToArray();
             yield return Enum.GetNames(typeof(WaterDemand)).ToArray();
             yield return Enum.GetNames(typeof(TreeType)).ToArray();
             yield return Enum.GetNames(typeof(Phase)).ToArray();

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -8,7 +9,7 @@ using Jpp.Ironstone.Core.Autocad;
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 {
     //JAb: Need to review - Tree base is circle?!?
-    public class NhbcHedgeRow : NHBCTree
+    public class HedgeRow : Tree
     {
         [XmlIgnore]
         public override Point3d Location
@@ -56,37 +57,70 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             var radius = GetRingRadius(depth, shrinkage);
             if (radius <= 0) return null;
 
-            var plus = c.GetOffsetCurves(radius)[0] as Polyline;
-            var minus = c.GetOffsetCurves(-radius)[0] as Polyline;
+            if (!(c is Polyline) && !(c is Polyline2d) && !(c is Polyline3d)) return null;
 
-            if (plus == null || minus == null) return null;
-
-            if (c is Polyline pLine)
+            Polyline poly = null;
+            switch (c)
             {
-                var vn = pLine.NumberOfVertices - 1;
-                for (var i = vn; i > 0; i--)
-                {
-                    var circle = new Circle { Center = pLine.GetPoint3dAt(i), Radius = radius };
-                    if (DoesIntersect(plus, circle)) plus.FilletAt(i, radius);
-                    if (DoesIntersect(minus, circle)) minus.FilletAt(i, radius);
-                }
+                case Polyline polyline:
+                    poly = polyline;
+                    break;
+                case Polyline2d polyline2d:
+                    poly = new Polyline();
+                    poly.ConvertFrom(polyline2d, false);
+                    break;
+                case Polyline3d polyline3d:
+                    poly = new Polyline();
+                    polyline3d.Flatten();
+
+                    poly.AddVertexAt(0, new Point2d(0, 0), 0, 0, 0);
+                    poly.AddVertexAt(1, polyline3d.StartPoint.Convert2d(plane),0,0,0);
+                    
+                    var objCol = new DBObjectCollection();
+                    polyline3d.Explode(objCol);
+
+                    var entList = new List<Entity>();
+                    foreach (Curve obj in objCol)
+                    {
+
+                        entList.Add(obj);
+                    }
+
+                    poly.JoinEntities(entList.ToArray());
+                    poly.RemoveVertexAt(0);
+                    break;
             }
 
-            var endAngleStart = plus.EndPoint.Convert2d(plane).GetVectorTo(minus.EndPoint.Convert2d(plane));
-            var endAngleEnd = minus.EndPoint.Convert2d(plane).GetVectorTo(plus.EndPoint.Convert2d(plane));
+            if (poly == null) return null;
+            var vn = poly.NumberOfVertices - 1;
 
-            var startAngleStart = plus.StartPoint.Convert2d(plane).GetVectorTo(minus.StartPoint.Convert2d(plane));
-            var startAngleEnd = minus.StartPoint.Convert2d(plane).GetVectorTo(plus.StartPoint.Convert2d(plane));
+            var pOffPlus = poly.GetOffsetCurves(radius)[0] as Polyline;
+            var pOffMinus = poly.GetOffsetCurves(-radius)[0] as Polyline;
+
+            for (var i = vn; i > 0; i--)
+            {
+                var circle = new Circle { Center = poly.GetPoint3dAt(i), Radius = radius };
+                if (DoesIntersect(pOffPlus, circle)) pOffPlus.FilletAt(i, radius);
+                if (DoesIntersect(pOffMinus, circle)) pOffMinus.FilletAt(i, radius);
+            }
+
+            if (pOffMinus == null || pOffPlus == null) return null;
+
+            var endAngleStart = pOffPlus.EndPoint.Convert2d(plane).GetVectorTo(pOffMinus.EndPoint.Convert2d(plane));
+            var endAngleEnd = pOffMinus.EndPoint.Convert2d(plane).GetVectorTo(pOffPlus.EndPoint.Convert2d(plane));
+
+            var startAngleStart = pOffPlus.StartPoint.Convert2d(plane).GetVectorTo(pOffMinus.StartPoint.Convert2d(plane));
+            var startAngleEnd = pOffMinus.StartPoint.Convert2d(plane).GetVectorTo(pOffPlus.StartPoint.Convert2d(plane));
 
             var endCurve = new Arc(c.EndPoint, radius, endAngleEnd.Angle, endAngleStart.Angle);
             var startCurve = new Arc(c.StartPoint, radius, startAngleStart.Angle, startAngleEnd.Angle);
 
-            plus.JoinEntities(new Entity[] { startCurve, endCurve, minus });
-            plus.Closed = true;
+            pOffPlus.JoinEntities(new Entity[] { startCurve, endCurve, pOffMinus });
+            pOffPlus.Closed = true;
 
-            return plus;
+            return pOffPlus;
         }
-
+        
         private static bool DoesIntersect(Entity firstCurve, Entity secondCurve)
         {
             var pts = new Point3dCollection();

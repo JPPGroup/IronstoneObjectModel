@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -10,7 +9,7 @@ using Jpp.Ironstone.Core.ServiceInterfaces;
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 {
     //TODO: Review class
-    public class TreeRingManager : AbstractDrawingObjectManager<NHBCTree>
+    public class TreeRingManager : AbstractDrawingObjectManager<Tree>
     {
         public PersistentObjectIdCollection RingsCollection { get; set; }
 
@@ -37,7 +36,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             GenerateRings();
         }
 
-        public void AddTree(NHBCTree tree)
+        public void AddTree(Tree tree)
         {
             ManagedObjects.Add(tree);
             tree.DirtyAdded = true;
@@ -103,6 +102,12 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     return;
                 }
 
+                if (ManagedObjects.Count == 0)
+                {
+                    acTrans.Commit();
+                    return;
+                }
+
                 //Add the merged ring to the drawing
                 BlockTableRecord acBlkTblRec = HostDocument.Database.GetModelSpace(true);
 
@@ -112,7 +117,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 DBObjectCollection heaveRings = new DBObjectCollection();
 
                 //Generate the rings for each tree
-                foreach (NHBCTree tree in ManagedObjects)
+                foreach (Tree tree in ManagedObjects)
                 {
                     DBObjectCollection collection = tree.DrawRings(sp.SoilShrinkability, StartDepth, sp.TargetStepSize);
                     Curve circ = tree.DrawShape(2.5f, sp.SoilShrinkability);
@@ -241,17 +246,15 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     }
                 }
 
-                if (createdRegions.Any())
+                Region heaveEnclosed = createdRegions[0];
+                for (int i = 1; i < createdRegions.Count; i++)
                 {
-                    Region heaveEnclosed = createdRegions[0];
-                    for (int i = 1; i < createdRegions.Count; i++)
-                    {
-                        heaveEnclosed.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
-                    }
-
-                    RingsCollection.Add(acBlkTblRec.AppendEntity(heaveEnclosed));
-                    acTrans.AddNewlyCreatedDBObject(heaveEnclosed, true);
+                    heaveEnclosed.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
                 }
+
+                RingsCollection.Add(acBlkTblRec.AppendEntity(heaveEnclosed));
+                acTrans.AddNewlyCreatedDBObject(heaveEnclosed, true);
+
 
                 HostDocument.Database.Clayer = currentLayer;
                 acTrans.Commit();

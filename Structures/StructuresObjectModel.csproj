@@ -101,8 +101,8 @@
     <Compile Include="Ground\SoilProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructureDocumentStore.cs" />
-    <Compile Include="TreeRings\NhbcHedgeRow.cs" />
-    <Compile Include="TreeRings\NHBCTree.cs" />
+    <Compile Include="TreeRings\HedgeRow.cs" />
+    <Compile Include="TreeRings\Tree.cs" />
     <Compile Include="TreeRings\TreeRingManager.cs" />
   </ItemGroup>
   <ItemGroup>

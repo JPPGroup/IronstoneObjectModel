@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml.Serialization;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -12,8 +9,8 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 {
-    [XmlInclude(typeof(NhbcHedgeRow))]
-    public class NHBCTree : CircleDrawingObject
+    [XmlInclude(typeof(HedgeRow))]
+    public class Tree : CircleDrawingObject
     {
         public string ID
         {
@@ -44,7 +41,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
         
         //private TextObject Label;
 
-        public NHBCTree() : base()
+        public Tree() : base()
         {
 
         }
@@ -76,9 +73,11 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             acBlkTblRec = acTrans.GetObject(acBlkTbl[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
 
             //Draw Trunk
-            Circle trunk = new Circle();
-            trunk.Center = new Point3d(0, 0, 0);
-            trunk.Radius = 0.25;
+            Circle trunk = new Circle
+            {
+                Center = new Point3d(0, 0, 0), 
+                Radius = 0.25
+            };
             // Add the new object to the block table record and the transaction
             this.BaseObject = acBlkTblRec.AppendEntity(trunk);
             acTrans.AddNewlyCreatedDBObject(trunk, true);
@@ -156,15 +155,16 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 Radius = radius
             };
         }
-        public static double M(TreeType type, Shrinkage shrinkage, WaterDemand waterDemand)
+
+        protected double M(Shrinkage shrinkage)
         {
-            switch (type)
+            switch (TreeType)
             {
                 case TreeType.Coniferous:
                     switch (shrinkage)
                     {
                         case Shrinkage.High:
-                            switch (waterDemand)
+                            switch (WaterDemand)
                             {
                                 case WaterDemand.High:
                                     return -0.25;
@@ -178,7 +178,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Medium:
-                            switch (waterDemand)
+                            switch (WaterDemand)
                             {
                                 case WaterDemand.High:
                                     return -0.2869;
@@ -192,7 +192,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Low:
-                            switch (waterDemand)
+                            switch (WaterDemand)
                             {
                                 case WaterDemand.High:
                                     return -0.3432;
@@ -211,7 +211,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     switch (shrinkage)
                     {
                         case Shrinkage.High:
-                            switch (waterDemand)
+                            switch (WaterDemand)
                             {
                                 case WaterDemand.High:
                                     return -0.5;
@@ -225,7 +225,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Medium:
-                            switch (waterDemand)
+                            switch (WaterDemand)
                             {
                                 case WaterDemand.High:
                                     return -0.5907;
@@ -239,7 +239,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Low:
-                            switch (waterDemand)
+                            switch (WaterDemand)
                             {
                                 case WaterDemand.High:
                                     return -0.7204;
@@ -258,15 +258,15 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             return 0;
         }
 
-        public static double C(TreeType type, Shrinkage shrinkage, WaterDemand waterDemand)
+        protected double C(Shrinkage shrinkage)
         {
-            switch (type)
+            switch (TreeType)
             {
                 case TreeType.Coniferous:
                     switch (shrinkage)
                     {
                         case Shrinkage.High:
-                            switch (waterDemand)
+                            switch (WaterDemand)
                             {
                                 case WaterDemand.High:
                                     return 0.85;
@@ -280,7 +280,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Medium:
-                            switch (waterDemand)
+                            switch (WaterDemand)
                             {
                                 case WaterDemand.High:
                                     return 0.8586;
@@ -294,7 +294,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Low:
-                            switch (waterDemand)
+                            switch (WaterDemand)
                             {
                                 case WaterDemand.High:
                                     return 0.8601;
@@ -313,7 +313,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     switch (shrinkage)
                     {
                         case Shrinkage.High:
-                            switch (waterDemand)
+                            switch (WaterDemand)
                             {
                                 case WaterDemand.High:
                                     return 1.75;
@@ -327,7 +327,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Medium:
-                            switch (waterDemand)
+                            switch (WaterDemand)
                             {
                                 case WaterDemand.High:
                                     return 1.7783;
@@ -341,7 +341,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             break;
 
                         case Shrinkage.Low:
-                            switch (waterDemand)
+                            switch (WaterDemand)
                             {
                                 case WaterDemand.High:
                                     return 1.7912;
@@ -362,7 +362,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 
         protected double GetRingRadius(double foundationDepth, Shrinkage shrinkage)
         {
-            double dh = M(TreeType, shrinkage, WaterDemand) * foundationDepth + C(TreeType, shrinkage, WaterDemand);
+            double dh = M(shrinkage) * foundationDepth + C(shrinkage);
             double actualRadius = dh * Height;
             double roundedRadius = Math.Ceiling(actualRadius * 100) / 100;
 
