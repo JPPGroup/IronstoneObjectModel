@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
@@ -10,7 +9,7 @@ using Jpp.Ironstone.Core.ServiceInterfaces;
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 {
     //TODO: Review class
-    public class TreeRingManager : AbstractDrawingObjectManager<NHBCTree>
+    public class TreeRingManager : AbstractDrawingObjectManager<Tree>
     {
         public PersistentObjectIdCollection RingsCollection { get; set; }
 
@@ -26,7 +25,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 
         public override void UpdateDirty()
         {
-            //TODO: Optimise
+            //TODO: Optimize
             base.UpdateDirty();
             UpdateAll();
         }
@@ -37,7 +36,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             GenerateRings();
         }
 
-        public void AddTree(NHBCTree tree)
+        public void AddTree(Tree tree)
         {
             ManagedObjects.Add(tree);
             tree.DirtyAdded = true;
@@ -76,18 +75,14 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             int maxExistingSteps = 0;
             int maxProposedSteps = 0;
 
-            // Get the current document and database
-            Document acDoc = Application.DocumentManager.MdiActiveDocument;
-            Database acCurDb = acDoc.Database;
-
             //Why openclose??
-            using (Transaction acTrans = acCurDb.TransactionManager.StartTransaction())
+            using (Transaction acTrans = HostDocument.Database.TransactionManager.StartTransaction())
             {
                 //Set required layers
-                acCurDb.RegisterLayer(Constants.EXISTING_TREE_LAYER);
-                acCurDb.RegisterLayer(Constants.PROPOSED_TREE_LAYER);
-                acCurDb.RegisterLayer(Constants.PILED_LAYER);
-                acCurDb.RegisterLayer(Constants.HEAVE_LAYER);
+                HostDocument.Database.RegisterLayer(Constants.EXISTING_TREE_LAYER);
+                HostDocument.Database.RegisterLayer(Constants.PROPOSED_TREE_LAYER);
+                HostDocument.Database.RegisterLayer(Constants.PILED_LAYER);
+                HostDocument.Database.RegisterLayer(Constants.HEAVE_LAYER);
 
                 //Delete existing rings
                 foreach (ObjectId obj in RingsCollection.Collection)
@@ -107,8 +102,14 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     return;
                 }
 
+                if (ManagedObjects.Count == 0)
+                {
+                    acTrans.Commit();
+                    return;
+                }
+
                 //Add the merged ring to the drawing
-                BlockTableRecord acBlkTblRec = HostDocument.Database.GetModelSpace();
+                BlockTableRecord acBlkTblRec = HostDocument.Database.GetModelSpace(true);
 
                 List<DBObjectCollection> existingRings = new List<DBObjectCollection>();
                 List<DBObjectCollection> proposedRings = new List<DBObjectCollection>();
@@ -116,14 +117,14 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 DBObjectCollection heaveRings = new DBObjectCollection();
 
                 //Generate the rings for each tree
-                foreach (NHBCTree tree in ManagedObjects)
+                foreach (Tree tree in ManagedObjects)
                 {
                     DBObjectCollection collection = tree.DrawRings(sp.SoilShrinkability, StartDepth, sp.TargetStepSize);
-                    Circle circ = tree.DrawRing(2.5f);
+                    Curve circ = tree.DrawShape(2.5f, sp.SoilShrinkability);
                     if(circ != null)
                         pillingRings.Add(circ);
 
-                    Circle heaveCirc = tree.DrawRing(1.5f);
+                    Curve heaveCirc = tree.DrawShape(1.5f, sp.SoilShrinkability);
                     if (heaveCirc != null)
                         heaveRings.Add(heaveCirc);
 
@@ -143,21 +144,21 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     }
                 }
 
-                ObjectId currentLayer = acCurDb.Clayer;
+                ObjectId currentLayer = HostDocument.Database.Clayer;
                 for (int ringIndex = 0; ringIndex < maxExistingSteps; ringIndex++)
                 {
-                    acCurDb.Clayer = acCurDb.GetLayer(Constants.EXISTING_TREE_LAYER.LayerId).ObjectId;
+                    HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.EXISTING_TREE_LAYER.LayerId).ObjectId;
                     GenerateRing(existingRings, ringIndex, ringColors, acBlkTblRec, acTrans);
                 }
                 for (int ringIndex = 0; ringIndex < maxProposedSteps; ringIndex++)
                 {
-                    acCurDb.Clayer = acCurDb.GetLayer(Constants.PROPOSED_TREE_LAYER.LayerId).ObjectId;
+                    HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PROPOSED_TREE_LAYER.LayerId).ObjectId;
                     GenerateRing(proposedRings, ringIndex, ringColors, acBlkTblRec, acTrans);
                 }
 
 
                 //Add hatching for piling
-                acCurDb.Clayer = acCurDb.GetLayer(Constants.PILED_LAYER.LayerId).ObjectId;
+                HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PILED_LAYER.LayerId).ObjectId;
                 List<Region> createdRegions = new List<Region>(); 
                 foreach (Curve c in pillingRings)
                 {
@@ -232,7 +233,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 }
 
                 //Add heave line
-                acCurDb.Clayer = acCurDb.GetLayer(Constants.HEAVE_LAYER.LayerId).ObjectId;
+                HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.HEAVE_LAYER.LayerId).ObjectId;
                 createdRegions = new List<Region>();
                 foreach (Curve c in heaveRings)
                 {
@@ -246,7 +247,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 }
 
                 Region heaveEnclosed = createdRegions[0];
-
                 for (int i = 1; i < createdRegions.Count; i++)
                 {
                     heaveEnclosed.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
@@ -255,7 +255,8 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 RingsCollection.Add(acBlkTblRec.AppendEntity(heaveEnclosed));
                 acTrans.AddNewlyCreatedDBObject(heaveEnclosed, true);
 
-                acCurDb.Clayer = currentLayer;
+
+                HostDocument.Database.Clayer = currentLayer;
                 acTrans.Commit();
             }
         }

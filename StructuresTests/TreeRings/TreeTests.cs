@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -15,9 +16,9 @@ using NUnit.Framework;
 namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 {
     [TestFixture]
-    class NHBCTreeTests : IronstoneTestFixture
+    class TreeTests : IronstoneTestFixture
     {
-        public NHBCTreeTests() : base(Assembly.GetExecutingAssembly(), typeof(NHBCTreeTests)) { }
+        public TreeTests() : base(Assembly.GetExecutingAssembly(), typeof(TreeTests)) { }
 
         [TestCase("EnglishElm", 22.8, 2)]
         //TODO: Add more test case for other soil types
@@ -42,7 +43,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 
             using (Transaction acTrans = acDoc.TransactionManager.StartTransaction())
             {
-                NHBCTree newTree = new NHBCTree();
+                Tree newTree = new Tree();
                 newTree.Phase = Phase.Existing;
                 newTree.Species = rtd.Tree;
                 newTree.Location = new Autodesk.AutoCAD.Geometry.Point3d(0, 0, 0);
@@ -50,45 +51,45 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                 bool found = false;
                 double startDepth = 0;
 
-                if (NHBCTree.DeciduousHigh.ContainsKey(rtd.Tree))
+                if (Tree.DeciduousHigh.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = NHBCTree.DeciduousHigh[rtd.Tree];
+                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Deciduous;
                     newTree.WaterDemand = WaterDemand.High;
                     found = true;
                     startDepth = 1;
                 }
 
-                if (NHBCTree.DeciduousMedium.ContainsKey(rtd.Tree))
+                if (Tree.DeciduousMedium.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = NHBCTree.DeciduousHigh[rtd.Tree];
+                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Deciduous;
                     newTree.WaterDemand = WaterDemand.Medium;
                     found = true;
                     startDepth = 0.9;
                 }
 
-                if (NHBCTree.DeciduousLow.ContainsKey(rtd.Tree))
+                if (Tree.DeciduousLow.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = NHBCTree.DeciduousHigh[rtd.Tree];
+                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Deciduous;
                     newTree.WaterDemand = WaterDemand.Low;
                     found = true;
                     startDepth = 0.75;
                 }
 
-                if (NHBCTree.ConiferousHigh.ContainsKey(rtd.Tree))
+                if (Tree.ConiferousHigh.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = NHBCTree.DeciduousHigh[rtd.Tree];
+                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Coniferous;
                     newTree.WaterDemand = WaterDemand.High;
                     found = true;
                     startDepth = 1;
                 }
 
-                if (NHBCTree.ConiferousMedium.ContainsKey(rtd.Tree))
+                if (Tree.ConiferousMedium.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = NHBCTree.DeciduousHigh[rtd.Tree];
+                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Coniferous;
                     newTree.WaterDemand = WaterDemand.Medium;
                     found = true;
@@ -103,6 +104,53 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                 
                 return c.Radius;
             }
+        }
+
+        [TestCaseSource(typeof(KeywordsArrayTestDataSource))]
+        public void VerifyTreeKeywords(string[] keywords)
+        {
+            var result = RunTest<bool>(nameof(VerifyKeywordsResident), keywords);
+            Assert.IsTrue(result);
+        }
+
+        public bool VerifyKeywordsResident(string[] words)
+        {
+            var listUppers = new List<string>();
+            foreach (var word in words)
+            {
+                var ch = word.First(char.IsUpper);
+                if (ch == 0) continue;
+
+                var uppers = string.Concat(ch);
+                var idx = word.IndexOf(ch);
+                for (var i = idx + 1; i < word.Length; i++)
+                {
+                    if (!char.IsUpper(word[i])) break;
+                    uppers = string.Concat(uppers, word[i]);
+                }
+
+                if (listUppers.Contains(uppers)) return false;
+
+                listUppers.Add(uppers);
+
+            }
+
+            return listUppers.Count == words.Length;
+        }
+    }
+
+    public class KeywordsArrayTestDataSource : IEnumerable
+    {
+        public IEnumerator GetEnumerator()
+        {
+            yield return Tree.ConiferousMedium.Keys.ToArray();
+            yield return Tree.ConiferousHigh.Keys.ToArray();
+            yield return Tree.DeciduousLow.Keys.ToArray();
+            yield return Tree.DeciduousMedium.Keys.ToArray();
+            yield return Tree.DeciduousHigh.Keys.ToArray();
+            yield return Enum.GetNames(typeof(WaterDemand)).ToArray();
+            yield return Enum.GetNames(typeof(TreeType)).ToArray();
+            yield return Enum.GetNames(typeof(Phase)).ToArray();
         }
     }
 
