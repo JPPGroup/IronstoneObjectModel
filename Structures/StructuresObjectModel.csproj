@@ -55,8 +55,8 @@
       <HintPath>..\packages\Common.0.1.5\lib\netstandard2.0\Common.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
-    <Reference Include="IronstoneCore, Version=0.1.100.153, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Jpp.Ironstone.Core.0.1.100\lib\net472\IronstoneCore.dll</HintPath>
+    <Reference Include="IronstoneCore, Version=0.1.101.154, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\Jpp.Ironstone.Core.0.1.101\lib\net472\IronstoneCore.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.ApplicationInsights, Version=2.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -101,7 +101,8 @@
     <Compile Include="Ground\SoilProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructureDocumentStore.cs" />
-    <Compile Include="TreeRings\NHBCTree.cs" />
+    <Compile Include="TreeRings\HedgeRow.cs" />
+    <Compile Include="TreeRings\Tree.cs" />
     <Compile Include="TreeRings\TreeRingManager.cs" />
   </ItemGroup>
   <ItemGroup>

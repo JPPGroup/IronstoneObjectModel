@@ -6,14 +6,13 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
-using Jpp.Ironstone.Core.Autocad.DrawingObjects;
 using Jpp.Ironstone.Highways.ObjectModel.Factories;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
 
 namespace Jpp.Ironstone.Highways.ObjectModel
 {
     [Serializable]
-    public class HighwaysManager : AbstractDrawingObjectManager
+    public class HighwaysManager : AbstractDrawingObjectManager<DummyDrawingObject>
     {
         private bool _finalized;
         private bool _cleared;
@@ -237,7 +236,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel
             }            
         }
 
-        public override void Clear()
+        public new void Clear()
         {
             ResetLayout();
 

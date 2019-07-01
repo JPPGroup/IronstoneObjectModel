@@ -13,7 +13,7 @@ using NUnit.Framework;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Tests
 {
-    [TestFixture(@"..\..\..\Drawings\NetworkTests1.dwg", 49, 11, 10, 4, 6 )]
+    [TestFixture(@"..\..\..\Drawings\NetworkTests1.dwg", 49, 11, 10, 4, 6)]
     [TestFixture(@"..\..\..\Drawings\NetworkTests2.dwg", 102, 10, 11, 8, 3)]
     [TestFixture(@"..\..\..\Drawings\NetworkTests3.dwg", 131, 30, 41, 26, 15)] //Layout will fail invalid due to arc radius...
     [TestFixture(@"..\..\..\Drawings\NetworkTests4.dwg", 0, 0, 0, 0, 0)]
@@ -101,7 +101,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
             var acTrans = acCurDb.TransactionManager.StartTransaction();
             try
             {
-                var curves = GetCurvesFromSelection(res.Value);                    
+                var curves = GetCurvesFromSelection(res.Value);
 
                 highway.InitialiseFromCurves(curves);
 
@@ -127,7 +127,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Tests
                 acTrans.Abort();
             }
 
-            return result;         
+            return result;
         }
 
         private static IEnumerable<Curve> GetCurvesFromSelection(IEnumerable acSSet)
