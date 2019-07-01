@@ -56,8 +56,8 @@
     <Reference Include="Common, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Common.0.1.5\lib\netstandard2.0\Common.dll</HintPath>
     </Reference>
-    <Reference Include="IronstoneCore, Version=0.1.101.12, Culture=neutral, processorArchitecture=AMD64">
-      <HintPath>..\packages\Jpp.Ironstone.Core.0.1.101-devf\lib\net472\IronstoneCore.dll</HintPath>
+    <Reference Include="IronstoneCore, Version=0.1.101.154, Culture=neutral, processorArchitecture=AMD64">
+      <HintPath>..\packages\Jpp.Ironstone.Core.0.1.101\lib\net472\IronstoneCore.dll</HintPath>
       <SpecificVersion>False</SpecificVersion>
     </Reference>
     <Reference Include="Microsoft.ApplicationInsights, Version=2.9.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -110,15 +110,15 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="IronstoneConfig.xml" />
-    <Content Include="IronstoneConfigBeta.xml" />
-    <Content Include="IronstoneConfigRelease.xml" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Structures\StructuresObjectModel.csproj">
       <Project>{ada84b10-90ab-4ad2-9f7c-fdfd362ac7ca}</Project>
       <Name>StructuresObjectModel</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="IronstoneConfig.xml" />
+    <Content Include="IronstoneConfigBeta.xml" />
+    <Content Include="IronstoneConfigRelease.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
