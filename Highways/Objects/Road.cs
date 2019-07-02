@@ -18,8 +18,8 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         public Guid Id { get; }
         public string Name { get; set; }
         public RoadCentreLineCollection CentreLines { get; }
-        public bool HasStartJunction { get; private set; }
-        public bool HasEndJunction { get; private set; }
+        public bool HasStartJunction { get; set; }
+        public bool HasEndJunction { get; set; }
         public double LeftCarriageWay
         {
             get => _leftCarriageWay;
