@@ -2,15 +2,14 @@
 using Autodesk.AutoCAD.ApplicationServices;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
-using Jpp.jHub;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 {
     public class DocumentManagementDocumentStore : DocumentStore
     {
-        private string _projectFileLocation;
+        //private string _projectFileLocation;
 
-        public ProjectContainer Container { get; private set; }
+       //public ProjectContainer Container { get; private set; }
 
         public LayoutSheetController LayoutSheetController { get; private set; }
 

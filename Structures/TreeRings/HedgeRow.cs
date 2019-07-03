@@ -92,6 +92,9 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             }
 
             if (poly == null) return null;
+            
+            //IMPORTANT: Flatten polyline, ensure coplanar objects are created for union of regions
+            poly.Flatten();
             var vn = poly.NumberOfVertices - 1;
 
             var pOffPlus = poly.GetOffsetCurves(radius)[0] as Polyline;

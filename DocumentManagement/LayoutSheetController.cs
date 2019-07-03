@@ -1,25 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.ApplicationServices;
+﻿using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Common;
 using Jpp.Ironstone.Core.Autocad;
-using Jpp.jHub;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 {
     public class LayoutSheetController
     {
-        public SerializibleDictionary<string, LayoutSheet> Sheets;
+        public SerializableDictionary<string, LayoutSheet> Sheets;
 
         public LayoutSheetController()
         {
-            Sheets = new SerializibleDictionary<string, LayoutSheet>();
+            Sheets = new SerializableDictionary<string, LayoutSheet>();
         }
 
         public void Scan()
