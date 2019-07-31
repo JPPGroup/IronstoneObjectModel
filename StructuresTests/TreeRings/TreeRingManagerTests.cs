@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -133,6 +134,9 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                     var ds = DataService.Current;
                     ds.InvalidateStoreTypes();
                     var treeRingManager = ds.GetStore<StructureDocumentStore>(acDoc.Name).GetManager<TreeRingManager>();
+                    treeRingManager.ManagedObjects.Clear();
+                    treeRingManager.UpdateAll();
+
                     var count = treeRingManager.ActiveObjects.Count;
 
                     treeRingManager.AddTree(hedge);
