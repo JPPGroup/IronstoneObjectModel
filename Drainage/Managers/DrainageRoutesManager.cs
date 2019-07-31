@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.ApplicationServices;
+using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Drainage.ObjectModel.Factories;
 using Jpp.Ironstone.Drainage.ObjectModel.Objects;
 
@@ -9,14 +10,14 @@ namespace Jpp.Ironstone.Drainage.ObjectModel.Managers
     [Serializable]
     public class DrainageRoutesManager : AbstractNotifiableDrawingObjectManagerManager<DrainageRoute>
     {
-        public DrainageRoutesManager(Document document) : base(document) { }
+        public DrainageRoutesManager(Document document, ILogger log) : base(document, log) { }
         private DrainageRoutesManager() : base() { }
 
         public override void UpdateDirty()
         {
             UpdateAll();
 
-            OnPropertyChanged("ManagedObjects");
+            OnPropertyChanged(nameof(ActiveObjects));
         }
 
         public override void UpdateAll()
@@ -25,11 +26,16 @@ namespace Jpp.Ironstone.Drainage.ObjectModel.Managers
 
             using (var acTrans = TransactionFactory.CreateFromNew())
             {
-                ManagedObjects.ForEach(r => r.Generate());
+
+                foreach (var obj in ActiveObjects)
+                {
+                    obj.Generate();
+                }
+
                 acTrans.Commit();
             }
 
-            OnPropertyChanged("ManagedObjects");
+            OnPropertyChanged(nameof(ActiveObjects));
         }
 
         public void BuildNewRoute(double initialInvert, double gradient, List<DrainageVertex> vertices)
