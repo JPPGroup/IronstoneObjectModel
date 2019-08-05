@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using Autodesk.AutoCAD.ApplicationServices;
 using Jpp.Ironstone.Core.Autocad;
+using Jpp.Ironstone.Core.ServiceInterfaces;
 
 namespace Jpp.Ironstone.Drainage.ObjectModel
 {
@@ -10,7 +11,7 @@ namespace Jpp.Ironstone.Drainage.ObjectModel
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected AbstractNotifiableDrawingObjectManagerManager(Document document) : base(document) { }
+        protected AbstractNotifiableDrawingObjectManagerManager(Document document, ILogger log) : base(document, log) { }
         protected AbstractNotifiableDrawingObjectManagerManager() { }
 
         protected virtual void OnPropertyChanged(string propertyName)

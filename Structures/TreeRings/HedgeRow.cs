@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -47,16 +48,92 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             }
         }
 
+
+        //TODO: Need to review drawing of initial offset...
         public override Curve DrawShape(double depth, Shrinkage shrinkage)
         {
-            var plane = new Plane();
-            var acTrans = Application.DocumentManager.MdiActiveDocument.TransactionManager.TopTransaction;
-            var c = acTrans.GetObject(BaseObject, OpenMode.ForWrite) as Curve;
-            if (c == null) return null;
-
             var radius = GetRingRadius(depth, shrinkage);
             if (radius <= 0) return null;
 
+            var pLine = PolylineFromBase();
+            if (pLine == null) return null;
+
+            var initOffset = MaxInitialOffset(pLine);
+            var initOffPlus = TryOffsetCurve(pLine, initOffset);
+            var initOffMinus = TryOffsetCurve(pLine, -initOffset);
+            
+            var plusVert = new List<int>();
+            var minusVert = new List<int>();
+
+            for (var i = 1; i < pLine.NumberOfVertices; i++)
+            {
+                var circle = new Circle {Center = pLine.GetPoint3dAt(i), Radius = initOffset };
+                if (DoesIntersect(initOffPlus, circle)) plusVert.Add(i);
+                if (DoesIntersect(initOffMinus, circle)) minusVert.Add(i);
+            }
+
+            var plusVertOrdered = plusVert.OrderByDescending(val => val).ToList();
+            var minusVertOrdered = minusVert.OrderByDescending(val => val).ToList();
+
+            plusVertOrdered.ForEach(i => initOffPlus.FilletAt(i, initOffset));
+            minusVertOrdered.ForEach(i => initOffMinus.FilletAt(i, initOffset));
+
+            //Now we've built the base create the real thing....
+            var adjust = radius - initOffset;
+            var realOffPlus = TryOffsetCurve(initOffPlus, adjust);
+            var realOffMinus = TryOffsetCurve(initOffMinus, -adjust);
+
+            var start = StartArc(pLine, realOffPlus, realOffMinus, radius);
+            var end = EndArc(pLine, realOffPlus, realOffMinus, radius);
+
+            realOffPlus.JoinEntities(new Entity[] { start, end, realOffMinus });
+            realOffPlus.Closed = true;
+
+            return realOffPlus;
+        }
+
+        //TODO: Consider moving to base extension
+        private static Polyline TryOffsetCurve(Curve pLine, double offset)
+        {
+            var noPolyEx = new ArgumentException("No offset curve created.");
+            try
+            {
+                var result = pLine.GetOffsetCurves(offset)[0] as Polyline;
+                return result ?? throw noPolyEx;
+            }
+            catch (Exception)
+            {
+                throw noPolyEx;
+            }
+        }
+
+        private Arc StartArc(Curve baseCurve, Curve plusCurve, Curve minusCurve, double radius)
+        {
+            var plane = new Plane();
+
+            var start = plusCurve.StartPoint.Convert2d(plane).GetVectorTo(baseCurve.StartPoint.Convert2d(plane));
+            var end = minusCurve.StartPoint.Convert2d(plane).GetVectorTo(baseCurve.StartPoint.Convert2d(plane));
+
+            return new Arc(baseCurve.StartPoint, radius, start.Angle, end.Angle);
+        }
+
+        private Arc EndArc(Curve baseCurve, Curve plusCurve, Curve minusCurve, double radius)
+        {
+            var plane = new Plane();
+
+            var start = plusCurve.EndPoint.Convert2d(plane).GetVectorTo(baseCurve.EndPoint.Convert2d(plane));
+            var end = minusCurve.EndPoint.Convert2d(plane).GetVectorTo(baseCurve.EndPoint.Convert2d(plane));
+
+            return new Arc(baseCurve.EndPoint, radius, end.Angle, start.Angle);
+        }
+
+        //TODO: Consider moving to base extension
+        private Polyline PolylineFromBase()
+        {
+            var acTrans = Application.DocumentManager.MdiActiveDocument.TransactionManager.TopTransaction;
+            var c = acTrans.GetObject(BaseObject, OpenMode.ForWrite) as Curve;
+            
+            if (c == null) return null;
             if (!(c is Polyline) && !(c is Polyline2d) && !(c is Polyline3d)) return null;
 
             Polyline poly = null;
@@ -70,64 +147,50 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     poly.ConvertFrom(polyline2d, false);
                     break;
                 case Polyline3d polyline3d:
+                    var plane = new Plane();
                     poly = new Polyline();
                     polyline3d.Flatten();
 
                     poly.AddVertexAt(0, new Point2d(0, 0), 0, 0, 0);
-                    poly.AddVertexAt(1, polyline3d.StartPoint.Convert2d(plane),0,0,0);
-                    
+                    poly.AddVertexAt(1, polyline3d.StartPoint.Convert2d(plane), 0, 0, 0);
+
                     var objCol = new DBObjectCollection();
                     polyline3d.Explode(objCol);
 
                     var entList = new List<Entity>();
-                    foreach (Curve obj in objCol)
-                    {
-
-                        entList.Add(obj);
-                    }
-
+                    foreach (Curve obj in objCol) entList.Add(obj);
                     poly.JoinEntities(entList.ToArray());
                     poly.RemoveVertexAt(0);
                     break;
             }
 
             if (poly == null) return null;
-            
+
             //IMPORTANT: Flatten polyline, ensure coplanar objects are created for union of regions
             poly.Flatten();
-            var vn = poly.NumberOfVertices - 1;
 
-            var pOffPlus = poly.GetOffsetCurves(radius)[0] as Polyline;
-            var pOffMinus = poly.GetOffsetCurves(-radius)[0] as Polyline;
+            return poly;
+        }
 
-            for (var i = vn; i > 0; i--)
+        private static double MaxInitialOffset(Polyline pLine)
+        {
+            var len = pLine.Length;
+            for (var i = 0; i < pLine.NumberOfVertices; i++)
             {
-                var circle = new Circle { Center = poly.GetPoint3dAt(i), Radius = radius };
-                if (DoesIntersect(pOffPlus, circle)) pOffPlus.FilletAt(i, radius);
-                if (DoesIntersect(pOffMinus, circle)) pOffMinus.FilletAt(i, radius);
+                if (pLine.GetSegmentType(i) != SegmentType.Line) continue;
+
+                var seg = pLine.GetLineSegment2dAt(i);
+                if (seg.Length < len) len = seg.Length;
             }
 
-            if (pOffMinus == null || pOffPlus == null) return null;
-
-            var endAngleStart = pOffPlus.EndPoint.Convert2d(plane).GetVectorTo(pOffMinus.EndPoint.Convert2d(plane));
-            var endAngleEnd = pOffMinus.EndPoint.Convert2d(plane).GetVectorTo(pOffPlus.EndPoint.Convert2d(plane));
-
-            var startAngleStart = pOffPlus.StartPoint.Convert2d(plane).GetVectorTo(pOffMinus.StartPoint.Convert2d(plane));
-            var startAngleEnd = pOffMinus.StartPoint.Convert2d(plane).GetVectorTo(pOffPlus.StartPoint.Convert2d(plane));
-
-            var endCurve = new Arc(c.EndPoint, radius, endAngleEnd.Angle, endAngleStart.Angle);
-            var startCurve = new Arc(c.StartPoint, radius, startAngleStart.Angle, startAngleEnd.Angle);
-
-            pOffPlus.JoinEntities(new Entity[] { startCurve, endCurve, pOffMinus });
-            pOffPlus.Closed = true;
-
-            return pOffPlus;
+            return len * 0.4;
         }
-        
-        private static bool DoesIntersect(Entity firstCurve, Entity secondCurve)
+
+        //TODO: Consider moving to base extension
+        private static bool DoesIntersect(Entity firstEntity, Entity secondEntity)
         {
             var pts = new Point3dCollection();
-            firstCurve.IntersectWith(secondCurve, Intersect.OnBothOperands, new Plane(), pts, IntPtr.Zero, IntPtr.Zero);
+            firstEntity.IntersectWith(secondEntity, Intersect.OnBothOperands, new Plane(), pts, IntPtr.Zero, IntPtr.Zero);
             return pts.Count > 0;
         }
     }

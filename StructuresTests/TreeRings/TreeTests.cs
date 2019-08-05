@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel.TreeRings;
 using NUnit.Framework;
@@ -18,7 +19,67 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
     [TestFixture]
     class TreeTests : IronstoneTestFixture
     {
-        public TreeTests() : base(Assembly.GetExecutingAssembly(), typeof(TreeTests)) { }
+        private static readonly Random Random = new Random();
+
+        public TreeTests() : base(Assembly.GetExecutingAssembly(), typeof(TreeTests), @"..\..\..\Drawings\blank.dwg") { }
+
+        [TestCase(1)]
+        [TestCase(10)]
+        [TestCase(100)]
+        [TestCase(200)]
+        public void VerifyTreeCount(int count)
+        {
+            var result = RunTest<bool>(nameof(VerifyTreeCountResident), count);
+            Assert.IsTrue(result, "Unexpected result from manager.");
+        }
+
+        public bool VerifyTreeCountResident(int count)
+        {
+            try
+            {
+                var acDoc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
+
+                var ds = DataService.Current;
+                ds.InvalidateStoreTypes();
+                var treeRingManager = ds.GetStore<StructureDocumentStore>(acDoc.Name).GetManager<TreeRingManager>();
+
+                using (var acTrans = acDoc.TransactionManager.StartTransaction())
+                {
+                    treeRingManager.ManagedObjects.Clear();
+                    treeRingManager.UpdateAll();
+
+                    for (var i = 0; i < count; i++)
+                    {
+                        var t = RandomTree(i);
+                        treeRingManager.AddTree(t);
+                    }
+
+                    treeRingManager.UpdateAll();
+
+                    acTrans.Commit();
+                }
+                
+                return treeRingManager.ManagedObjects.Count == count && treeRingManager.RingsCollection.Count > 0;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private static Tree RandomTree(int id)
+        {
+            return new Tree
+            {
+                Phase = Phase.Proposed,
+                Species = "EnglishElm",
+                TreeType = TreeType.Deciduous,
+                WaterDemand = WaterDemand.High,
+                Height = Tree.DeciduousHigh["EnglishElm"],
+                ID = id.ToString(),
+                Location = new Point3d(Random.NextDouble(), Random.NextDouble(), 0)
+            };
+        }
 
         [TestCase("EnglishElm", 22.8, 2)]
         //TODO: Add more test case for other soil types

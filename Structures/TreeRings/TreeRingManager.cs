@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.ApplicationServices;
+﻿using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
+using System;
+using System.Collections.Generic;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 {
@@ -13,7 +13,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
     {
         public PersistentObjectIdCollection RingsCollection { get; set; }
 
-        public TreeRingManager(Document document) : base(document)
+        public TreeRingManager(Document document, ILogger log) : base(document, log)
         {
             RingsCollection = new PersistentObjectIdCollection();
         }
@@ -95,19 +95,17 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     RingsCollection.Clear();
                 }
 
-                //If grnaular soil return immediately as no need to do rings
-                if (sp.Granular)
-                {
-                    acTrans.Commit();
-                    return;
-                }
+                acTrans.Commit();
 
-                if (ManagedObjects.Count == 0)
-                {
-                    acTrans.Commit();
-                    return;
-                }
+                //If granular soil return immediately as no need to do rings
+                if (sp.Granular) return;
 
+                //If no active objects, return immediately as no need to do rings
+                if (ActiveObjects.Count == 0) return;
+            }
+
+            using (Transaction acTrans = HostDocument.Database.TransactionManager.StartTransaction())
+            {
                 //Add the merged ring to the drawing
                 BlockTableRecord acBlkTblRec = HostDocument.Database.GetModelSpace(true);
 
@@ -116,31 +114,44 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 DBObjectCollection pillingRings = new DBObjectCollection();
                 DBObjectCollection heaveRings = new DBObjectCollection();
 
-                //Generate the rings for each tree
-                foreach (Tree tree in ManagedObjects)
+                //Try generate the rings for each tree
+
+                foreach (Tree tree in ActiveObjects)
                 {
-                    DBObjectCollection collection = tree.DrawRings(sp.SoilShrinkability, StartDepth, sp.TargetStepSize);
-                    Curve circ = tree.DrawShape(2.5f, sp.SoilShrinkability);
-                    if(circ != null)
-                        pillingRings.Add(circ);
-
-                    Curve heaveCirc = tree.DrawShape(1.5f, sp.SoilShrinkability);
-                    if (heaveCirc != null)
-                        heaveRings.Add(heaveCirc);
-
-                    switch (tree.Phase)
+                    try
                     {
-                        case Phase.Existing:
-                            existingRings.Add(collection);
-                            if (collection.Count > maxExistingSteps)
-                                maxExistingSteps = collection.Count;
-                            break;
+                        DBObjectCollection collection = tree.DrawRings(sp.SoilShrinkability, StartDepth, sp.TargetStepSize);
+                        if (collection != null && collection.Count > 0)
+                        {
+                            Curve circ = tree.DrawShape(2.5f, sp.SoilShrinkability);
+                            if (circ != null) pillingRings.Add(circ);
 
-                        case Phase.Proposed:
-                            proposedRings.Add(collection);
-                            if (collection.Count > maxProposedSteps)
-                                maxProposedSteps = collection.Count;
-                            break;
+                            Curve heaveCirc = tree.DrawShape(1.5f, sp.SoilShrinkability);
+                            if (heaveCirc != null) heaveRings.Add(heaveCirc);
+
+                            switch (tree.Phase)
+                            {
+                                case Phase.Existing:
+                                    existingRings.Add(collection);
+                                    if (collection.Count > maxExistingSteps)
+                                        maxExistingSteps = collection.Count;
+                                    break;
+
+                                case Phase.Proposed:
+                                    proposedRings.Add(collection);
+                                    if (collection.Count > maxProposedSteps)
+                                        maxProposedSteps = collection.Count;
+                                    break;
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        Log.LogException(e);
+                        Log.Entry($"Issue generating rings for tree id {tree.ID}. Please review/remove tree.");
+                     
+                        acTrans.Abort();
+                        return;
                     }
                 }
 
