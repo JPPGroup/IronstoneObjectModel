@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
+using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Highways.ObjectModel.Factories;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
 
@@ -21,7 +22,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel
         public PersistentObjectIdCollection JunctionOffsetCollection { get; private set; }
         [XmlIgnore] public List<Junction> Junctions { get; set; }
 
-        public HighwaysManager(Document document) : base(document) 
+        public HighwaysManager(Document document, ILogger log) : base(document, log) 
         {
             JunctionOffsetCollection = new PersistentObjectIdCollection();
         }

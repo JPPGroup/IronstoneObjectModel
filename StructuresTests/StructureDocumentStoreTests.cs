@@ -14,23 +14,21 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test
         [Test]
         public void VerifyStoreLoaded()
         {
-            var resultNotLoaded = RunTest<bool>(nameof(VerifyStoreLoadedResident), false);
-            var resultLoaded = RunTest<bool>(nameof(VerifyStoreLoadedResident), true);
+            var resultLoaded = RunTest<bool>(nameof(VerifyStoreLoadedResident));
 
             Assert.Multiple(() =>
             {
-                Assert.IsFalse(resultNotLoaded, "Data store should not be loaded.");
                 Assert.IsTrue(resultLoaded, "Data store should be loaded.");
             });
         }
 
-        public bool VerifyStoreLoadedResident(bool invalidate)
+        public bool VerifyStoreLoadedResident()
         {
             try
             {
                 var acDoc = Application.DocumentManager.MdiActiveDocument;
                 var ds = DataService.Current;
-                if (invalidate) ds.InvalidateStoreTypes();
+                ds.InvalidateStoreTypes();
                 var store = ds.GetStore<StructureDocumentStore>(acDoc.Name);
 
                 return store != null;
