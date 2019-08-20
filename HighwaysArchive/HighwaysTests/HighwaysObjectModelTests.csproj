@@ -107,13 +107,31 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Factories\TransactionFactoryTests.cs" />
     <Compile Include="HighwaysDocumentStoreTests.cs" />
     <Compile Include="IronstoneTestFixture.cs" />
-    <Compile Include="Roads\RoadManagerTests.cs" />
+    <Compile Include="Extensions\ArcExtensionTests.cs" />
+    <Compile Include="Extensions\CurveExtensionTests.cs" />
+    <Compile Include="Objects\CentreLineOffsetTests.cs" />
+    <Compile Include="Objects\JunctionTests.cs" />
+    <Compile Include="Objects\CentreLineTests.cs" />
+    <Compile Include="Extensions\PolylineExtensionTests.cs" />
+    <Compile Include="HighwaysManagerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Helpers\RadiansHelperTests.cs" />
+    <Compile Include="Response\PavementProperties.cs" />
+    <Compile Include="Response\CarriageWayProperties.cs" />
+    <Compile Include="Response\HighwaysManagerProperties.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
+    <None Include="Drawings\NetworkTests1.dwg" />
+    <None Include="Drawings\NetworkTests2.dwg" />
+    <None Include="Drawings\NetworkTests3.dwg" />
+    <None Include="Drawings\PolylineExTests1.dwg" />
+    <None Include="Drawings\PolylineExTests2.dwg" />
+    <None Include="Drawings\PolylineExTests3.dwg" />
+    <None Include="Drawings\PolylineExTests4.dwg" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -127,7 +145,6 @@
     <Content Include="IronstoneConfigBeta.xml" />
     <Content Include="IronstoneConfigRelease.xml" />
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

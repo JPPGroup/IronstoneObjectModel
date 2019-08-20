@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocumentManagementObjectMod
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StructuresObjectModelTests", "StructuresTests\StructuresObjectModelTests.csproj", "{AC8D2081-ACC4-428A-A1CB-DC86084C5275}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HighwaysObjectModelTests", "HighwaysTests\HighwaysObjectModelTests.csproj", "{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrainageObjectModel", "Drainage\DrainageObjectModel.csproj", "{94D84ABE-06AE-488C-8574-7B2A050FB8F4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrainageObjectModelTests", "DrainageTests\DrainageObjectModelTests.csproj", "{80EA8689-F13E-44E5-B24A-3E3C15BF8893}"
@@ -20,6 +18,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousingObjectModel", "Housing\HousingObjectModel.csproj", "{B45B4490-1CFB-412E-BCD0-9606290E4777}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousingObjectModelTests", "HousingTests\HousingObjectModelTests.csproj", "{882C08F0-8B71-4E7E-871D-058EECCEB932}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HighwaysObjectModelTests", "HighwaysTests\HighwaysObjectModelTests.csproj", "{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,10 +43,6 @@ Global
 		{AC8D2081-ACC4-428A-A1CB-DC86084C5275}.Debug|x64.Build.0 = Debug|x64
 		{AC8D2081-ACC4-428A-A1CB-DC86084C5275}.Release|x64.ActiveCfg = Release|x64
 		{AC8D2081-ACC4-428A-A1CB-DC86084C5275}.Release|x64.Build.0 = Release|x64
-		{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}.Debug|x64.ActiveCfg = Debug|x64
-		{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}.Debug|x64.Build.0 = Debug|x64
-		{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}.Release|x64.ActiveCfg = Release|x64
-		{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}.Release|x64.Build.0 = Release|x64
 		{94D84ABE-06AE-488C-8574-7B2A050FB8F4}.Debug|x64.ActiveCfg = Debug|x64
 		{94D84ABE-06AE-488C-8574-7B2A050FB8F4}.Debug|x64.Build.0 = Debug|x64
 		{94D84ABE-06AE-488C-8574-7B2A050FB8F4}.Release|x64.ActiveCfg = Release|x64
@@ -63,6 +59,10 @@ Global
 		{882C08F0-8B71-4E7E-871D-058EECCEB932}.Debug|x64.Build.0 = Debug|x64
 		{882C08F0-8B71-4E7E-871D-058EECCEB932}.Release|x64.ActiveCfg = Release|x64
 		{882C08F0-8B71-4E7E-871D-058EECCEB932}.Release|x64.Build.0 = Release|x64
+		{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}.Debug|x64.ActiveCfg = Debug|x64
+		{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}.Debug|x64.Build.0 = Debug|x64
+		{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}.Release|x64.ActiveCfg = Release|x64
+		{9AE5F9F7-A8DD-4543-BB89-9330BB282AD1}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
