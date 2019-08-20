@@ -1,6 +1,7 @@
 ﻿using System;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
@@ -54,7 +55,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
                     var startPoint = new Point2d(arc.StartPoint.X, arc.StartPoint.Y);
                     var arcCentre = new Point2d(arc.Center.X, arc.Center.Y);
                     var startVector = arcCentre.GetVectorTo(startPoint);
-                    curveAngle = arc.Clockwise() ? startVector.Angle - RadiansHelper.DEGREES_90 : startVector.Angle + RadiansHelper.DEGREES_90;
+                    curveAngle = arc.IsClockwise() ? startVector.Angle - RadiansHelper.DEGREES_90 : startVector.Angle + RadiansHelper.DEGREES_90;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(curve), curve, null);
@@ -76,7 +77,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Extensions
                     var startPoint = new Point2d(p.X, p.Y);
                     var arcCentre = new Point2d(arc.Center.X, arc.Center.Y);
                     var startVector = arcCentre.GetVectorTo(startPoint);
-                    curveAngle = arc.Clockwise() ? startVector.Angle - RadiansHelper.DEGREES_90 : startVector.Angle + RadiansHelper.DEGREES_90;
+                    curveAngle = arc.IsClockwise() ? startVector.Angle - RadiansHelper.DEGREES_90 : startVector.Angle + RadiansHelper.DEGREES_90;
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(curve), curve, null);

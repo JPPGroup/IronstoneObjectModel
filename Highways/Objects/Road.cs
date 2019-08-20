@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
+using Jpp.Ironstone.Highways.ObjectModel.Abstract;
 using Jpp.Ironstone.Highways.ObjectModel.Factories;
 using Jpp.Ironstone.Highways.ObjectModel.Objects.Offsets;
 
@@ -114,6 +115,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
         [XmlIgnore] public bool Valid => CentreLines.Valid;
         public RoadClosureStart RoadClosureStart { get; set; }
         public RoadClosureEnd RoadClosureEnd { get; set; }
+        public List<RoadFeature> Features { get; }
 
         public Road()
         {
@@ -121,6 +123,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             CentreLines = new RoadCentreLineCollection(this);
             RoadClosureStart = new RoadClosureStart();
             RoadClosureEnd = new RoadClosureEnd();
+            Features = new List<RoadFeature>();
         }
 
         public void Generate()
@@ -130,6 +133,12 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             centreList.ForEach(c => c.Generate());
             RoadClosureStart.Create(CentreLines.StartLine);
             RoadClosureEnd.Create(CentreLines.EndLine);
+
+            var featureList = Features.ToList();
+            featureList.ForEach(f =>
+            {
+                if (!f.Generate(this)) Features.Remove(f);
+            });
         }        
        
         public void Highlight()
@@ -186,6 +195,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             centreList.ForEach(c => c.Reset());
             RoadClosureStart.Clear();
             RoadClosureEnd.Clear();
+            Features.ForEach(f => f.Clear());
         }
 
         public double GetPavementDistance(SidesOfCentre side)

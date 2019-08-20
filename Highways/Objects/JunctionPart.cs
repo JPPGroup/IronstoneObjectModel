@@ -2,7 +2,7 @@
 using System.Xml.Serialization;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Jpp.Ironstone.Highways.ObjectModel.Extensions;
+using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Highways.ObjectModel.Helpers;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Objects
@@ -22,14 +22,14 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                         if (CentreLine.Type != SegmentType.Arc) return CentreLine.StartVector.Angle;
 
                         var arcStart = (Arc)CentreLine.GetCurve();
-                        return arcStart.Clockwise() 
+                        return arcStart.IsClockwise() 
                             ? RadiansHelper.AngleForRightSide(CentreLine.StartVector.Angle)
                             : RadiansHelper.AngleForLeftSide(CentreLine.StartVector.Angle);
                     case JunctionPartTypes.End:
                         if (CentreLine.Type != SegmentType.Arc) return CentreLine.EndVector.Angle;
 
                         var arcEnd = (Arc)CentreLine.GetCurve();
-                        return arcEnd.Clockwise()
+                        return arcEnd.IsClockwise()
                             ? RadiansHelper.AngleForLeftSide(CentreLine.EndVector.Angle)
                             : RadiansHelper.AngleForRightSide(CentreLine.EndVector.Angle);
                     case JunctionPartTypes.Mid:
@@ -38,7 +38,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
                         var arcMid = (Arc)CentreLine.GetCurve();
                         var centreMid = new Point2d(arcMid.Center.X, arcMid.Center.Y);
                         var vecMid = centreMid.GetVectorTo(IntersectionPoint);
-                        return arcMid.Clockwise()
+                        return arcMid.IsClockwise()
                             ? RadiansHelper.AngleForRightSide(vecMid.Angle)
                             : RadiansHelper.AngleForLeftSide(vecMid.Angle);
                     default:

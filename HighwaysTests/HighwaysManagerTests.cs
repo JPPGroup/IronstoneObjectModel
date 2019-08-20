@@ -6,8 +6,8 @@ using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
+using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
-using Jpp.Ironstone.Highways.ObjectModel.Extensions;
 using Jpp.Ironstone.Highways.ObjectModel.Tests.Response;
 using NUnit.Framework;
 

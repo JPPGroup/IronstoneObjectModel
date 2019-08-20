@@ -7,8 +7,10 @@ using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
+using Jpp.Ironstone.Highways.ObjectModel.Abstract;
 using Jpp.Ironstone.Highways.ObjectModel.Factories;
 using Jpp.Ironstone.Highways.ObjectModel.Objects;
+using Jpp.Ironstone.Highways.ObjectModel.Objects.Features;
 
 namespace Jpp.Ironstone.Highways.ObjectModel
 {
@@ -83,7 +85,33 @@ namespace Jpp.Ironstone.Highways.ObjectModel
             RemoveOffsets();
             _cleared = true;
         }
-       
+
+        public bool AddRoadFeature(RoadFeature feature)
+        {
+            switch (feature.Type)
+            {
+                case RoadFeature.RoadFeatureTypes.CrossOver:
+                    return AddCrossOver(feature);
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private bool AddCrossOver(RoadFeature feature)
+        {
+            if(!(feature is CrossOver crossOver)) throw new ArgumentException(nameof(feature));
+
+            foreach (var road in Roads)
+            {
+                if (!crossOver.Generate(road)) continue;
+
+                road.Features.Add(crossOver);
+                return true;
+            }
+
+            return false;
+        }
+
         private void GenerateRoads()
         {        
             if (Roads == null || Roads.Count == 0) return;

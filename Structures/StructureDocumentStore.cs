@@ -12,7 +12,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel
     {
         public SoilProperties SoilProperties { get; set; }
 
-        public StructureDocumentStore(Document doc, Type[] managerTypes, ILogger log) : base(doc, managerTypes, log) { }
+        public StructureDocumentStore(Document doc, Type[] managerTypes, ILogger log, LayerManager layerManager) : base(doc, managerTypes, log, layerManager) { }
 
         protected override void Save()
         {
