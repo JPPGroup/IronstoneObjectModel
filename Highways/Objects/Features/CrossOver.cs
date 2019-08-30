@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Xml.Serialization;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -9,11 +11,57 @@ using Jpp.Ironstone.Highways.ObjectModel.Factories;
 
 namespace Jpp.Ironstone.Highways.ObjectModel.Objects.Features
 {
+    //TODO: Consider adding to core a serializable Point3d?
     public class CrossOver : RoadFeature
     {
-        public Point3d StartFootwayPoint { get; set; }
-        [XmlIgnore] public Point3d StartRoadPoint { get; private set; }
+        private double[] _startFootwayPointArray;
+        private double[] _endFootwayPointArray;
+
         public long StartObjectPtr { get; set; }
+        public long EndObjectPtr { get; set; }
+        public double[] StartFootwayPointArray
+        {
+            get => _startFootwayPointArray;
+            set
+            {
+                if (value == _startFootwayPointArray) return;
+                if(value.Length != 3) throw new ArgumentException(nameof(value));
+
+                _startFootwayPointArray = value;
+            }
+        }
+        public double[] EndFootwayPointArray
+        {
+            get => _endFootwayPointArray;
+            set
+            {
+                if (value == _endFootwayPointArray) return;
+                if (value.Length != 3) throw new ArgumentException(nameof(value));
+
+                _endFootwayPointArray = value;
+            }
+        }
+
+        [XmlIgnore] public Point3d StartFootwayPoint {
+            get => new Point3d(StartFootwayPointArray[0], StartFootwayPointArray[1], StartFootwayPointArray[2]);
+            set
+            {
+                StartFootwayPointArray[0] = value.X;
+                StartFootwayPointArray[1] = value.Y;
+                StartFootwayPointArray[2] = value.Z;
+            }
+        }
+        [XmlIgnore] public Point3d EndFootwayPoint
+        {
+            get => new Point3d(EndFootwayPointArray[0], EndFootwayPointArray[1], EndFootwayPointArray[2]);
+            set
+            {
+                EndFootwayPointArray[0] = value.X;
+                EndFootwayPointArray[1] = value.Y;
+                EndFootwayPointArray[2] = value.Z;
+            }
+        }
+        [XmlIgnore] public Point3d StartRoadPoint { get; private set; }
         [XmlIgnore] public ObjectId StartObjectId
         {
             get
@@ -25,9 +73,7 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects.Features
             }
             set => StartObjectPtr = value.Handle.Value;
         }
-        public Point3d EndFootwayPoint { get; set; }
         [XmlIgnore] public Point3d EndRoadPoint { get; private set; }
-        public long EndObjectPtr { get; set; }
         [XmlIgnore] public ObjectId EndObjectId
         {
             get
@@ -40,96 +86,29 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects.Features
             set => EndObjectPtr = value.Handle.Value;
         }
 
-        public CrossOver() : base(RoadFeatureTypes.CrossOver) { }
+        public CrossOver() : base(RoadFeatureTypes.CrossOver)
+        {
+            StartFootwayPointArray = new double[3];
+            EndFootwayPointArray = new double[3];
+        }
 
         public override bool Generate(Road road)
         {
             Clear();
 
-            var startLine = DrawPerpendicularLine(road, StartFootwayPoint);
-            if( startLine == null) return false;
+            var start = new CrossOverConstruction(StartFootwayPoint, road);
+            var end = new CrossOverConstruction(EndFootwayPoint, road);
+            
+            if (!start.IsValid || !end.IsValid) return false;
 
-            var endLine = DrawPerpendicularLine(road, EndFootwayPoint);
-            if (endLine == null) return false;
-
-
-            var startPoints = IntersectionPointsOnRoad(new Circle {Center = startLine.EndPoint, Radius = Constants.DEFAULT_CROSSOVER_RADIUS}, road);
-            var endPoints = IntersectionPointsOnRoad(new Circle { Center = endLine.EndPoint, Radius = Constants.DEFAULT_CROSSOVER_RADIUS }, road);
-
-            StartRoadPoint = GetFurthestPoint(startPoints, endPoints);
-            EndRoadPoint = GetFurthestPoint(endPoints, startPoints);
+            StartRoadPoint = start.GetFurthestPoint(end.RoadPoints);
+            EndRoadPoint = end.GetFurthestPoint(start.RoadPoints);
 
             DrawCrossLines();
 
+            RoadFeatureErased += road.Feature_Erased;
+
             return true;
-        }
-
-        private Line DrawPerpendicularLine(Road road, Point3d point)
-        {
-            var acTrans = TransactionFactory.CreateFromTop();
-
-            foreach (var centre in road.CentreLines)
-            {
-                double angle;
-                foreach (ObjectId obj in centre.CarriageWayRight.Pavement.Curves.Collection)
-                {
-                    var curve = (Curve)acTrans.GetObject(obj, OpenMode.ForWrite, true);
-                    var p = curve.GetClosestPointTo(point, false);
-
-                    if (point.DistanceTo(p) < Constants.POINT_TOLERANCE)
-                    {
-                        angle = curve.AngleFromCurveToForSide(SidesOfCentre.Left, point);
-                        return DrawLineFromPoint(point, road.RightPavement, angle);
-                    }
-                }
-
-                foreach (ObjectId obj in centre.CarriageWayLeft.Pavement.Curves.Collection)
-                {
-                    var curve = (Curve)acTrans.GetObject(obj, OpenMode.ForWrite, true);
-                    var p = curve.GetClosestPointTo(point, false);
-
-                    if (point.DistanceTo(p) < Constants.POINT_TOLERANCE)
-                    {
-                        angle = curve.AngleFromCurveToForSide(SidesOfCentre.Right, point);
-
-                        return DrawLineFromPoint(point, road.LeftPavement, angle);
-                    }
-                }
-            }
-
-
-
-            return null;
-        }
-
-        private Line DrawLineFromPoint(Point3d point, double length, double angle)
-        {
-            var endX = length * Math.Cos(angle) + point.X;
-            var endY = length * Math.Sin(angle) + point.Y;
-            var end = new Point3d(endX, endY, point.X);
-
-            return new Line(point, end);
-        }
-
-        private Point3d GetFurthestPoint(Point3dCollection pointsCollection, Point3dCollection comparedCollection)
-        {
-            var returnPt = pointsCollection[0];
-            var distance = returnPt.DistanceTo(comparedCollection[0]);
-
-            foreach (Point3d pt in pointsCollection)
-            {
-                foreach (Point3d compare in comparedCollection)
-                {
-                    var ptDistance = pt.DistanceTo(compare);
-                    if (ptDistance > distance)
-                    {
-                        distance = ptDistance;
-                        returnPt = pt;
-                    }
-                }
-            }
-
-            return returnPt;
         }
 
         private void DrawCrossLines()
@@ -149,334 +128,227 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects.Features
                 acTrans.AddNewlyCreatedDBObject(startLine, true);
                 acTrans.AddNewlyCreatedDBObject(endLine, true);
 
+                startLine.Erased += CrossOver_Erased;
+                endLine.Erased += CrossOver_Erased;
+
                 acTrans.Commit();
             }
         }
 
         public override void Clear()
         {
-            var acTrans = TransactionFactory.CreateFromTop();
+            using (var acTrans = TransactionFactory.CreateFromNew())
+            {
+                if (!StartObjectId.IsErased)
+                {
+                    var line = acTrans.GetObject(StartObjectId,OpenMode.ForRead);
 
-            if (!StartObjectId.IsErased) acTrans.GetObject(StartObjectId, OpenMode.ForWrite, true).Erase();
-            if (!EndObjectId.IsErased) acTrans.GetObject(EndObjectId, OpenMode.ForWrite, true).Erase();
+                    if (line.IsWriteEnabled == false) line.UpgradeOpen();
 
-            StartObjectId = ObjectId.Null;
-            EndObjectId = ObjectId.Null;
+                    //line.Erased -= CrossOver_Erased;
+                    line.Erase();
+                }
+
+                if (!EndObjectId.IsErased)
+                {
+                    var line = acTrans.GetObject(EndObjectId, OpenMode.ForRead);
+
+                    if (line.IsWriteEnabled == false) line.UpgradeOpen();
+
+                    //line.Erased -= CrossOver_Erased;
+                    line.Erase();
+                }
+                
+                acTrans.Commit();
+            }
         }
 
-
-        private bool PointOnRoadClosure(RoadClosure closure, Point3d point)
+        private void CrossOver_Erased(object sender, ObjectErasedEventArgs e)
         {
-            if (!closure.Active) return false;
+            Clear();
+            OnRoadFeatureErased();
+        }
+    }
 
-            var collection = new ObjectIdCollection
-            {
-                closure.PadPavementLeftLineId, 
-                closure.PadPavementRightLineId, 
-                closure.EndPavementLineId
-            };
+    internal class CrossOverConstruction
+    {
+        private readonly Point3d _footwayPoint;
+        private readonly Road _road;
 
-            return PointOnObjectIdCollection(collection, point);
+        private List<ObjectIdCollection> _roadObjectIdCollection;
+        private Line _perpendicularLine;
+        private Circle _constructionCircle;
+
+        public Point3dCollection RoadPoints { get; }
+        public bool IsValid => RoadPoints.Count > 0;
+
+        public CrossOverConstruction(Point3d point, Road road)
+        {
+            _footwayPoint = point;
+            _road = road;
+            
+            _roadObjectIdCollection = new List<ObjectIdCollection>();
+            RoadPoints = new Point3dCollection();
+
+            if (!SetLineAndRoadObjects()) return;
+
+            SetConstructionCircle();
+            SetPointsOnRoad();
         }
 
-        private bool PointOnObjectIdCollection(ObjectIdCollection collection, Point3d point)
+        public Point3d GetFurthestPoint(Point3dCollection comparedCollection)
+        {
+            var returnPt = RoadPoints[0];
+            var distance = returnPt.DistanceTo(comparedCollection[0]);
+
+            foreach (Point3d pt in RoadPoints)
+            {
+                foreach (Point3d compare in comparedCollection)
+                {
+                    var ptDistance = pt.DistanceTo(compare);
+                    if (!(ptDistance > distance)) continue;
+
+                    distance = ptDistance;
+                    returnPt = pt;
+                }
+            }
+
+            return returnPt;
+        }
+
+        private bool SetLineAndRoadObjects()
         {
             var acTrans = TransactionFactory.CreateFromTop();
-            foreach (ObjectId obj in collection)
-            {
-                var curve = (Curve)acTrans.GetObject(obj, OpenMode.ForWrite, true);
-                var p = curve.GetClosestPointTo(point, false);
 
-                if(point.DistanceTo(p) < Constants.POINT_TOLERANCE) return true;
+            foreach (var centre in _road.CentreLines)
+            {
+                double angle;
+                foreach (ObjectId obj in centre.CarriageWayRight.Pavement.Curves.Collection)
+                {
+                    var curve = (Curve)acTrans.GetObject(obj, OpenMode.ForWrite, true);
+                    var p = curve.GetClosestPointTo(_footwayPoint, false);
+
+                    if (!(p.DistanceTo(_footwayPoint) < Constants.POINT_TOLERANCE)) continue;
+
+                    angle = curve.AngleFromCurveToForSide(SidesOfCentre.Left, _footwayPoint);
+
+                    _perpendicularLine = LineFromPoint(_footwayPoint, _road.RightPavement, angle);
+                    _roadObjectIdCollection = _road.CentreLines.Select(c => c.CarriageWayRight.Curves.Collection).ToList();
+
+                    return true;
+                }
+
+                foreach (ObjectId obj in centre.CarriageWayLeft.Pavement.Curves.Collection)
+                {
+                    var curve = (Curve)acTrans.GetObject(obj, OpenMode.ForWrite, true);
+                    var p = curve.GetClosestPointTo(_footwayPoint, false);
+
+                    if (!(p.DistanceTo(_footwayPoint) < Constants.POINT_TOLERANCE)) continue;
+
+                    angle = curve.AngleFromCurveToForSide(SidesOfCentre.Right, _footwayPoint);
+
+                    _perpendicularLine = LineFromPoint(_footwayPoint, _road.LeftPavement, angle);
+                    _roadObjectIdCollection = _road.CentreLines.Select(c => c.CarriageWayLeft.Curves.Collection).ToList();
+
+                    return true;
+                }
+            }
+
+            if (_road.RoadClosureEnd.Active)
+            {
+                if (SetLineAndRoadObjectsForClosure(_road.RoadClosureEnd)) return true;
+            }
+
+            if (_road.RoadClosureStart.Active)
+            {
+                if (SetLineAndRoadObjectsForClosure(_road.RoadClosureStart)) return true;
             }
 
             return false;
         }
 
-        private Point3dCollection IntersectionPointsOnRoad(Curve curve, Road road)
+        private bool SetLineAndRoadObjectsForClosure(RoadClosure roadRoadClosure)
         {
-            var ptsCol = new Point3dCollection();
+            var acTrans = TransactionFactory.CreateFromTop();
+            double angle;
+
+            //left
+            var lPad = (Curve)acTrans.GetObject(roadRoadClosure.PadPavementLeftLineId, OpenMode.ForWrite, true);
+            var lPoint = lPad.GetClosestPointTo(_footwayPoint, false);
+
+            if (lPoint.DistanceTo(_footwayPoint) < Constants.POINT_TOLERANCE)
+            {
+                angle = lPad.AngleFromCurveToForSide(SidesOfCentre.Right, _footwayPoint);
+
+                _perpendicularLine = LineFromPoint(_footwayPoint, _road.LeftPavement, angle);
+                _roadObjectIdCollection = _road.CentreLines.Select(c => c.CarriageWayLeft.Curves.Collection).ToList();
+                return true;
+            }
+
+            //right
+            var rPad = (Curve)acTrans.GetObject(roadRoadClosure.PadPavementRightLineId, OpenMode.ForWrite, true);
+            var rPoint = rPad.GetClosestPointTo(_footwayPoint, false);
+
+            if (rPoint.DistanceTo(_footwayPoint) < Constants.POINT_TOLERANCE)
+            {
+                angle = rPad.AngleFromCurveToForSide(SidesOfCentre.Left, _footwayPoint);
+
+                _perpendicularLine = LineFromPoint(_footwayPoint, _road.RightPavement, angle);
+                _roadObjectIdCollection = _road.CentreLines.Select(c => c.CarriageWayRight.Curves.Collection).ToList();
+                return true;
+            }
+
+            //end 
+            var end = (Curve)acTrans.GetObject(roadRoadClosure.EndPavementLineId, OpenMode.ForWrite, true);
+            var ePoint = end.GetClosestPointTo(_footwayPoint, false);
+
+            if (ePoint.DistanceTo(_footwayPoint) < Constants.POINT_TOLERANCE)
+            {
+                var side = roadRoadClosure.Type == ClosureTypes.End ? SidesOfCentre.Right : SidesOfCentre.Left;
+                angle = end.AngleFromCurveToForSide(side, _footwayPoint);
+                _perpendicularLine = LineFromPoint(_footwayPoint, roadRoadClosure.Distance, angle);
+                _roadObjectIdCollection.Add(new ObjectIdCollection { roadRoadClosure.EndCarriageWayLineId });
+
+                return true;
+            }
+
+            return false;
+        }
+
+        private void SetConstructionCircle()
+        {
+            _constructionCircle = new Circle {Center = _perpendicularLine.EndPoint, Radius = Constants.DEFAULT_CROSSOVER_RADIUS};
+        }
+
+        private void SetPointsOnRoad()
+        {
+            RoadPoints.Clear();
+
             var acTrans = TransactionFactory.CreateFromTop();
 
-            foreach (var centre in road.CentreLines)
+            foreach (var objectCol in _roadObjectIdCollection)
             {
-                foreach (ObjectId obj in centre.CarriageWayRight.Curves.Collection)
+                foreach (ObjectId obj in objectCol)
                 {
-                    var roadObj = (Curve)acTrans.GetObject(obj, OpenMode.ForWrite, true);
+                    var roadObj = (Curve) acTrans.GetObject(obj, OpenMode.ForWrite, true);
                     var pts = new Point3dCollection();
                     var plane = new Plane();
-                    curve.IntersectWith(roadObj, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
+                    _constructionCircle.IntersectWith(roadObj, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
 
                     if (pts.Count <= 0) continue;
 
-                    foreach (Point3d pt in pts) ptsCol.Add(pt);
-                }
-
-                foreach (ObjectId obj in centre.CarriageWayLeft.Curves.Collection)
-                {
-                    var roadObj = (Curve)acTrans.GetObject(obj, OpenMode.ForWrite, true);
-                    var pts = new Point3dCollection();
-                    var plane = new Plane();
-                    curve.IntersectWith(roadObj, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
-
-                    if (pts.Count <= 0) continue;
-
-                    foreach (Point3d pt in pts) ptsCol.Add(pt);
+                    foreach (Point3d pt in pts) RoadPoints.Add(pt);
                 }
             }
+        }
 
-            if (road.RoadClosureEnd.Active)
-            {
-                var roadObj = (Curve)acTrans.GetObject(road.RoadClosureEnd.EndCarriageWayLineId, OpenMode.ForWrite, true);
-                var pts = new Point3dCollection();
-                var plane = new Plane();
-                curve.IntersectWith(roadObj, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
+        private static Line LineFromPoint(Point3d point, double length, double angle)
+        {
+            var endX = length * Math.Cos(angle) + point.X;
+            var endY = length * Math.Sin(angle) + point.Y;
+            var end = new Point3d(endX, endY, point.X);
 
-                if (pts.Count > 0) foreach (Point3d pt in pts) ptsCol.Add(pt);
-            }
-
-            if (road.RoadClosureStart.Active)
-            {
-                var roadObj = (Curve)acTrans.GetObject(road.RoadClosureStart.EndCarriageWayLineId, OpenMode.ForWrite, true);
-                var pts = new Point3dCollection();
-                var plane = new Plane();
-                curve.IntersectWith(roadObj, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
-
-                if (pts.Count > 0) foreach (Point3d pt in pts) ptsCol.Add(pt);
-            }
-
-            return ptsCol;
+            return new Line(point, end);
         }
     }
 }
-//public class CrossOver
-        //{
-        
-
-        //    public long LinePtr { get; set; }
-        //    public double BaseAngle { get; set; }
-        //    public double InitialLength { get; set; }
-        //    public Point3d StartPoint { get; set; }
-        //    [XmlIgnore] public ObjectId LineId
-        //    {
-        //        get
-        //        {
-        //            if (LinePtr == 0) return ObjectId.Null;
-
-        //            var acCurDb = Application.DocumentManager.MdiActiveDocument.Database;
-        //            return acCurDb.GetObjectId(false, new Handle(LinePtr), 0);
-        //        }
-        //        set => LinePtr = value.Handle.Value;
-        //    }
-
-        //    public void Clear()
-        //    {
-        //        var acTrans = TransactionFactory.CreateFromTop();
-
-        //        if (!LineId.IsErased) acTrans.GetObject(LineId, OpenMode.ForWrite, true).Erase();
-
-        //        LineId = ObjectId.Null;
-        //    }
-
-        //    public bool Generate(Point3d startPoint, Point3d endPoint, List<Road> roads)
-        //    {
-        //        foreach (var road in roads)
-        //        {
-
-        //        }
-
-        //        return true;
-        //    }
-
-        //    private static Line DrawLine(Point3d startPoint, double angle, Road road, double initialLength)
-        //    {
-        //        var endX = initialLength * Math.Cos(angle) + startPoint.X;
-        //        var endY = initialLength * Math.Sin(angle) + startPoint.Y;
-        //        var end = new Point3d(endX, endY, 0);
-
-        //        return TrimSplay(road, new Line(startPoint, end));
-        //    }
-
-        //    public static Line[] LinesPointOnRoad(Point3d point, Road road, bool isStart)
-        //    {
-        //        using (var acTrans = TransactionFactory.CreateFromNew())
-        //        {
-        //            foreach (var centre in road.CentreLines)
-        //            {
-        //                //Do right...
-        //                foreach (ObjectId obj in centre.CarriageWayRight.Pavement.Curves.Collection)
-        //                {
-        //                    var curve = (Curve)acTrans.GetObject(obj, OpenMode.ForWrite, true);
-        //                    var p = curve.GetClosestPointTo(point, false);
-
-        //                    if (point.DistanceTo(p) < POINT_TOLERANCE)
-        //                    {
-        //                        var angle = curve.AngleFromCurveToForSide(SidesOfCentre.Left, point);
-        //                        var dist = centre.CarriageWayRight.Pavement.DistanceFromCentre;
-        //                        var lineAngle = CalcAngle(angle, Constants.DEFAULT_CROSSOVER_ANGLE, point, road.CentreLines.First().GetCurve().StartPoint, isStart);
-
-        //                        return new[] { DrawLine(point, lineAngle, road, dist) };
-
-        //                        //return new[] { lineBas, linePlus, lineMinus };
-        //                    }
-        //                }
-
-        //                //Do left...
-        //                foreach (ObjectId obj in centre.CarriageWayLeft.Pavement.Curves.Collection)
-        //                {
-        //                    var curve = (Curve)acTrans.GetObject(obj, OpenMode.ForWrite, true);
-        //                    var p = curve.GetClosestPointTo(point, false);
-
-        //                    if (point.DistanceTo(p) < POINT_TOLERANCE)
-        //                    {
-        //                        var angle = curve.AngleFromCurveToForSide(SidesOfCentre.Right, point);
-        //                        var dist = centre.CarriageWayLeft.Pavement.DistanceFromCentre;
-        //                        var lineAngle = CalcAngle(angle, Constants.DEFAULT_CROSSOVER_ANGLE, point, road.CentreLines.First().GetCurve().StartPoint, isStart);
-
-        //                        return new[] { DrawLine(point, lineAngle, road, dist) };
-
-        //                       // return new[] { lineBas, linePlus, lineMinus };
-        //                    }
-        //                }
-        //            }
-
-        //            //Do End...
-        //            if (road.RoadClosureEnd.Active)
-        //            {
-        //                //left pad
-        //                var lPad = (Curve)acTrans.GetObject(road.RoadClosureEnd.PadPavementLeftLineId, OpenMode.ForWrite, true);
-        //                var lPadPoint = lPad.GetClosestPointTo(point, false);
-        //                //right pad 
-        //                var rPad = (Curve)acTrans.GetObject(road.RoadClosureEnd.PadPavementRightLineId, OpenMode.ForWrite, true);
-        //                var rPadPoint = rPad.GetClosestPointTo(point, false);
-
-        //                //end 
-        //                var end = (Curve)acTrans.GetObject(road.RoadClosureEnd.EndPavementLineId, OpenMode.ForWrite, true);
-        //                var endPoint = end.GetClosestPointTo(point, false);
-
-        //                double angle = 0;
-        //                double dist = 0;
-        //                bool onEnd = false;
-
-        //                if (point.DistanceTo(lPadPoint) < POINT_TOLERANCE)
-        //                {
-        //                    angle = lPad.AngleFromCurveToForSide(SidesOfCentre.Right, point);
-        //                    dist = road.CentreLines.Last().CarriageWayLeft.Pavement.DistanceFromCentre;
-        //                    onEnd = true;
-        //                }
-
-        //                if (point.DistanceTo(rPadPoint) < POINT_TOLERANCE)
-        //                {
-        //                    angle = rPad.AngleFromCurveToForSide(SidesOfCentre.Left, point);
-        //                    dist = road.CentreLines.Last().CarriageWayRight.Pavement.DistanceFromCentre;
-        //                    onEnd = true;
-        //                }
-
-        //                if (point.DistanceTo(endPoint) < POINT_TOLERANCE)
-        //                {
-        //                    angle = end.AngleFromCurveToForSide(SidesOfCentre.Right, point);
-        //                    dist = road.CentreLines.Last().CarriageWayRight.Pavement.DistanceFromCentre;
-        //                    onEnd = true;
-        //                }
-
-        //                if (onEnd)
-        //                {
-        //                    var lineAngle = CalcAngle(angle, Constants.DEFAULT_CROSSOVER_ANGLE, point, road.CentreLines.First().GetCurve().StartPoint,isStart);
-
-        //                    return new [] { DrawLine(point, lineAngle, road, dist)};
-        //                }
-
-        //            }
-        //            //Do Start...
-
-        //            return null;
-        //        }
-        //    }
-
-        //    private static Line TrimSplay(Road road, Line splay)
-        //    {
-        //        var acTrans = TransactionFactory.CreateFromTop();
-        //        var possLines = new List<Line>();
-
-        //        foreach (var centre in road.CentreLines)
-        //        {
-        //            foreach (ObjectId obj in centre.CarriageWayRight.Curves.Collection)
-        //            {
-        //                var curve = (Curve)acTrans.GetObject(obj, OpenMode.ForWrite, true);
-        //                var pts = new Point3dCollection();
-        //                var plane = new Plane();
-        //                curve.IntersectWith(splay, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
-
-        //                if (pts.Count > 0) possLines.Add(new Line(splay.StartPoint, pts[0]));
-        //            }
-
-        //            foreach (ObjectId obj in centre.CarriageWayLeft.Curves.Collection)
-        //            {
-        //                var curve = (Curve)acTrans.GetObject(obj, OpenMode.ForWrite, true);
-        //                var pts = new Point3dCollection();
-        //                var plane = new Plane();
-        //                curve.IntersectWith(splay, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
-
-        //                if (pts.Count > 0) possLines.Add(new Line(splay.StartPoint, pts[0]));
-        //            }
-        //        }
-
-        //        if (road.RoadClosureEnd.Active)
-        //        {
-        //            var curve = (Curve)acTrans.GetObject(road.RoadClosureEnd.EndCarriageWayLineId, OpenMode.ForWrite, true);
-        //            var pts = new Point3dCollection();
-        //            var plane = new Plane();
-        //            curve.IntersectWith(splay, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
-
-        //            if (pts.Count > 0) possLines.Add(new Line(splay.StartPoint, pts[0]));
-        //        }
-
-        //        if (road.RoadClosureStart.Active)
-        //        {
-        //            var curve = (Curve)acTrans.GetObject(road.RoadClosureStart.EndCarriageWayLineId, OpenMode.ForWrite, true);
-        //            var pts = new Point3dCollection();
-        //            var plane = new Plane();
-        //            curve.IntersectWith(splay, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
-
-        //            if (pts.Count > 0) possLines.Add(new Line(splay.StartPoint, pts[0]));
-        //        }
-
-        //        //TODO: Trim with Junction...
-
-        //        return possLines.Count == 0 ? null : possLines.OrderBy(l => l.Length).First();
-        //    }
-
-        //    private static double CalcAngle(double baseAngle, double crossAngle, Point3d crossPoint1, Point3d crossPoint2, bool isStart)
-        //    {
-        //        var xAngle = RadiansHelper.DegreesToRadians(crossAngle);
-        //        var anglePlus = baseAngle + xAngle;
-        //        var angleMinus = baseAngle - xAngle;
-        //        var angleToStart = new Line(crossPoint1, crossPoint2).Angle;
-
-        //        var diffBase = Math.Abs(baseAngle - angleToStart);
-        //        var diffPlus = Math.Abs(anglePlus - angleToStart);
-        //        var diffMinus = Math.Abs(angleMinus - angleToStart);
-
-        //        var flip = diffBase > 180;
-
-        //        if (isStart)
-        //        {
-        //            if (flip)
-        //            {
-        //                return diffPlus < diffBase ? anglePlus : angleMinus;
-        //            }
-
-        //            return diffPlus > diffBase ? anglePlus : angleMinus;
-
-        //        }
-
-        //        if (flip)
-        //        {
-        //            return diffMinus > diffBase ? anglePlus : angleMinus;
-        //        }
-
-        //        return diffMinus < diffBase ? anglePlus : angleMinus;
-        //    }
-
-        //}
-//}

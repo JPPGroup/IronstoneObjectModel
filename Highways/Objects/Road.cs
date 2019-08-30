@@ -137,7 +137,11 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             var featureList = Features.ToList();
             featureList.ForEach(f =>
             {
-                if (!f.Generate(this)) Features.Remove(f);
+                if (!f.Generate(this))
+                {
+                    f.RoadFeatureErased -= Feature_Erased;
+                    Features.Remove(f);
+                }
             });
         }        
        
@@ -195,7 +199,11 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             centreList.ForEach(c => c.Reset());
             RoadClosureStart.Clear();
             RoadClosureEnd.Clear();
-            Features.ForEach(f => f.Clear());
+            Features.ForEach(f =>
+            {
+                f.RoadFeatureErased -= Feature_Erased;
+                f.Clear();
+            });
         }
 
         public double GetPavementDistance(SidesOfCentre side)
@@ -216,5 +224,13 @@ namespace Jpp.Ironstone.Highways.ObjectModel.Objects
             return GetPavementDistance(side) >= Constants.MINIMUM_PAVEMENT ? PavementTypes.Footway : PavementTypes.Service;
         }
 
+        public void Feature_Erased(object sender, EventArgs e)
+        {
+            if (sender is RoadFeature feature)
+            {
+                feature.RoadFeatureErased -= Feature_Erased;
+                Features.Remove(feature);
+            }
+        }
     }
 }
