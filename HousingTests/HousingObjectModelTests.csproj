@@ -122,7 +122,7 @@
     <Content Include="IronstoneConfigRelease.xml" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\HousingObjectModel\HousingObjectModel.csproj">
+    <ProjectReference Include="..\Housing\HousingObjectModel.csproj">
       <Project>{b45b4490-1cfb-412e-bcd0-9606290e4777}</Project>
       <Name>HousingObjectModel</Name>
     </ProjectReference>
