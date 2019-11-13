@@ -33,6 +33,13 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
         //JAb: Not SOLID, violates Liskov Substitution & Interface Segregation principles!
         protected override void GenerateBase() { }
 
+        public override void Generate()
+        {
+            base.Generate();
+            ValidateCentreLine();
+        }
+
+
         public override DBObjectCollection DrawRings(Shrinkage shrinkage, double startDepth, double step)
         {
             var collection = new DBObjectCollection();
@@ -47,7 +54,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 currentDepth += step;
             }
         }
-
 
         //TODO: Need to review drawing of initial offset...
         public override Curve DrawShape(double depth, Shrinkage shrinkage)
@@ -192,6 +198,26 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             var pts = new Point3dCollection();
             firstEntity.IntersectWith(secondEntity, Intersect.OnBothOperands, new Plane(), pts, IntPtr.Zero, IntPtr.Zero);
             return pts.Count > 0;
+        }
+
+        private void ValidateCentreLine()
+        {
+            //Ensure joining vertices are not effectively straight - tolerance set at 0.1 degree
+            const double tolerance = (Math.PI / 180) * 0.1;
+            var basePolyLine = PolylineFromBase();
+
+            for (var i = basePolyLine.NumberOfVertices - 2; i > 0; i--)
+            {
+                var l1 = basePolyLine.GetLineSegmentAt(i- 1);
+                var l2 = basePolyLine.GetLineSegmentAt(i);
+
+                var v1 = l1.EndPoint - l1.StartPoint;
+                var v2 = l2.EndPoint - l2.StartPoint;
+                var angle = v1.GetAngleTo(v2);
+
+                if(angle < tolerance) 
+                    basePolyLine.RemoveVertexAt(i);
+            }
         }
     }
 }
