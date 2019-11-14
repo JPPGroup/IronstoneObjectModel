@@ -159,14 +159,21 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 for (int ringIndex = 0; ringIndex < maxExistingSteps; ringIndex++)
                 {
                     HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.EXISTING_TREE_LAYER.LayerId).ObjectId;
-                    GenerateRing(existingRings, ringIndex, ringColors, acBlkTblRec, acTrans);
+                    if (!GenerateEnclosedRing(existingRings, ringIndex, ringColors, acBlkTblRec, acTrans))
+                    {
+                        acTrans.Abort();
+                        return;
+                    }
                 }
                 for (int ringIndex = 0; ringIndex < maxProposedSteps; ringIndex++)
                 {
                     HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PROPOSED_TREE_LAYER.LayerId).ObjectId;
-                    GenerateRing(proposedRings, ringIndex, ringColors, acBlkTblRec, acTrans);
+                    if (!GenerateEnclosedRing(proposedRings, ringIndex, ringColors, acBlkTblRec, acTrans))
+                    {
+                        acTrans.Abort();
+                        return;
+                    }
                 }
-
 
                 //Add hatching for piling
                 HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PILED_LAYER.LayerId).ObjectId;
@@ -272,61 +279,72 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             }
         }
 
-        private void GenerateRing(List<DBObjectCollection> existingRings, int ringIndex, int[] ringColors, BlockTableRecord acBlkTblRec, Transaction acTrans)
+        private bool GenerateEnclosedRing(List<DBObjectCollection> existingRings, int ringIndex, int[] ringColors, BlockTableRecord acBlkTblRec, Transaction acTrans)
         {
-            if (existingRings.Count > 0)
+            try
             {
-                //Determine overlaps
-                List<Curve> currentStep = new List<Curve>();
-
-                //Build a collection of the outer rings only
-                foreach (DBObjectCollection col in existingRings)
+                if (existingRings.Count > 0)
                 {
-                    //Check not stepping beyond
-                    if (col.Count > ringIndex)
+                    //Determine overlaps
+                    List<Curve> currentStep = new List<Curve>();
+
+                    //Build a collection of the outer rings only
+                    foreach (DBObjectCollection col in existingRings)
                     {
-                        if (col[ringIndex] is Curve)
+                        //Check not stepping beyond
+                        if (col.Count > ringIndex)
                         {
-                            currentStep.Add(col[ringIndex] as Curve);
+                            if (col[ringIndex] is Curve)
+                            {
+                                currentStep.Add(col[ringIndex] as Curve);
+                            }
                         }
                     }
-                }
 
-                List<Region> createdRegions = new List<Region>();
+                    List<Region> createdRegions = new List<Region>();
 
-                //Create regions
-                foreach (Curve c in currentStep)
-                {
-                    DBObjectCollection temp = new DBObjectCollection();
-                    temp.Add(c);
-                    DBObjectCollection regions = Region.CreateFromCurves(temp);
-                    foreach (Region r in regions)
+                    //Create regions
+                    foreach (Curve c in currentStep)
                     {
-                        createdRegions.Add(r);
+                        DBObjectCollection temp = new DBObjectCollection();
+                        temp.Add(c);
+                        DBObjectCollection regions = Region.CreateFromCurves(temp);
+                        foreach (Region r in regions)
+                        {
+                            createdRegions.Add(r);
+                        }
                     }
+
+                    Region enclosed = createdRegions[0];
+
+                    for (int i = 1; i < createdRegions.Count; i++)
+                    {
+                        enclosed.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
+                    }
+
+                    //Protection for color overflow, loop around
+                    if (ringIndex >= ringColors.Length)
+                    {
+                        int multiple = (int)Math.Floor((double)(ringIndex / ringColors.Length));
+                        enclosed.ColorIndex = ringColors[ringIndex - multiple * ringColors.Length];
+                    }
+                    else
+                    {
+                        enclosed.ColorIndex = ringColors[ringIndex];
+                    }
+
+                    RingsCollection.Add(acBlkTblRec.AppendEntity(enclosed));
+                    acTrans.AddNewlyCreatedDBObject(enclosed, true);
                 }
 
-                Region enclosed = createdRegions[0];
-
-                for (int i = 1; i < createdRegions.Count; i++)
-                {
-                    enclosed.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
-                }
-
-                //Protection for color overflow, loop around
-                if (ringIndex >= ringColors.Length)
-                {
-                    int multiple = (int) Math.Floor((double) (ringIndex / ringColors.Length));
-                    enclosed.ColorIndex = ringColors[ringIndex - multiple * ringColors.Length];
-                }
-                else
-                {
-                    enclosed.ColorIndex = ringColors[ringIndex];
-                }
-
-                RingsCollection.Add(acBlkTblRec.AppendEntity(enclosed));
-                acTrans.AddNewlyCreatedDBObject(enclosed, true);
+                return true;
             }
+            catch (Exception e)
+            {
+                Log.LogException(e);
+                return false;
+            }
+
         }
     }
 }
