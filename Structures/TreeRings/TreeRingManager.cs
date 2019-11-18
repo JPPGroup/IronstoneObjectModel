@@ -9,6 +9,10 @@ using System.Collections.Generic;
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 {
     //TODO: Review class
+    [Layer(Name = Constants.PROPOSED_TREE_LAYER)]
+    [Layer(Name = Constants.EXISTING_TREE_LAYER)]
+    [Layer(Name = Constants.PILED_LAYER)]
+    [Layer(Name = Constants.HEAVE_LAYER)]
     public class TreeRingManager : AbstractDrawingObjectManager<Tree>
     {
         public PersistentObjectIdCollection RingsCollection { get; set; }
@@ -78,12 +82,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             //Why openclose??
             using (Transaction acTrans = HostDocument.Database.TransactionManager.StartTransaction())
             {
-                //Set required layers
-                HostDocument.Database.RegisterLayer(Constants.EXISTING_TREE_LAYER);
-                HostDocument.Database.RegisterLayer(Constants.PROPOSED_TREE_LAYER);
-                HostDocument.Database.RegisterLayer(Constants.PILED_LAYER);
-                HostDocument.Database.RegisterLayer(Constants.HEAVE_LAYER);
-
                 //Delete existing rings
                 foreach (ObjectId obj in RingsCollection.Collection)
                 {
@@ -158,16 +156,17 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 ObjectId currentLayer = HostDocument.Database.Clayer;
                 for (int ringIndex = 0; ringIndex < maxExistingSteps; ringIndex++)
                 {
-                    HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.EXISTING_TREE_LAYER.LayerId).ObjectId;
+                    HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.EXISTING_TREE_LAYER).ObjectId;
                     if (!GenerateEnclosedRing(existingRings, ringIndex, ringColors, acBlkTblRec, acTrans))
                     {
                         acTrans.Abort();
                         return;
                     }
                 }
+
                 for (int ringIndex = 0; ringIndex < maxProposedSteps; ringIndex++)
                 {
-                    HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PROPOSED_TREE_LAYER.LayerId).ObjectId;
+                    HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PROPOSED_TREE_LAYER).ObjectId;
                     if (!GenerateEnclosedRing(proposedRings, ringIndex, ringColors, acBlkTblRec, acTrans))
                     {
                         acTrans.Abort();
@@ -175,8 +174,9 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     }
                 }
 
+
                 //Add hatching for piling
-                HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PILED_LAYER.LayerId).ObjectId;
+                HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PILED_LAYER).ObjectId;
                 List<Region> createdRegions = new List<Region>(); 
                 foreach (Curve c in pillingRings)
                 {
@@ -251,7 +251,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 }
 
                 //Add heave line
-                HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.HEAVE_LAYER.LayerId).ObjectId;
+                HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.HEAVE_LAYER).ObjectId;
                 createdRegions = new List<Region>();
                 foreach (Curve c in heaveRings)
                 {

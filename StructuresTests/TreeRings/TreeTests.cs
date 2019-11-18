@@ -39,12 +39,12 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
             {
                 var acDoc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
 
-                var ds = DataService.Current;
-                ds.InvalidateStoreTypes();
-                var treeRingManager = ds.GetStore<StructureDocumentStore>(acDoc.Name).GetManager<TreeRingManager>();
-
                 using (var acTrans = acDoc.TransactionManager.StartTransaction())
                 {
+                    var ds = DataService.Current;
+                    ds.InvalidateStoreTypes();
+                    var treeRingManager = ds.GetStore<StructureDocumentStore>(acDoc.Name).GetManager<TreeRingManager>();
+
                     treeRingManager.ManagedObjects.Clear();
                     treeRingManager.UpdateAll();
 
@@ -57,9 +57,9 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                     treeRingManager.UpdateAll();
 
                     acTrans.Commit();
+
+                    return treeRingManager.ManagedObjects.Count == count && treeRingManager.RingsCollection.Count > 0;
                 }
-                
-                return treeRingManager.ManagedObjects.Count == count && treeRingManager.RingsCollection.Count > 0;
             }
             catch (Exception)
             {

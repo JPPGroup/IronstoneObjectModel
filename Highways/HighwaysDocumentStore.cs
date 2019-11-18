@@ -7,6 +7,6 @@ namespace Jpp.Ironstone.Highways.ObjectModel
 {
     public class HighwaysDocumentStore : DocumentStore
     {      
-        public HighwaysDocumentStore(Document doc, Type[] managerTypes, ILogger log, LayerManager layerManager) : base(doc, managerTypes, log, layerManager) { }
+        public HighwaysDocumentStore(Document doc, Type[] managerTypes, ILogger log, LayerManager layerManager, IUserSettings settings) : base(doc, managerTypes, log, layerManager, settings) { }
     }
 }
