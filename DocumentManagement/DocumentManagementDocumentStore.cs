@@ -13,7 +13,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         public LayoutSheetController LayoutSheetController { get; private set; }
 
-        public DocumentManagementDocumentStore(Document doc, Type[] managerTypes, ILogger log, LayerManager layerManager) : base(doc, managerTypes, log, layerManager) { }
+        public DocumentManagementDocumentStore(Document doc, Type[] managerTypes, ILogger log, LayerManager layerManager, IUserSettings settings) : base(doc, managerTypes, log, layerManager, settings) { }
         
         protected override void Save()
         {
