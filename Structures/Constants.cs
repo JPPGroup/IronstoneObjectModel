@@ -6,6 +6,7 @@
         public const string PROPOSED_TREE_LAYER = "JPP_Foundations_TreeRings_Proposed";
         public const string PILED_LAYER = "JPP_Foundations_Pilled";
         public const string HEAVE_LAYER = "JPP_Foundations_TreeRings_Proposed";
+        public const string LABEL_LAYER = "JPP_Foundations_TreeRings_Label";
 
         /*
          * Need to ensure layer properties are in settings file.
