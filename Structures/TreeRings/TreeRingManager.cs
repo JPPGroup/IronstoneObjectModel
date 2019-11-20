@@ -5,6 +5,7 @@ using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using System;
 using System.Collections.Generic;
+using Jpp.Ironstone.Structures.ObjectModel.Properties;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 {
@@ -146,7 +147,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     catch (Exception e)
                     {
                         Log.LogException(e);
-                        Log.Entry($"Issue generating rings for tree id {tree.ID}. Please review/remove tree.");
+                        Log.Entry(string.Format(Resources.TreeRingManager_Message_ErrorOnBaseRings, tree.ID));
                      
                         acTrans.Abort();
                         return;
@@ -159,6 +160,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.EXISTING_TREE_LAYER).ObjectId;
                     if (!GenerateEnclosedRing(existingRings, ringIndex, ringColors, acBlkTblRec, acTrans))
                     {
+                        HostDocument.Database.Clayer = currentLayer;
                         acTrans.Abort();
                         return;
                     }
@@ -169,6 +171,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PROPOSED_TREE_LAYER).ObjectId;
                     if (!GenerateEnclosedRing(proposedRings, ringIndex, ringColors, acBlkTblRec, acTrans))
                     {
+                        HostDocument.Database.Clayer = currentLayer;
                         acTrans.Abort();
                         return;
                     }
@@ -177,7 +180,67 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 
                 //Add hatching for piling
                 HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PILED_LAYER).ObjectId;
-                List<Region> createdRegions = new List<Region>(); 
+                if (!GeneratePilingRings(pillingRings, acBlkTblRec, acTrans))
+                {
+                    HostDocument.Database.Clayer = currentLayer;
+                    acTrans.Abort();
+                    return;
+                }
+
+                //Add heave line
+                HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.HEAVE_LAYER).ObjectId;
+                if (!GenerateHeaveRings(heaveRings, acBlkTblRec, acTrans))
+                {
+                    HostDocument.Database.Clayer = currentLayer;
+                    acTrans.Abort();
+                    return;
+                }
+
+                HostDocument.Database.Clayer = currentLayer;
+                acTrans.Commit();
+            }
+        }
+
+        private bool GenerateHeaveRings(DBObjectCollection heaveRings, BlockTableRecord acBlkTblRec, Transaction acTrans)
+        {
+            try
+            {
+                List<Region> createdRegions = new List<Region>();
+                foreach (Curve c in heaveRings)
+                {
+                    DBObjectCollection temp = new DBObjectCollection();
+                    temp.Add(c);
+                    DBObjectCollection regions = Region.CreateFromCurves(temp);
+                    foreach (Region r in regions)
+                    {
+                        createdRegions.Add(r);
+                    }
+                }
+
+                Region heaveEnclosed = createdRegions[0];
+                for (int i = 1; i < createdRegions.Count; i++)
+                {
+                    heaveEnclosed.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
+                }
+
+                RingsCollection.Add(acBlkTblRec.AppendEntity(heaveEnclosed));
+                acTrans.AddNewlyCreatedDBObject(heaveEnclosed, true);
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.LogException(e);
+                Log.Entry(Resources.TreeRingManager_Message_ErrorOnHeaveRings);
+                return false;
+            }
+        }
+
+        private bool GeneratePilingRings(DBObjectCollection pillingRings, BlockTableRecord acBlkTblRec, Transaction acTrans)
+        {
+            try
+            {
+                List<Region> createdRegions = new List<Region>();
                 foreach (Curve c in pillingRings)
                 {
                     DBObjectCollection temp = new DBObjectCollection();
@@ -239,44 +302,26 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                         acHatch.HatchStyle = HatchStyle.Ignore;
                         acHatch.EvaluateHatch(true);
 
-                        Byte alpha = (Byte) (255 * (100 - 80) / 100);
+                        Byte alpha = (Byte)(255 * (100 - 80) / 100);
                         acHatch.Transparency = new Transparency(alpha);
 
                         DrawOrderTable dot =
-                            (DrawOrderTable) acTrans.GetObject(acBlkTblRec.DrawOrderTableId, OpenMode.ForWrite);
+                            (DrawOrderTable)acTrans.GetObject(acBlkTblRec.DrawOrderTableId, OpenMode.ForWrite);
                         ObjectIdCollection tempCollection = new ObjectIdCollection();
                         tempCollection.Add(acHatch.ObjectId);
                         dot.MoveToBottom(tempCollection);
                     }
                 }
 
-                //Add heave line
-                HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.HEAVE_LAYER).ObjectId;
-                createdRegions = new List<Region>();
-                foreach (Curve c in heaveRings)
-                {
-                    DBObjectCollection temp = new DBObjectCollection();
-                    temp.Add(c);
-                    DBObjectCollection regions = Region.CreateFromCurves(temp);
-                    foreach (Region r in regions)
-                    {
-                        createdRegions.Add(r);
-                    }
-                }
-
-                Region heaveEnclosed = createdRegions[0];
-                for (int i = 1; i < createdRegions.Count; i++)
-                {
-                    heaveEnclosed.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
-                }
-
-                RingsCollection.Add(acBlkTblRec.AppendEntity(heaveEnclosed));
-                acTrans.AddNewlyCreatedDBObject(heaveEnclosed, true);
-
-
-                HostDocument.Database.Clayer = currentLayer;
-                acTrans.Commit();
+                return true;
             }
+            catch (Exception e)
+            {
+                Log.LogException(e);
+                Log.Entry(Resources.TreeRingManager_Message_ErrorOnPilingRings);
+                return false;
+            }
+
         }
 
         private bool GenerateEnclosedRing(List<DBObjectCollection> existingRings, int ringIndex, int[] ringColors, BlockTableRecord acBlkTblRec, Transaction acTrans)
@@ -342,9 +387,9 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             catch (Exception e)
             {
                 Log.LogException(e);
+                Log.Entry(Resources.TreeRingManager_Message_ErrorOnEnclosedRings);
                 return false;
             }
-
         }
     }
 }
