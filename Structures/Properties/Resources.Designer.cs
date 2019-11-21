@@ -70,29 +70,11 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Issue generating enclosed rings. Use undo to revert changes..
+        ///   Looks up a localized string similar to Issue generating rings. Use undo to revert changes..
         /// </summary>
-        internal static string TreeRingManager_Message_ErrorOnEnclosedRings {
+        internal static string TreeRingManager_Message_ErrorOnGenerateRings {
             get {
-                return ResourceManager.GetString("TreeRingManager_Message_ErrorOnEnclosedRings", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Issue generating heave rings. Use undo to revert changes..
-        /// </summary>
-        internal static string TreeRingManager_Message_ErrorOnHeaveRings {
-            get {
-                return ResourceManager.GetString("TreeRingManager_Message_ErrorOnHeaveRings", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Issue generating piling rings. Use undo to revert changes..
-        /// </summary>
-        internal static string TreeRingManager_Message_ErrorOnPilingRings {
-            get {
-                return ResourceManager.GetString("TreeRingManager_Message_ErrorOnPilingRings", resourceCulture);
+                return ResourceManager.GetString("TreeRingManager_Message_ErrorOnGenerateRings", resourceCulture);
             }
         }
     }

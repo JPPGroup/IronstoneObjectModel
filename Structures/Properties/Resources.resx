@@ -120,13 +120,7 @@
   <data name="TreeRingManager_Message_ErrorOnBaseRings" xml:space="preserve">
     <value>Issue generating rings for tree id {0}. Please review/remove tree.</value>
   </data>
-  <data name="TreeRingManager_Message_ErrorOnEnclosedRings" xml:space="preserve">
-    <value>Issue generating enclosed rings. Use undo to revert changes.</value>
-  </data>
-  <data name="TreeRingManager_Message_ErrorOnHeaveRings" xml:space="preserve">
-    <value>Issue generating heave rings. Use undo to revert changes.</value>
-  </data>
-  <data name="TreeRingManager_Message_ErrorOnPilingRings" xml:space="preserve">
-    <value>Issue generating piling rings. Use undo to revert changes.</value>
+  <data name="TreeRingManager_Message_ErrorOnGenerateRings" xml:space="preserve">
+    <value>Issue generating rings. Use undo to revert changes.</value>
   </data>
 </root>
