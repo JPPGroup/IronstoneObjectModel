@@ -145,11 +145,19 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             }
                         }
                     }
-                    catch (Exception e)
+                    catch (ArgumentException e) //catch expected argument exception from DrawRings
                     {
                         Log.LogException(e);
                         Log.Entry(string.Format(Resources.TreeRingManager_Message_ErrorOnBaseRings, tree.ID));
-                     
+
+                        acTrans.Abort();
+                        return;
+                    }
+                    catch (Exception e) //catch AutoCAD exception just in case something weird happened
+                    {
+                        Log.LogException(e);
+                        Log.Entry(string.Format(Resources.TreeRingManager_Message_ErrorOnBaseRings, tree.ID));
+
                         acTrans.Abort();
                         return;
                     }
@@ -180,7 +188,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 
                     acTrans.Commit();
                 }
-                catch (Exception e)
+                catch (Exception e) //catch AutoCAD exception just in case something weird happened
                 {
                     Log.LogException(e);
                     Log.Entry(Resources.TreeRingManager_Message_ErrorOnGenerateRings, Severity.Warning);
