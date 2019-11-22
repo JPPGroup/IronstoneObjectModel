@@ -10,6 +10,7 @@ using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 {
     [XmlInclude(typeof(HedgeRow))]
+    [Layer(Name = Constants.LABEL_LAYER)]
     public class Tree : CircleDrawingObject
     {
         public string ID
@@ -104,7 +105,8 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             {
                 Height = 2, 
                 Location = Location, 
-                Contents = $"No. {ID}\\P{Species}\\P{Height}m"
+                Contents = $"No. {ID}\\P{Species}\\P{Height}m",
+                Layer = Constants.LABEL_LAYER
             };
 
             /*Label = new TextObject();

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.168
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29403.142
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StructuresObjectModel", "Structures\StructuresObjectModel.csproj", "{ADA84B10-90AB-4AD2-9F7C-FDFD362AC7CA}"
 EndProject
@@ -16,6 +16,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrainageObjectModel", "Drainage\DrainageObjectModel.csproj", "{94D84ABE-06AE-488C-8574-7B2A050FB8F4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DrainageObjectModelTests", "DrainageTests\DrainageObjectModelTests.csproj", "{80EA8689-F13E-44E5-B24A-3E3C15BF8893}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousingObjectModel", "Housing\HousingObjectModel.csproj", "{B45B4490-1CFB-412E-BCD0-9606290E4777}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HousingObjectModelTests", "HousingTests\HousingObjectModelTests.csproj", "{882C08F0-8B71-4E7E-871D-058EECCEB932}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +55,14 @@ Global
 		{80EA8689-F13E-44E5-B24A-3E3C15BF8893}.Debug|x64.Build.0 = Debug|x64
 		{80EA8689-F13E-44E5-B24A-3E3C15BF8893}.Release|x64.ActiveCfg = Release|x64
 		{80EA8689-F13E-44E5-B24A-3E3C15BF8893}.Release|x64.Build.0 = Release|x64
+		{B45B4490-1CFB-412E-BCD0-9606290E4777}.Debug|x64.ActiveCfg = Debug|x64
+		{B45B4490-1CFB-412E-BCD0-9606290E4777}.Debug|x64.Build.0 = Debug|x64
+		{B45B4490-1CFB-412E-BCD0-9606290E4777}.Release|x64.ActiveCfg = Release|x64
+		{B45B4490-1CFB-412E-BCD0-9606290E4777}.Release|x64.Build.0 = Release|x64
+		{882C08F0-8B71-4E7E-871D-058EECCEB932}.Debug|x64.ActiveCfg = Debug|x64
+		{882C08F0-8B71-4E7E-871D-058EECCEB932}.Debug|x64.Build.0 = Debug|x64
+		{882C08F0-8B71-4E7E-871D-058EECCEB932}.Release|x64.ActiveCfg = Release|x64
+		{882C08F0-8B71-4E7E-871D-058EECCEB932}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

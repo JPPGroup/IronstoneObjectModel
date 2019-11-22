@@ -7,6 +7,6 @@ namespace Jpp.Ironstone.Drainage.ObjectModel
 {
     public class DrainageDocumentStore : DocumentStore
     {
-        public DrainageDocumentStore(Document doc, Type[] managerTypes, ILogger log) : base(doc, managerTypes, log) { }
+        public DrainageDocumentStore(Document doc, Type[] managerTypes, ILogger log, LayerManager layerManager, IUserSettings settings) : base(doc, managerTypes, log, layerManager, settings) { }
     }
 }
