@@ -4,15 +4,18 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.Civil.ApplicationServices;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
+using Jpp.Ironstone.Structures.ObjectModel;
 using CivSurface = Autodesk.Civil.DatabaseServices.Surface;
 
 namespace Jpp.Ironstone.Housing.ObjectModel.Concept
 {
-    [Layer(Name = Constants.PLOT_BOUNDARY_LAYER)]
     public class ConceptualPlotManager : AbstractDrawingObjectManager<ConceptualPlot>
     {
         [XmlIgnore]
-        public CivSurface ProposedLevels { get; set; } 
+        public CivSurface ProposedLevels { get; set; }
+
+        [XmlIgnore]
+        public CivSurface ExistingLevels { get; set; }
 
         public ConceptualPlotManager(Document document, ILogger log) : base(document, log)
         {
@@ -46,21 +49,23 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
         {
             //Get the target surface
             ObjectIdCollection SurfaceIds = CivilApplication.ActiveDocument.GetSurfaceIds();
+            SoilProperties soilProperties = DataService.Current.GetStore<StructureDocumentStore>(this.HostDocument.Name).SoilProperties;
 
             foreach (ObjectId surfaceId in SurfaceIds)
             {
-                CivSurface temp = surfaceId.GetObject(OpenMode.ForRead) as CivSurface;
-                if (temp.Name == "Proposed Ground")
+                // Direct cast is safe as collection is filtered down to surfaces by Autocad
+                CivSurface temp = (CivSurface)surfaceId.GetObject(OpenMode.ForRead);
+
+                // Continue is not used, incase user has set the same surface as both
+                if (temp.Name ==  soilProperties.ProposedGroundSurfaceName)
                 {
                     ProposedLevels = temp;
                 }
+                if (temp.Name == soilProperties.ExistingGroundSurfaceName)
+                {
+                    ExistingLevels = temp;
+                }
             }
-        }
-
-        public void Add(ConceptualPlot plot)
-        {
-            ManagedObjects.Add(plot);
-            plot.DirtyAdded = true;
         }
     }
 }

@@ -42,16 +42,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
             SetLayer(Constants.PLOT_BOUNDARY_LAYER);
         }
 
-        protected override void ObjectErased(object sender, ObjectErasedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        protected override void ObjectModified(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
+        // TODO: Port of existing code, requires refactoring immininently
         public void EstimateFFLFromSurface()
         {
             Document acDoc = Application.DocumentManager.MdiActiveDocument;

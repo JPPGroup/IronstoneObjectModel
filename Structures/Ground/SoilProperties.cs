@@ -1,16 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.ApplicationServices;
 using Jpp.Common;
 
 namespace Jpp.Ironstone.Structures.ObjectModel
 {
     public class SoilProperties : BaseNotify
     {
+        public string ProposedGroundSurfaceName
+        {
+            get { return _proposedGroundSurfaceName; }
+            set { SetField(ref _proposedGroundSurfaceName, value, nameof(ProposedGroundSurfaceName)); }
+        }
+
+        public string ExistingGroundSurfaceName
+        {
+            get { return _existingGroundSurfaceName; }
+            set { SetField(ref _existingGroundSurfaceName, value, nameof(ExistingGroundSurfaceName)); }
+        }
+
+        private string _proposedGroundSurfaceName, _existingGroundSurfaceName;
+
         public Shrinkage SoilShrinkability
         {
             get { return _soilShrinkability; }
