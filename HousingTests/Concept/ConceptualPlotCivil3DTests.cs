@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.Civil.ApplicationServices;
 using Jpp.Ironstone.Core.Autocad.DrawingObjects.Primitives;
@@ -43,21 +44,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Tests.Concept
             ConceptualPlot plot;
             using (Transaction trans = doc.TransactionManager.StartTransaction())
             {
-                DataService.Current.PopulateStoreTypes();
-                SoilProperties props = DataService.Current.GetStore<StructureDocumentStore>(doc.Name).SoilProperties;
-                props.ExistingGroundSurfaceName = input.ExistingGround;
-                props.ProposedGroundSurfaceName = input.ProposedGround;
-
-                ObjectId obj = doc.Database.GetObjectId(false, new Handle(146034), 0);
-
-                DBObject ent = trans.GetObject(obj, OpenMode.ForWrite);
-
-                PolylineDrawingObject polyObject = new PolylineDrawingObject(ent as Polyline);
-                plot = new ConceptualPlot(polyObject);
-
-                CivSurface existingGround = GetSurface(props.ExistingGroundSurfaceName);
-                CivSurface proposedGround = GetSurface(props.ProposedGroundSurfaceName);
-                plot.EstimateFoundationLevel(existingGround, proposedGround, props);
+                plot = BuildConceptualPlot(input, doc, trans);
 
                 FoundationLevels result = new FoundationLevels()
                 {
@@ -66,6 +53,55 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Tests.Concept
                 return result;
             }
         }
+
+        private ConceptualPlot BuildConceptualPlot(FoundationInput input, Document doc, Transaction trans)
+        {
+            ConceptualPlot plot;
+            DataService.Current.PopulateStoreTypes();
+            SoilProperties props = DataService.Current.GetStore<StructureDocumentStore>(doc.Name).SoilProperties;
+            props.ExistingGroundSurfaceName = input.ExistingGround;
+            props.ProposedGroundSurfaceName = input.ProposedGround;
+
+            ObjectId obj = doc.Database.GetObjectId(false, new Handle(146034), 0);
+
+            DBObject ent = trans.GetObject(obj, OpenMode.ForWrite);
+
+            PolylineDrawingObject polyObject = new PolylineDrawingObject(ent as Polyline);
+            plot = new ConceptualPlot(polyObject);
+
+            CivSurface existingGround = GetSurface(props.ExistingGroundSurfaceName);
+            CivSurface proposedGround = GetSurface(props.ProposedGroundSurfaceName);
+            plot.EstimateFoundationLevel(existingGround, proposedGround, props);
+            plot.RenderFoundations(props.DepthBands);
+            return plot;
+        }
+
+        [TestCase("Ex Ground", "Prop Ground", "#FFFF00")]
+        [TestCase("Ex Ground", "No Ground", "#008000")]
+        public void AddHatch(string exGround, string propGround, string expectedResult)
+        {
+            FoundationInput input = new FoundationInput()
+            {
+                ExistingGround = exGround,
+                ProposedGround = propGround
+            };
+            string hatchColor = RunTest<string>(nameof(AddHatchResident), input);
+            StringAssert.AreEqualIgnoringCase(expectedResult, hatchColor);
+        }
+
+        public string AddHatchResident(FoundationInput input)
+        {
+            Document doc = Application.DocumentManager.MdiActiveDocument;
+            ConceptualPlot plot;
+
+            Debugger.Launch();
+            using (Transaction trans = doc.TransactionManager.StartTransaction())
+            {
+                plot = BuildConceptualPlot(input, doc, trans);
+                return ColorTranslator.ToHtml(plot.DepthHatch.Color.ColorValue);
+            }
+        }
+
 
         private CivSurface GetSurface(string name)
         {

@@ -45,8 +45,14 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
             }
             set
             {
-                if (SubObjects.ContainsKey(DEPTH_HATCH_KEY)) 
+                if (SubObjects.ContainsKey(DEPTH_HATCH_KEY))
+                {
                     SubObjects[DEPTH_HATCH_KEY] = value;
+                }
+                else
+                {
+                    SubObjects.Add(DEPTH_HATCH_KEY, value);
+                }
 
             }
         }
@@ -249,12 +255,13 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
             double relativeDepth = _depth.ExistingGroundLevel.Value - _depth.FoundationDepth.Value;
 
             var band = depthBands.Where(db => db.StartDepth <= relativeDepth && db.EndDepth > relativeDepth);
-            if(band.Count() >= 1)
+            if(band.Count() > 1)
                 throw new InvalidOperationException("Multiple applicable bands");
 
             if (band.Count() == 0)
                 throw new InvalidOperationException("Multiple applicable bands");
 
+            // TODO: CHange to pull pattern from settings file
             DepthHatch = CreateHatch("SOLID");
             DepthHatch.Color = band.First().Color;
         }

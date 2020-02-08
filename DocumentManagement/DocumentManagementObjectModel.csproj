@@ -22,7 +22,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLocal|x64'">
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>    
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Resources\CivilTemplate.dwg" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\CivilTemplate.dwg" />
+  </ItemGroup>    
   <ItemGroup>    
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -42,6 +48,7 @@
     <PackageReference Include="AspectInjector">
       <Version>2.3.1</Version>
     </PackageReference>
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.10.1" />
 	<PackageReference Include="Jpp.Ironstone.BaseApi.2019">
       <Version>0.1.1</Version>
       <ExcludeAssets>runtime</ExcludeAssets>
@@ -67,11 +74,21 @@
     <ProjectReference Include="..\..\ironstone-core\Ironstone Core\Ironstone Core.csproj" />    
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
     <None Update="IronstoneConfig.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
 </Project>

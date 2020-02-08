@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Jpp.Common;
+using Jpp.Ironstone.Core;
+using Jpp.Ironstone.Core.ServiceInterfaces;
+using Unity;
 
 namespace Jpp.Ironstone.Structures.ObjectModel
 {
@@ -50,7 +54,22 @@ namespace Jpp.Ironstone.Structures.ObjectModel
             _soilShrinkability = Shrinkage.Medium;
             _granular = false;
             _targetStepSize = 0.3f;
-            DepthBands = new ObservableCollection<DepthBand>();
+            DepthBands = LoadDefaultBands();
+        }
+
+        private ObservableCollection<DepthBand> LoadDefaultBands()
+        {
+            IUserSettings settings = CoreExtensionApplication._current.Container.Resolve<IUserSettings>();
+
+            ObservableCollection<DepthBand> bands = new ObservableCollection<DepthBand>();
+
+            var defaults = settings.GetObject<List<DepthBand>>("structures.foundations.depthBands");
+            foreach (DepthBand band in defaults)
+            {
+                bands.Add(band);
+            }
+
+            return bands;
         }
 
         /*private void Update()

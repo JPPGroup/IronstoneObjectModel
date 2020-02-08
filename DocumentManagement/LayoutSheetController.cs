@@ -1,26 +1,32 @@
-﻿using Autodesk.AutoCAD.ApplicationServices;
+﻿using System;
+using System.IO;
+using System.Reflection;
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Common;
 using Jpp.Ironstone.Core.Autocad;
-using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
+using Jpp.Ironstone.Core.ServiceInterfaces;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 {
     public class LayoutSheetController
     {
         public SerializableDictionary<string, LayoutSheet> Sheets;
+        private Document _document;
+        private ILogger _logger;
+        private IUserSettings _settings;
 
-        public LayoutSheetController()
+        public LayoutSheetController(ILogger logger, Document doc, IUserSettings settings)
         {
             Sheets = new SerializableDictionary<string, LayoutSheet>();
-        }   
+            _document = doc;
+            _logger = logger;
+            _settings = settings;
+        }
 
-        public void Scan(Document acDoc = null)
+        public void Scan()
         {
-            if(acDoc == null)
-                acDoc = Application.DocumentManager.MdiActiveDocument;
-
-            Database acCurDb = acDoc.Database;
+            Database acCurDb = _document.Database;
 
             Transaction acTrans = acCurDb.TransactionManager.TopTransaction;
             DBDictionary layouts = acTrans.GetObject(acCurDb.LayoutDictionaryId, OpenMode.ForRead) as DBDictionary;
@@ -31,49 +37,105 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                 if (!Sheets.ContainsKey(item.Key) && item.Key != "Model")
                 {
                     Layout acLayout = acTrans.GetObject(item.Value, OpenMode.ForRead) as Layout;
-                    LayoutSheet ls = new LayoutSheet();
-                    ls.Name = item.Key;
+                    LayoutSheet ls = new LayoutSheet(_logger, acLayout);
 
                     Sheets.Add(item.Key, ls);
                 }
             }
+        }
 
-            foreach (LayoutSheet layoutSheet in Sheets.Values)
+        public void AddLayout(string layoutName, PaperSize size)
+        {
+            using (Database template = new Database(false, true))
             {
-                ParseTitleBlock(layoutSheet);
+                Transaction destTransaction = _document.TransactionManager.TopTransaction;
+                SideLoad(template);
+                //Database old = Application.DocumentManager.MdiActiveDocument.Database;
+
+                Layout destinationLayout = destTransaction.GetObject(LayoutManager.Current.CreateLayout(layoutName), OpenMode.ForWrite) as Layout;
+                
+                //HostApplicationServices.WorkingDatabase = template;
+
+                using (Transaction sourceTrans = template.TransactionManager.StartTransaction())
+                {
+                    Layout layout = _document.Database.GetLayout(GetLayoutName(size));
+                    destinationLayout.CopyFrom(layout);
+                    BlockTableRecord sourceBlockTableRecord =
+                        sourceTrans.GetObject(layout.BlockTableRecordId, OpenMode.ForRead) as BlockTableRecord;
+                    ObjectIdCollection sourceObjects = new ObjectIdCollection();
+                    foreach (ObjectId objectId in sourceBlockTableRecord)
+                    {
+                        sourceObjects.Add(objectId);
+                    }
+                    IdMapping mapping = new IdMapping();
+                    // TODO: Confirm ignore is correct option
+                    _document.Database.WblockCloneObjects(sourceObjects, destinationLayout.BlockTableRecordId, mapping, DuplicateRecordCloning.Ignore, false);
+                }
+            }
+            
+        }
+
+        private void SideLoad(Database template)
+        {
+            string templatePath = _settings.GetValue("defaultTemplateFile");
+            bool cleanup = false;
+            if (templatePath.Equals("embedded", StringComparison.CurrentCultureIgnoreCase))
+            {
+                templatePath = Path.GetTempFileName();
+                using (Stream s = Assembly.GetExecutingAssembly()
+                    .GetManifestResourceStream("Jpp.Ironstone.DocumentManagement.ObjectModel.CivilTemplate.dwg"))
+                {
+                    using (FileStream outStream = File.OpenWrite(templatePath))
+                    {
+                        s.CopyTo(outStream);
+                    }
+                }
+
+                cleanup = true;
+            }
+
+            template.ReadDwgFile(templatePath, FileOpenMode.OpenForReadAndAllShare, false, null);
+            template.CloseInput(true);
+
+            if (cleanup)
+            {
+                File.Delete(templatePath);
             }
         }
 
-        private void ParseTitleBlock(LayoutSheet sheet)
+        private string GetLayoutName(PaperSize size)
         {
-            Transaction acTrans = Application.DocumentManager.MdiActiveDocument.Database.TransactionManager.TopTransaction;
-
-            Layout acLayout = Application.DocumentManager.MdiActiveDocument.Database.GetLayout(sheet.Name);
-            BlockTableRecord btr = (BlockTableRecord)acTrans.GetObject(acLayout.BlockTableRecordId, OpenMode.ForRead);
-
-            foreach (ObjectId objectId in btr)
+            switch (size)
             {
-                Entity ent = (Entity)acTrans.GetObject(objectId, OpenMode.ForRead);
-                if (ent.GetType() == typeof(BlockReference))
-                {
-                    BlockReference blkRef = (BlockReference)ent;
-                    /*if (blkRef.IsDynamicBlock)
-                    {
-                        // Here you have a DynamicBlock reference.
-                    }*/
-                    string name = blkRef.Name;
-                    bool dynamic = blkRef.IsDynamicBlock;
+                case PaperSize.A0Landscape:
+                    return "Civ_A0L";
 
-                    AttributeCollection attCol = blkRef.AttributeCollection;
+                case PaperSize.A1Landscape:
+                    return "Civ_A1L";
 
-                    foreach (ObjectId objID in attCol)
-                    {
-                        DBObject dbObj = acTrans.GetObject(objID, OpenMode.ForRead) as DBObject;
+                case PaperSize.A2Landscape:
+                    return "Civ_A2L";
 
-                        AttributeReference acAttRef = dbObj as AttributeReference;
-                    }
+                case PaperSize.A3Landscape:
+                    return "Civ_A3L";
 
-                }
+                case PaperSize.A0Portrait:
+                    return "Civ_A0P";
+
+                case PaperSize.A1Portrait:
+                    return "Civ_A1P";
+
+                case PaperSize.A2Portrait:
+                    return "Civ_A2P";
+
+                case PaperSize.A3Portrait:
+                    return "Civ_A3P";
+
+                case PaperSize.A4Portrait:
+                    return "Civ_A4P";
+
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
         }
     }
