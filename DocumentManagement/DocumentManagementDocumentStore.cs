@@ -11,19 +11,19 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
        //public ProjectContainer Container { get; private set; }
 
-        public LayoutSheetController LayoutSheetController { get; private set; }
+        //public LayoutSheetController LayoutSheetController { get; private set; }
 
         public DocumentManagementDocumentStore(Document doc, Type[] managerTypes, ILogger log, LayerManager layerManager, IUserSettings settings) : base(doc, managerTypes, log, layerManager, settings) { }
         
         protected override void Save()
         {
-            SaveBinary("LayoutSheetController", LayoutSheetController);
+            //SaveBinary("LayoutSheetController", LayoutSheetController);
             base.Save();
         }
 
         protected override void Load()
         {
-            LayoutSheetController = LoadBinary<LayoutSheetController>("LayoutSheetController");
+            //LayoutSheetController = LoadBinary<LayoutSheetController>("LayoutSheetController");
             base.Load();
         }
     }

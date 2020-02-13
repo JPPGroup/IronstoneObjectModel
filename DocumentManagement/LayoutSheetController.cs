@@ -13,11 +13,13 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         public LayoutSheetController()
         {
             Sheets = new SerializableDictionary<string, LayoutSheet>();
-        }
+        }   
 
-        public void Scan()
+        public void Scan(Document acDoc = null)
         {
-            Document acDoc = Application.DocumentManager.MdiActiveDocument;
+            if(acDoc == null)
+                acDoc = Application.DocumentManager.MdiActiveDocument;
+
             Database acCurDb = acDoc.Database;
 
             Transaction acTrans = acCurDb.TransactionManager.TopTransaction;
@@ -26,7 +28,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             // Step through and list each named layout and Model
             foreach (DBDictionaryEntry item in layouts)
             {
-                if (!Sheets.ContainsKey(item.Key))
+                if (!Sheets.ContainsKey(item.Key) && item.Key != "Model")
                 {
                     Layout acLayout = acTrans.GetObject(item.Value, OpenMode.ForRead) as Layout;
                     LayoutSheet ls = new LayoutSheet();
