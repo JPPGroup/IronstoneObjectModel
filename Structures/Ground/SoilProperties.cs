@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.ObjectModel;
 using Jpp.Common;
 
 namespace Jpp.Ironstone.Structures.ObjectModel
@@ -41,12 +42,15 @@ namespace Jpp.Ironstone.Structures.ObjectModel
         }
         private float _targetStepSize;
 
+        public ObservableCollection<DepthBand> DepthBands { get; }
+
         public SoilProperties()
         {
             //Init to conservative starting values
             _soilShrinkability = Shrinkage.Medium;
             _granular = false;
             _targetStepSize = 0.3f;
+            DepthBands = new ObservableCollection<DepthBand>();
         }
 
         /*private void Update()

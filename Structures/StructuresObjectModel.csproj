@@ -107,6 +107,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Constants.cs" />
+    <Compile Include="Ground\DepthBand.cs" />
     <Compile Include="Ground\Shrinkage.cs" />
     <Compile Include="Ground\SoilProperties.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

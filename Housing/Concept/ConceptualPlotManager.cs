@@ -1,10 +1,13 @@
-﻿using System.Xml.Serialization;
+﻿using System.Collections.Generic;
+using System.Xml.Serialization;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.Civil.ApplicationServices;
+using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel;
+using Unity;
 using CivSurface = Autodesk.Civil.DatabaseServices.Surface;
 
 namespace Jpp.Ironstone.Housing.ObjectModel.Concept
@@ -17,12 +20,31 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
         [XmlIgnore]
         public CivSurface ExistingLevels { get; set; }
 
+        [XmlIgnore]
+        public SoilProperties Properties
+        {
+            get
+            {
+                if (_properties == null)
+                {
+                    _properties = DataService.Current.GetStore<StructureDocumentStore>(this.HostDocument.Name).SoilProperties;
+                }
+
+                return _properties;
+            }
+        }
+
+        private SoilProperties _properties;
+        private ILogger _logger;
+
         public ConceptualPlotManager(Document document, ILogger log) : base(document, log)
         {
+            _logger = CoreExtensionApplication._current.Container.Resolve<ILogger>();
         }
 
         public ConceptualPlotManager() : base()
         {
+            _logger = CoreExtensionApplication._current.Container.Resolve<ILogger>();
         }
 
         public override void UpdateDirty()
@@ -34,14 +56,26 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
 
         public override void UpdateAll()
         {
-            if(ProposedLevels == null)
+            if (ExistingLevels == null || ProposedLevels == null)
                 GetSurfaces();
 
-            // TODO: Check if this is required for when deserializing
-            foreach (ConceptualPlot conceptualPlot in ManagedObjects)
+
+            if (ExistingLevels != null)
             {
-                conceptualPlot.Manager = this;
+                // TODO: Check if this is required for when deserializing
+                foreach (ConceptualPlot conceptualPlot in ManagedObjects)
+                {
+                    if (conceptualPlot.FoundationsEnabled)
+                    {
+                        if(!SharedUIHelper.StructuresAvailable)
+                            _logger.Entry("Foundations cannot be updated while the structures modules is not present", Severity.Error);
+
+                        if(conceptualPlot.EstimateFoundationLevel(ExistingLevels, ProposedLevels, Properties))
+                            conceptualPlot.RenderFoundations(Properties.DepthBands);
+                    }
+                }
             }
+
             base.UpdateAll();
         }
 

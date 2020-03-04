@@ -1,12 +1,16 @@
 ﻿using System;
-using System.Xml.Serialization;
+using System.Collections.Generic;
+using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.Civil.DatabaseServices;
+using Jpp.DesignCalculations.Calculations.Design.Foundations;
 using Jpp.Ironstone.Core.Autocad.DrawingObjects.Primitives;
+using Jpp.Ironstone.Structures.ObjectModel;
 using DBObject = Autodesk.AutoCAD.DatabaseServices.DBObject;
+using CivSurface = Autodesk.Civil.DatabaseServices.Surface;
+using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace Jpp.Ironstone.Housing.ObjectModel.Concept
 {
@@ -15,26 +19,74 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
     /// </summary>
     public class ConceptualPlot : ClosedPolylineDrawingObject
     {
-        [XmlIgnore]
-        public ConceptualPlotManager Manager { get; set; }
-
         public string PlotId { get; set; }
+
+        private NHBC2020FoundationDepth _depth;
+        
+        public double FoundationDepth
+        {
+            get
+            {
+                if (!_depth.Calculated)
+                    throw new InvalidOperationException();
+
+                return _depth.FoundationDepth.Value;
+            }
+        }
+
+        public HatchDrawingObject DepthHatch
+        {
+            get
+            {
+                if (SubObjects.ContainsKey(DEPTH_HATCH_KEY))
+                    return SubObjects[DEPTH_HATCH_KEY] as HatchDrawingObject;
+
+                return null;
+            }
+            set
+            {
+                if (SubObjects.ContainsKey(DEPTH_HATCH_KEY)) 
+                    SubObjects[DEPTH_HATCH_KEY] = value;
+
+            }
+        }
+
+        private const string DEPTH_HATCH_KEY = "DEPTH_HATCH";
 
         public ConceptualPlot(PolylineDrawingObject drawingObject) : base(drawingObject)
         {
+            _depth = new NHBC2020FoundationDepth();
         }
 
         private ConceptualPlot() : base()
         {
-
+            _depth = new NHBC2020FoundationDepth();
         }
 
-        public override Point3d Location { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
-        public override double Rotation { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public bool FoundationsEnabled { get; set; }
+
+        // TODO: Properly implement this
+        public override Point3d Location
+        {
+            get
+            {
+                return Point3d.Origin;
+                
+            }
+            set { ; }
+        }
+
+        // TODO: Properly implement this
+        public override double Rotation
+        {
+            get { return 0; }
+            set { ; }
+        }
 
         public override void Erase()
         {
-            throw new NotImplementedException();
+            // TODO: Implement
+            //throw new NotImplementedException();
         }
 
         public override void Generate()
@@ -43,9 +95,9 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
         }
 
         // TODO: Port of existing code, requires refactoring immininently
-        public void EstimateFFLFromSurface()
+        public void EstimateFFLFromSurface(CivSurface proposed)
         {
-            Document acDoc = Application.DocumentManager.MdiActiveDocument;
+            Document acDoc = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.MdiActiveDocument;
             Database acCurDb = acDoc.Database;
             using (Transaction acTrans = acCurDb.TransactionManager.StartTransaction())
             {
@@ -58,7 +110,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
 
                 ObjectId perimId = FeatureLine.Create("plot" + PlotId, obj.ObjectId);
                 FeatureLine perim = acTrans.GetObject(perimId, OpenMode.ForWrite) as FeatureLine;
-                perim.AssignElevationsFromSurface(Manager.ProposedLevels.Id, false);
+                perim.AssignElevationsFromSurface(proposed.Id, false);
                 var points = perim.GetPoints(Autodesk.Civil.FeatureLinePointType.PIPoint);
 
                 // TODO: Move to settings
@@ -114,6 +166,103 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
                 //obj.Erase();
                 acTrans.Commit();
             }
+        }
+
+        public bool EstimateFoundationLevel(CivSurface existing, CivSurface proposed, SoilProperties properties)
+        {
+            SetFoundationInputs(existing, proposed, properties);
+
+            _depth.Run();
+            if (_depth.Calculated)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private SurfaceProperties ExtractSurfaceInformation(CivSurface targetSurface)
+        {
+            Document acDoc = Application.DocumentManager.MdiActiveDocument;
+            Database acCurDb = acDoc.Database;
+            Transaction acTrans = acCurDb.TransactionManager.TopTransaction;
+            Polyline boundary = (Polyline) acTrans.GetObject(this.BaseObject, OpenMode.ForRead);
+
+            Point2dCollection points = new Point2dCollection();
+            for (int i = 0, size = boundary.NumberOfVertices; i < size; i++)
+                points.Add(boundary.GetPoint2dAt(i));
+
+            SurfaceProperties result = new SurfaceProperties();
+
+            using (Database destDb = new Database(true, true))
+            {
+                using (Transaction transDest = destDb.TransactionManager.StartTransaction())
+                {
+
+                    Database db = Application.DocumentManager.MdiActiveDocument.Database;
+                    HostApplicationServices.WorkingDatabase = destDb;
+
+                    ObjectId newSurfaceId = TinSurface.CreateByCropping(destDb, "Surface<[Next Counter(CP)]>",
+                        targetSurface.ObjectId, points);
+                    TinSurface newSurface = transDest.GetObject(newSurfaceId, OpenMode.ForRead) as TinSurface;
+                    GeneralSurfaceProperties genProps = newSurface.GetGeneralProperties();
+                    result.MaxElevation = genProps.MaximumElevation;
+                    result.MinElevation = genProps.MinimumElevation;
+
+                    HostApplicationServices.WorkingDatabase = db;
+                }
+            }
+
+            return result;
+        }
+
+        private void SetFoundationInputs(CivSurface existing, CivSurface proposed, SoilProperties properties)
+        {
+            _depth.ExistingGroundLevel = ExtractSurfaceInformation(existing).MinElevation;
+
+            if(proposed != null)
+                _depth.ProposedGroundLevel = ExtractSurfaceInformation(proposed).MinElevation;
+
+            switch (properties.SoilShrinkability)
+            {
+                case Shrinkage.High:
+                    _depth.SoilPlasticity = VolumeChangePotential.High;
+                    break;
+
+                case Shrinkage.Medium:
+                    _depth.SoilPlasticity = VolumeChangePotential.Medium;
+                    break;
+
+                case Shrinkage.Low:
+                    _depth.SoilPlasticity = VolumeChangePotential.Low;
+                    break;
+            }
+        }
+
+        public void RenderFoundations(IEnumerable<DepthBand> depthBands)
+        {
+            if(!_depth.Calculated)
+                throw new InvalidOperationException("Please run calculation before attempting to render the depths");
+
+            double relativeDepth = _depth.ExistingGroundLevel.Value - _depth.FoundationDepth.Value;
+
+            var band = depthBands.Where(db => db.StartDepth <= relativeDepth && db.EndDepth > relativeDepth);
+            if(band.Count() >= 1)
+                throw new InvalidOperationException("Multiple applicable bands");
+
+            if (band.Count() == 0)
+                throw new InvalidOperationException("Multiple applicable bands");
+
+            DepthHatch = CreateHatch("SOLID");
+            DepthHatch.Color = band.First().Color;
+        }
+
+        private struct SurfaceProperties
+        {
+            public double MaxElevation { get; set; }
+            public double MinElevation { get; set; }
         }
     }
 }

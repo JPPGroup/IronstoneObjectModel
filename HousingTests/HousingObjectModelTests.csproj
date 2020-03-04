@@ -115,14 +115,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Concept\ConceptualPlotCivil3DTests.cs" />
     <Compile Include="Concept\ConceptualPlotTests.cs" />
     <Compile Include="HousingDocumentStoreTests.cs" />
+    <Compile Include="IronstoneCivilTestFixture.cs" />
     <Compile Include="IronstoneTestFixture.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
     <None Include="BaseConfig.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Concept\ConceptPreppedDrawing.dwg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
@@ -135,6 +140,10 @@
     <ProjectReference Include="..\Housing\HousingObjectModel.csproj">
       <Project>{b45b4490-1cfb-412e-bcd0-9606290e4777}</Project>
       <Name>HousingObjectModel</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Structures\StructuresObjectModel.csproj">
+      <Project>{ada84b10-90ab-4ad2-9f7c-fdfd362ac7ca}</Project>
+      <Name>StructuresObjectModel</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
