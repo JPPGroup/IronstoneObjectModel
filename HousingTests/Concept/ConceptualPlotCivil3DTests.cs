@@ -10,6 +10,7 @@ using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Housing.ObjectModel.Concept;
 using Jpp.Ironstone.Structures.ObjectModel;
 using NUnit.Framework;
+using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 using CivSurface = Autodesk.Civil.DatabaseServices.Surface;
 
 namespace Jpp.Ironstone.Housing.ObjectModel.Tests.Concept
@@ -24,7 +25,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Tests.Concept
         }
         
         [TestCase("Ex Ground", "Prop Ground", -0.90)]
-        [TestCase("Ex Ground", "No Ground", 0.01)]
+        [TestCase("Ex Ground", "No Ground", 0.1)]
         public void EstimateFoundations(string exGround, string propGround, double expectedResult)
         {
             FoundationInput input = new FoundationInput()

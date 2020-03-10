@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel.TreeRings;
@@ -21,7 +18,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
     {
         private static readonly Random Random = new Random();
 
-        public TreeTests() : base(Assembly.GetExecutingAssembly(), typeof(TreeTests), @"..\..\..\Drawings\blank.dwg") { }
+        public TreeTests() : base(Assembly.GetExecutingAssembly(), typeof(TreeTests), Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\Test Drawings\\blank.dwg") { }
 
         [TestCase(1)]
         [TestCase(10)]

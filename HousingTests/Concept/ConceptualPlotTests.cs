@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.Autocad.DrawingObjects.Primitives;
 using Jpp.Ironstone.Housing.ObjectModel.Concept;
 using NUnit.Framework;
+using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace Jpp.Ironstone.Housing.ObjectModel.Tests.Concept
 {
