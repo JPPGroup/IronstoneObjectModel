@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using Jpp.Ironstone.Core.Autocad;
+using Jpp.Ironstone.Core.ServiceInterfaces;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 {
-    class ViewportDrawingObject : DrawingObject
+    public class ViewportDrawingObject : DrawingObject
     {
         protected ViewportDrawingObject() : base()
         { }
@@ -51,11 +55,6 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             throw new NotImplementedException();
         }
 
-        public override Rectangle GetBoundingBox()
-        {
-            throw new NotImplementedException();
-        }
-
         public void SetDimensions(double Bottom, double Top, double Left, double Right)
         {
             Transaction trans = _database.TransactionManager.TopTransaction;
@@ -71,6 +70,49 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             Transaction trans = _database.TransactionManager.TopTransaction;
             Viewport vp = trans.GetObject(BaseObject, OpenMode.ForWrite) as Viewport;
             vp.CustomScale = scale;
+        }
+
+        public void SetStandardScale(IUserSettings settings, double scale)
+        {
+            double[] settingScales = settings.GetObject<double[]>("standardScales");
+            List<double> scaleValue = new List<double>();
+            foreach (double setting in settingScales)
+            {
+                scaleValue.Add(1000 / setting);
+            }
+
+            scaleValue = scaleValue.OrderByDescending(d => d).ToList();
+
+            double standardScale = 0;
+            foreach (double d in scaleValue)
+            {
+                if (d < scale)
+                {
+                    standardScale = d;
+                    break;
+                }
+            }
+
+            if (standardScale == 0)
+                throw new ArgumentOutOfRangeException($"No appropriate scale found, requested {scale} equates to {1/scale}");
+            
+            SetScale(standardScale);
+        }
+
+        public void FocusOn(IUserSettings settings, Extents3d extents)
+        {
+            Transaction trans = _database.TransactionManager.TopTransaction;
+            Viewport vp = trans.GetObject(BaseObject, OpenMode.ForWrite) as Viewport;
+            Point3d center = (extents.MinPoint + ((extents.MaxPoint - extents.MinPoint) * 0.5));
+            vp.ViewCenter = new Point2d(center.X, center.Y);
+
+            double requiredHeight = extents.MaxPoint.Y - extents.MinPoint.Y;
+            double requiredHeightScale = vp.Height / requiredHeight;
+
+            double requiredWidth = extents.MaxPoint.X - extents.MinPoint.X;
+            double requiredWidthScale = vp.Width / requiredWidth;
+
+            SetStandardScale(settings, Math.Min(requiredHeightScale, requiredWidthScale));
         }
     }
 }

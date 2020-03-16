@@ -26,10 +26,11 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             _viewportGrid = new ViewportDrawingObject[1,1];
         }
 
-        public void AddFullViewport()
+        public ViewportDrawingObject AddFullViewport()
         {
             ViewportDrawingObject viewport = ViewportDrawingObject.Create(_layout, Bottom, Top, Left, Right);
             _viewportGrid[0, 0] = viewport;
+            return viewport;
         }
     }
 }

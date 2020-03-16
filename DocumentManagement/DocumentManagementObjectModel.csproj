@@ -25,9 +25,11 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\CivilTemplate.dwg" />
+    <None Remove="Resources\SchemeTrackerV26.xlsx" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\CivilTemplate.dwg" />
+    <EmbeddedResource Include="Resources\SchemeTrackerV26.xlsx" />
   </ItemGroup>    
   <ItemGroup>    
     <Reference Include="System" />

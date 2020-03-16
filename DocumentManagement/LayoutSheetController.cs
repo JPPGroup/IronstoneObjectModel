@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Common;
@@ -44,7 +45,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             }
         }
 
-        public void AddLayout(string layoutName, PaperSize size)
+        public LayoutSheet AddLayout(string layoutName, PaperSize size)
         {
             using (Database template = new Database(false, true))
             {
@@ -53,12 +54,12 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                 //Database old = Application.DocumentManager.MdiActiveDocument.Database;
 
                 Layout destinationLayout = destTransaction.GetObject(LayoutManager.Current.CreateLayout(layoutName), OpenMode.ForWrite) as Layout;
-                
                 //HostApplicationServices.WorkingDatabase = template;
 
                 using (Transaction sourceTrans = template.TransactionManager.StartTransaction())
                 {
-                    Layout layout = _document.Database.GetLayout(GetLayoutName(size));
+                    //Layout layout = _document.Database.GetLayout(GetLayoutName(size));
+                    Layout layout = template.GetLayout(GetLayoutName(size));
                     destinationLayout.CopyFrom(layout);
                     BlockTableRecord sourceBlockTableRecord =
                         sourceTrans.GetObject(layout.BlockTableRecordId, OpenMode.ForRead) as BlockTableRecord;
@@ -71,8 +72,40 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                     // TODO: Confirm ignore is correct option
                     _document.Database.WblockCloneObjects(sourceObjects, destinationLayout.BlockTableRecordId, mapping, DuplicateRecordCloning.Ignore, false);
                 }
+
+                LayoutSheet resultSheet = new LayoutSheet(_logger, destinationLayout);
+                Sheets.Add(resultSheet.Name, resultSheet);
+
+                return resultSheet;
             }
-            
+        }
+
+        public void RemoveDefaultLayouts()
+        {
+            Transaction trans = _document.TransactionManager.TopTransaction;
+
+            DBDictionary layoutDic = trans.GetObject(_document.Database.LayoutDictionaryId, OpenMode.ForRead, false) as DBDictionary;
+
+            string pattern = @"\d+ - .+";
+
+            LayoutManager acLayoutMgr = LayoutManager.Current;
+
+            foreach (DBDictionaryEntry entry in layoutDic)
+            {
+                ObjectId layoutId = entry.Value;
+                Layout layout = trans.GetObject(layoutId, OpenMode.ForRead) as Layout;
+
+                if (!layout.LayoutName.StartsWith("Model"))
+                {
+                    Match m = Regex.Match(layout.LayoutName, pattern);
+                    if (!m.Success)
+                    {
+                        acLayoutMgr.DeleteLayout(layout.LayoutName);
+                        if(Sheets.ContainsKey(layout.LayoutName))
+                            Sheets.Remove(layout.LayoutName);
+                    }
+                }
+            }
         }
 
         private void SideLoad(Database template)
@@ -83,10 +116,11 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             {
                 templatePath = Path.GetTempFileName();
                 using (Stream s = Assembly.GetExecutingAssembly()
-                    .GetManifestResourceStream("Jpp.Ironstone.DocumentManagement.ObjectModel.CivilTemplate.dwg"))
+                    .GetManifestResourceStream("Jpp.Ironstone.DocumentManagement.ObjectModel.Resources.CivilTemplate.dwg"))
                 {
                     using (FileStream outStream = File.OpenWrite(templatePath))
                     {
+                        // TODO: Add null checks/testing here
                         s.CopyTo(outStream);
                     }
                 }

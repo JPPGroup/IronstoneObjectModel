@@ -24,14 +24,17 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         public DrawingArea DrawingArea { get; private set; }
         public NoteArea NoteArea { get; private set; }
 
-        public LayoutSheet(ILogger logger, Layout layout)
+        public LayoutSheet(ILogger logger, Layout layout, bool JPPLayout = true)
         {
             _layout = layout;
             LayoutID = layout.Id;
             Name = layout.LayoutName;
-            SetSize(_layout.CanonicalMediaName);
 
-            FindTitleBlock();
+            if (JPPLayout)
+            {
+                SetSize(_layout.CanonicalMediaName);
+                FindTitleBlock();
+            }
         }
 
         private void SetSize(string canonicalMediaName)
@@ -85,9 +88,10 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             psv.SetStdScaleType(ps, StdScaleType.StdScale1To1);
 
             /*PlotConfig pConfig = PlotConfigManager.SetCurrentConfig("DWG To PDF.pc3");
-            var devices = psv.GetPlotDeviceList();
+            var devices = psv.GetPlotDeviceList();*/
+            psv.SetPlotConfigurationName(ps, "DWG To PDF.pc3", null);
             psv.RefreshLists(ps);
-            var media = psv.GetCanonicalMediaNameList(ps);*/
+            var media = psv.GetCanonicalMediaNameList(ps);
 
             psv.SetPlotConfigurationName(ps, "DWG To PDF.pc3", GetMediaName());
 
@@ -121,7 +125,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             switch (Size)
             {
                 case PaperSize.A1Landscape:
-                    return "ISO_expand_A1(841.00_x_594.00_MM)";
+                    return "ISO_expand_A1_(841.00_x_594.00_MM)";
             }
             
             throw new ArgumentOutOfRangeException();

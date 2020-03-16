@@ -1,16 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.Civil;
 using Autodesk.Civil.DatabaseServices;
 using Jpp.DesignCalculations.Calculations.Design.Foundations;
 using Jpp.Ironstone.Core.Autocad.DrawingObjects.Primitives;
+using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel;
 using DBObject = Autodesk.AutoCAD.DatabaseServices.DBObject;
 using CivSurface = Autodesk.Civil.DatabaseServices.Surface;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
+using Region = Autodesk.AutoCAD.DatabaseServices.Region;
+using Entity = Autodesk.AutoCAD.DatabaseServices.Entity;
 
 namespace Jpp.Ironstone.Housing.ObjectModel.Concept
 {
@@ -176,7 +181,8 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
 
         public bool EstimateFoundationLevel(CivSurface existing, CivSurface proposed, SoilProperties properties)
         {
-            SetFoundationInputs(existing, proposed, properties);
+            if (!SetFoundationInputs(existing, proposed, properties))
+                return false;
 
             _depth.Run();
             if (_depth.Calculated)
@@ -189,7 +195,8 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
             }
         }
 
-        private SurfaceProperties ExtractSurfaceInformation(CivSurface targetSurface)
+        // TODO: Revoew this method
+        /*private SurfaceProperties? ExtractSurfaceInformation(CivSurface targetSurface)
         {
             Document acDoc = Application.DocumentManager.MdiActiveDocument;
             Database acCurDb = acDoc.Database;
@@ -206,30 +213,75 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
             {
                 using (Transaction transDest = destDb.TransactionManager.StartTransaction())
                 {
-
+            
                     Database db = Application.DocumentManager.MdiActiveDocument.Database;
                     HostApplicationServices.WorkingDatabase = destDb;
 
-                    ObjectId newSurfaceId = TinSurface.CreateByCropping(destDb, "Surface<[Next Counter(CP)]>",
-                        targetSurface.ObjectId, points);
-                    TinSurface newSurface = transDest.GetObject(newSurfaceId, OpenMode.ForRead) as TinSurface;
-                    GeneralSurfaceProperties genProps = newSurface.GetGeneralProperties();
-                    result.MaxElevation = genProps.MaximumElevation;
-                    result.MinElevation = genProps.MinimumElevation;
+                    // TODO: Review if exception handling is the answer
+                    ObjectId newSurfaceId;
+                    try
+                    {
+                        // This errors out when surface has ben copied
+                        newSurfaceId = TinSurface.CreateByCropping(destDb, "Surface<[Next Counter(CP)]>",
+                            targetSurface.ObjectId, points);
 
-                    HostApplicationServices.WorkingDatabase = db;
+                        TinSurface newSurface = transDest.GetObject(newSurfaceId, OpenMode.ForRead) as TinSurface;
+                        GeneralSurfaceProperties genProps = newSurface.GetGeneralProperties();
+                        result.MaxElevation = genProps.MaximumElevation;
+                        result.MinElevation = genProps.MinimumElevation;
+                    }
+                    catch (SurfaceException e)
+                    {
+                        return null;
+                    }
+                    finally
+                    {
+                        HostApplicationServices.WorkingDatabase = db;
+                    }
                 }
             }
 
             return result;
+        }*/
+
+        public FeatureLine GetPerim(CivSurface targetSurface)
+        {
+            Document acDoc = Application.DocumentManager.MdiActiveDocument;
+            Database acCurDb = acDoc.Database;
+            Transaction acTrans = acCurDb.TransactionManager.TopTransaction;
+            //Polyline boundary = (Polyline) acTrans.GetObject(this.BaseObject, OpenMode.ForRead);
+            
+            ObjectId perimId = FeatureLine.Create(Guid.NewGuid().ToString(), this.BaseObject);
+            FeatureLine perim = acTrans.GetObject(perimId, OpenMode.ForWrite) as FeatureLine;
+            perim.AssignElevationsFromSurface(targetSurface.Id, true);
+
+            return perim;
         }
 
-        private void SetFoundationInputs(CivSurface existing, CivSurface proposed, SoilProperties properties)
+        private bool SetFoundationInputs(CivSurface existing, CivSurface proposed, SoilProperties properties)
         {
-            _depth.ExistingGroundLevel = ExtractSurfaceInformation(existing).MinElevation;
+            /*SurfaceProperties? existingProps = ExtractSurfaceInformation(existing);
+            if (existingProps.HasValue)
+            {
+                _depth.ExistingGroundLevel = existingProps.Value.MinElevation;
+            }
+            else
+            {
+                return false;
+            }*/
+            FeatureLine existingLine = GetPerim(existing);
+            _depth.ExistingGroundLevel = existingLine.MinElevation;
 
-            if(proposed != null)
-                _depth.ProposedGroundLevel = ExtractSurfaceInformation(proposed).MinElevation;
+            if (proposed != null)
+            {
+                /*SurfaceProperties? proposedProps = ExtractSurfaceInformation(proposed);
+                if (proposedProps.HasValue)
+                {
+                    _depth.ProposedGroundLevel = proposedProps.Value.MinElevation;
+                }*/
+                FeatureLine proposedLine = GetPerim(proposed);
+                _depth.ProposedGroundLevel = proposedLine.MinElevation;
+            }
 
             switch (properties.SoilShrinkability)
             {
@@ -245,9 +297,11 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
                     _depth.SoilPlasticity = VolumeChangePotential.Low;
                     break;
             }
+
+            return true;
         }
 
-        public void RenderFoundations(IEnumerable<DepthBand> depthBands)
+        public void RenderFoundations(IEnumerable<DepthBand> depthBands, ILogger logger)
         {
             if(!_depth.Calculated)
                 throw new InvalidOperationException("Please run calculation before attempting to render the depths");
@@ -256,10 +310,10 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
 
             var band = depthBands.Where(db => db.StartDepth <= relativeDepth && db.EndDepth > relativeDepth);
             if(band.Count() > 1)
-                throw new InvalidOperationException("Multiple applicable bands");
+                logger.Entry("Multiple overlapping depth bands found, using first band encountered", Severity.Warning);
 
             if (band.Count() == 0)
-                throw new InvalidOperationException("Multiple applicable bands");
+                throw new InvalidOperationException("No matching band found");
 
             // TODO: CHange to pull pattern from settings file
             DepthHatch = CreateHatch("SOLID");

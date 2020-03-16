@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using Sheet = DocumentFormat.OpenXml.Spreadsheet.Sheet;
@@ -55,10 +56,19 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             }
             else
             {
-                string sourcePath =
+                /*string sourcePath =
                     Path.Combine(Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location),
                         "DrawingRegister\\T17-1 Scheme Tracker V26.xlsx");
-                File.Copy(sourcePath, _path);
+                File.Copy(sourcePath, _path);*/
+                using (Stream s = Assembly.GetExecutingAssembly()
+                    .GetManifestResourceStream("Jpp.Ironstone.DocumentManagement.ObjectModel.Resources.SchemeTrackerV26.xlsx"))
+                {
+                    using (FileStream outStream = File.OpenWrite(_path))
+                    {
+                        // TODO: Add null checks/testing here
+                        s.CopyTo(outStream);
+                    }
+                }
             }
         }
 

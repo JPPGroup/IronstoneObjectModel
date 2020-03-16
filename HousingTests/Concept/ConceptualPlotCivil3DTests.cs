@@ -72,7 +72,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Tests.Concept
             CivSurface existingGround = GetSurface(props.ExistingGroundSurfaceName);
             CivSurface proposedGround = GetSurface(props.ProposedGroundSurfaceName);
             plot.EstimateFoundationLevel(existingGround, proposedGround, props);
-            plot.RenderFoundations(props.DepthBands);
+            plot.RenderFoundations(props.DepthBands, null);
             return plot;
         }
 

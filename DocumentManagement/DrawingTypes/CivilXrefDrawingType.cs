@@ -10,10 +10,11 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using Jpp.Ironstone.Core.Autocad;
+using Jpp.Ironstone.DocumentManagement.ObjectModel.DrawingTypes;
 
 namespace Jpp.Ironstone.DocumentManagement.Objectmodel.DrawingTypes
 {
-    public class CivilXrefDrawingType : AbstractDrawingType
+    public class CivilXrefDrawingType : AbstractXrefDrawingType
     {
         public override void SetDrawing(Document acDoc)
         {
@@ -122,6 +123,11 @@ namespace Jpp.Ironstone.DocumentManagement.Objectmodel.DrawingTypes
                     tr.Commit();
                 }
             }
+        }
+
+        public override void Initialise(Document doc)
+        {
+            throw new NotImplementedException();
         }
     }
 }

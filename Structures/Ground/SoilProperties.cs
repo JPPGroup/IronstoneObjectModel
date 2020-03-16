@@ -46,7 +46,19 @@ namespace Jpp.Ironstone.Structures.ObjectModel
         }
         private float _targetStepSize;
 
-        public ObservableCollection<DepthBand> DepthBands { get; }
+        public ObservableCollection<DepthBand> DepthBands
+        {
+            get
+            {
+                if (_depthBands == null)
+                    _depthBands = LoadDefaultBands();
+
+                return _depthBands;
+            }
+            set { _depthBands = value; }
+        }
+
+        private ObservableCollection<DepthBand> _depthBands;
 
         public SoilProperties()
         {
@@ -54,7 +66,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel
             _soilShrinkability = Shrinkage.Medium;
             _granular = false;
             _targetStepSize = 0.3f;
-            DepthBands = LoadDefaultBands();
+            
         }
 
         private ObservableCollection<DepthBand> LoadDefaultBands()
