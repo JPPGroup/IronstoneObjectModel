@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -13,7 +13,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
     [TestFixture]
     public class TreeRingManagerTests : IronstoneTestFixture
     {
-        public TreeRingManagerTests() : base(Assembly.GetExecutingAssembly(), typeof(TreeRingManagerTests), @"..\..\..\Drawings\blank.dwg") { }
+        public TreeRingManagerTests() : base(Assembly.GetExecutingAssembly(), typeof(TreeRingManagerTests), Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\Test Drawings\\blank.dwg") { }
 
         [Test]
         public void VerifyManagerLoaded()

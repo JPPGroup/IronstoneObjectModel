@@ -5,7 +5,7 @@ using Jpp.AcTestFramework;
 using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Mocking;
 
-namespace Jpp.Ironstone.Structures.ObjectModel.Test
+namespace Jpp.Ironstone.DocumentManagement.ObjectModel.IntegrationTests
 {
     public abstract class IronstoneTestFixture : CoreConsoleTestFixture
     {
