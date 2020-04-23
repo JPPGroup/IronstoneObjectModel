@@ -15,6 +15,13 @@
   <Import Project="..\IronstoneBase\IronstoneObjectModelBaseProject.csproj" />
   <ItemGroup>
     <Reference Include="PresentationCore" />
+
+  <ItemGroup Condition=" $(Configuration.Contains('Local')) == false ">
+    <!-- Add design calcs -->
+  </ItemGroup>
+  <ItemGroup Condition=" $(Configuration.Contains('Local')) ">
+    
+    <ProjectReference Include="..\..\DesignCalculations\src\DesignCalculations.Engine\DesignCalculations.Engine.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="IronstoneConfig.xml">
