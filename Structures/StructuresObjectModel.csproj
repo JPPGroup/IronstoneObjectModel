@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup Condition=" $(Configuration.Contains('Local')) ">
     <ProjectReference Include="..\..\ironstone-core\Ironstone Core\Ironstone Core.csproj" />
+    <ProjectReference Include="..\..\DesignCalculations\src\DesignCalculations.Engine\DesignCalculations.Engine.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="IronstoneConfig.xml">
