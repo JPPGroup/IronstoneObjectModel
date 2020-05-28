@@ -25,7 +25,8 @@
   <ItemGroup Condition=" $(Configuration.Contains('Local')) == false">
     <!--Add reference to design calcs-->
   </ItemGroup>
-  <ItemGroup Condition=" $(Configuration.Contains('Local')) ">
+  <ItemGroup Condition=" $(Configuration.Contains('Local')) ">    
+    <ProjectReference Include="..\Structures\StructuresObjectModel.csproj" />
     <ProjectReference Include="..\..\DesignCalculations\src\DesignCalculations.Calculations\DesignCalculations.Calculations.csproj" />
   </ItemGroup>
   <ItemGroup>

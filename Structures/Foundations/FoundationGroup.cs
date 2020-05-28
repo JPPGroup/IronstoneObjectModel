@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Jpp.Ironstone.Structures.ObjectModel.Ground;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
