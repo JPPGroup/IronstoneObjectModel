@@ -68,5 +68,42 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Properties {
                 return ResourceManager.GetString("ExtensionApplication_UI_HousingContextTabTitle", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to House Plots.
+        /// </summary>
+        internal static string ExtensionApplication_UI_HousingDesignTabTitle {
+            get {
+                return ResourceManager.GetString("ExtensionApplication_UI_HousingDesignTabTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Houses_Small {
+            get {
+                object obj = ResourceManager.GetObject("Houses_Small", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to House Elements.
+        /// </summary>
+        internal static string SharedUIHelper_UI_MasterCreationContextTabTitle {
+            get {
+                return ResourceManager.GetString("SharedUIHelper_UI_MasterCreationContextTabTitle", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to New Plot Type.
+        /// </summary>
+        internal static string SharedUIHelper_UI_NewPlotMaster {
+            get {
+                return ResourceManager.GetString("SharedUIHelper_UI_NewPlotMaster", resourceCulture);
+            }
+        }
     }
 }
