@@ -5,11 +5,13 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.Autocad;
+using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel.Foundations;
 
 namespace Jpp.Ironstone.Housing.ObjectModel.Detail
 {
     // TODO: Review the entire class as this has been copied wholesale
+    [Layer(Name = FoundationCentreLine.FOUNDATION_LAYER)]
     public partial class DetailPlotManager : AbstractDrawingObjectManager<DetailPlot>
     {
         private List<FoundationGroup> _foundationGroups;
@@ -19,27 +21,32 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
             throw new NotImplementedException();
         }
 
+        private string _foundationLayerName;
+
         public void UpdateAllFoundations()
         {
-            using (Transaction acTrans = HostDocument.Database.TransactionManager.StartTransaction())
+            LayerManager layerManager = DataService.Current.GetStore<DocumentStore>(HostDocument.Name).LayerManager;
+            _foundationLayerName = layerManager.GetLayerName(FoundationCentreLine.FOUNDATION_LAYER);
+
+            foreach (FoundationGroup group in _foundationGroups)
             {
-                _foundationGroups.Clear();
-
-                ICollection<FoundationCentreLine> centrelines = GetCentrelines();
-                centrelines = DetermineOverlayedLines(centrelines);
-                GroupCentrelines(centrelines);
-
-                foreach (FoundationGroup foundationGroup in _foundationGroups)
-                {
-                    foundationGroup.Rebuild();
-                }
-
-                RemoveCentrelines(centrelines);
-
-                acTrans.Commit();
+                group.Delete();
             }
+
+            _foundationGroups.Clear();
+
+            ICollection<FoundationCentreLine> centrelines = GetCentrelines();
+            centrelines = DetermineOverlayedLines(centrelines);
+            GroupCentrelines(centrelines);
+
+            foreach (FoundationGroup foundationGroup in _foundationGroups)
+            {
+                foundationGroup.Rebuild();
+            }
+
+            RemoveCentrelines(centrelines);
         }
-        
+
         private ICollection<FoundationCentreLine> GetCentrelines()
         {
             // Explode plots into foundation centrelines 
@@ -74,7 +81,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
             List<FoundationNode> nodes = new List<FoundationNode>();
 
             GenerateNodes(nodes, centrelines);
-            Partition(centrelines);
+            Partition(nodes, centrelines);
         }
 
         private void GenerateNodes(List<FoundationNode> nodes, ICollection<FoundationCentreLine> centrelines)
@@ -116,7 +123,8 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
 
                                 foreach (DBObject splitSegment in splitSegments)
                                 {
-                                    FoundationCentreLine fcl = new FoundationCentreLine(acDoc, _soilProperties);
+                                    
+                                    FoundationCentreLine fcl = new FoundationCentreLine(acDoc, _soilProperties, _foundationLayerName);
                                     fcl.BaseObject = modelSpace.AppendEntity(splitSegment as Entity);
                                     acTrans.AddNewlyCreatedDBObject(splitSegment, true);
                                     centrelines.Add(fcl);
@@ -135,7 +143,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
         }
 
 
-        private void Partition(ICollection<FoundationCentreLine> centrelines)
+        private void Partition(List<FoundationNode> nodes, ICollection<FoundationCentreLine> centrelines)
         {
             /*Guid id = Guid.NewGuid();
             //TODO: Add optimisation partition code here
@@ -155,6 +163,11 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
             foreach (FoundationCentreLine foundationCentreLine in centrelines)
             {
                 foundationGroup.Centrelines.Add(foundationCentreLine);
+            }
+
+            foreach (FoundationNode foundationNode in nodes)
+            {
+                foundationGroup.Nodes.Add(foundationNode);
             }
 
             _foundationGroups.Add(foundationGroup);

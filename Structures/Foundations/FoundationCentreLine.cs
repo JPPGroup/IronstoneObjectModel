@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.Autocad;
@@ -11,6 +10,9 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
 {
     public class FoundationCentreLine : LineDrawingObject
     {
+        public const string FOUNDATION_LAYER = "structures.foundations.layers.foundation";
+        // TODO: Check layers can be found
+
         public Guid PartitionId { get; set; }
 
         public List<string> PlotIds { get; }
@@ -24,63 +26,82 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
 
         private SoilProperties _soilProperties;
 
-        public Entity LeftOffset { get; set; }
-        public Entity RightOffset { get; set; }
+        public ObjectId LeftOffset { get; set; }
+        public ObjectId RightOffset { get; set; }
 
-        public FoundationCentreLine(Document doc, SoilProperties soilProperties) : base(doc)
+        public Curve LeftOffsetCached
+        {
+            get
+            {
+                if (_leftOffsetCached == null)
+                {
+                    Transaction trans = _document.TransactionManager.TopTransaction;
+                    _leftOffsetCached = (Curve)trans.GetObject(LeftOffset, OpenMode.ForWrite);
+                }
+
+                return _leftOffsetCached;
+            }
+            private set { _leftOffsetCached = value; }
+        }
+
+        public Curve RightOffsetCached
+        {
+            get
+            {
+                if (_rightOffsetCached == null)
+                {
+                    Transaction trans = _document.TransactionManager.TopTransaction;
+                    _rightOffsetCached = (Curve)trans.GetObject(RightOffset, OpenMode.ForWrite);
+                }
+
+                return _rightOffsetCached;
+            }
+            private set { _rightOffsetCached = value; }
+        }
+
+        private Curve _leftOffsetCached, _rightOffsetCached;
+
+        public FoundationCentreLine(Document doc, SoilProperties soilProperties, string foundationLayerName) : base(doc)
         {
             _soilProperties = soilProperties;
             _offsets = new PersistentObjectIdCollection();
             PlotIds = new List<string>();
+            _foundationLayerName = foundationLayerName;
         }
+
+        private string _foundationLayerName;
 
         public void AddWidths()
         {
+            RightOffsetCached = null;
+            LeftOffsetCached = null;
             //double requiredWidth = UnfactoredLineLoad / _soilProperties.AllowableGroundBearingPressure;
             double requiredWidth = CalculateRequiredWidth();
             
-            Transaction acTrans = _document.TransactionManager.TopTransaction;
+            Transaction trans = _document.TransactionManager.TopTransaction;
             
-            LeftOffset = this.CreateLeftOffset(requiredWidth / 2);
-            RightOffset = this.CreateRightOffset(requiredWidth / 2);
+            LeftOffsetCached = this.CreateLeftOffset(requiredWidth / 2);
+            LeftOffsetCached.Layer = _foundationLayerName;
+            RightOffsetCached = this.CreateRightOffset(requiredWidth / 2);
+            RightOffsetCached.Layer = _foundationLayerName;
 
             BlockTableRecord modelSpace = _document.Database.GetModelSpace(true);
 
-            modelSpace.AppendEntity(LeftOffset);
-            modelSpace.AppendEntity(RightOffset);
+            LeftOffset = modelSpace.AppendEntity(LeftOffsetCached);
+            RightOffset = modelSpace.AppendEntity(RightOffsetCached);
 
-            acTrans.AddNewlyCreatedDBObject(LeftOffset, true);
-            acTrans.AddNewlyCreatedDBObject(RightOffset, true);
+            trans.AddNewlyCreatedDBObject(LeftOffsetCached, true);
+            trans.AddNewlyCreatedDBObject(RightOffsetCached, true);
         }
 
-        /*public override void Generate()
+        public override void Erase()
         {
-            double requiredWidth = UnfactoredLineLoad / _soilProperties.AllowableGroundBearingPressure;
-
-            //To a minimum of 300
-            //TODO: Confirm that this should be presnt, needs a more elegant solution
-            if (double.IsNaN(requiredWidth) || requiredWidth < 0.3)
-                requiredWidth = 0.3;
-
-            // Get the current document and database
-            Document acDoc = Application.DocumentManager.MdiActiveDocument;
-            Database acCurDb = acDoc.Database;
-
-            Transaction acTrans = acCurDb.TransactionManager.TopTransaction;
+            Transaction trans = _document.TransactionManager.TopTransaction;
+            trans.GetObject(LeftOffset, OpenMode.ForWrite).Erase();
+            trans.GetObject(RightOffset, OpenMode.ForWrite).Erase();
             
-            LeftOffset = this.CreateLeftOffset(requiredWidth / 2);
-            RightOffset = this.CreateRightOffset(requiredWidth / 2);
-
-            BlockTableRecord modelSpace = acCurDb.GetModelSpace();
-            modelSpace.UpgradeOpen();
-
-            modelSpace.AppendEntity(LeftOffset);
-            modelSpace.AppendEntity(RightOffset);
-
-            acTrans.AddNewlyCreatedDBObject(LeftOffset, true);
-            acTrans.AddNewlyCreatedDBObject(RightOffset, true);
-            
-        }*/
+            base.Erase();
+        }
 
         public double CalculateRequiredWidth()
         {
@@ -123,9 +144,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
                 nodes.Add(Node2);
             }
 
-            /*double startAngle = Math.Atan((EndPoint.X - StartPoint.X) / (EndPoint.Y - StartPoint.Y)) * 180 / Math.PI;
-            double endAngle = Math.Atan((StartPoint.X - EndPoint.X) / (StartPoint.Y - EndPoint.Y)) * 180 / Math.PI;*/
-
             Vector3d startVector = StartPoint.GetVectorTo(EndPoint);
             double startAngle = startVector.GetAngleTo(Vector3d.YAxis, Vector3d.ZAxis) * 180 / Math.PI;
             Vector3d endVector = EndPoint.GetVectorTo(StartPoint);
@@ -137,7 +155,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
 
         public static FoundationCentreLine CreateFromLine(LineDrawingObject lineDrawingObject, SoilProperties soilProperties)
         {
-            FoundationCentreLine foundationCentreLine = new FoundationCentreLine(lineDrawingObject.Document, soilProperties);
+            LayerManager layerManager = DataService.Current.GetStore<DocumentStore>(lineDrawingObject.Document.Name).LayerManager;
+            string foundationLayerName = layerManager.GetLayerName(FoundationCentreLine.FOUNDATION_LAYER);
+
+            FoundationCentreLine foundationCentreLine = new FoundationCentreLine(lineDrawingObject.Document, soilProperties, foundationLayerName);
             foundationCentreLine.BaseObject = lineDrawingObject.BaseObject;
 
             return foundationCentreLine;
