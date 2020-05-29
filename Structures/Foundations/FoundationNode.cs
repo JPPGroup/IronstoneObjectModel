@@ -57,13 +57,13 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
                     switch (cp)
                     {
                         case ConnectionPoint.Start:
-                            nextSubject = currentCentreLine.RightOffset as Curve;
-                            previousSubject = currentCentreLine.LeftOffset as Curve;
+                            nextSubject = currentCentreLine.RightOffsetCached;
+                            previousSubject = currentCentreLine.LeftOffsetCached;
                             break;
 
                         case ConnectionPoint.End:
-                            nextSubject = currentCentreLine.LeftOffset as Curve;
-                            previousSubject = currentCentreLine.RightOffset as Curve;
+                            nextSubject = currentCentreLine.LeftOffsetCached;
+                            previousSubject = currentCentreLine.RightOffsetCached;
                             break;
 
                         default:
@@ -74,11 +74,11 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
                     switch (nextConnection.ConnectionPoint)
                     {
                         case ConnectionPoint.Start:
-                            nextTarget = nextCentreLine.LeftOffset as Curve;
+                            nextTarget = nextCentreLine.LeftOffsetCached;
                             break;
 
                         case ConnectionPoint.End:
-                            nextTarget = nextCentreLine.RightOffset as Curve;
+                            nextTarget = nextCentreLine.RightOffsetCached;
                             break;
 
                         default:
@@ -88,11 +88,11 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
                     switch (previouConnection.ConnectionPoint)
                     {
                         case ConnectionPoint.Start:
-                            previousTarget = previousCentreLine.RightOffset as Curve;
+                            previousTarget = previousCentreLine.RightOffsetCached;
                             break;
 
                         case ConnectionPoint.End:
-                            previousTarget = previousCentreLine.LeftOffset as Curve;
+                            previousTarget = previousCentreLine.LeftOffsetCached;
                             break;
 
                         default:

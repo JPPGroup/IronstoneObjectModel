@@ -12,13 +12,13 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
 
         public List<string> Plots { get; }
 
-        /*public List<FoundationNode> Nodes { get; }*/
+        public List<FoundationNode> Nodes { get; }
         public List<FoundationCentreLine> Centrelines { get; }
 
         public FoundationGroup()
         {
             Plots = new List<string>();
-            //Nodes = new List<FoundationNode>();
+            Nodes = new List<FoundationNode>();
             Centrelines = new List<FoundationCentreLine>();
         }
 
@@ -35,11 +35,24 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
             AdjustTopSteps();
         }
 
+        public void Delete()
+        {
+            foreach (FoundationCentreLine foundationCentreLine in Centrelines)
+            {
+                foundationCentreLine.Erase();
+            }
+        }
+
         private void DetermineWidths()
         {
             foreach (FoundationCentreLine foundationCentreLine in Centrelines)
             {
                 foundationCentreLine.AddWidths();
+            }
+
+            foreach (FoundationNode foundationNode in Nodes)
+            {
+                foundationNode.TrimFoundations();
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
@@ -41,9 +42,18 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
 
         public override void UpdateAll()
         {
-            base.UpdateAll();
+            using (Transaction trans = HostDocument.Database.TransactionManager.StartTransaction())
+            {
+                base.UpdateAll();
 
-            UpdateAllFoundations();
+                UpdateAllFoundations();
+                foreach (DetailPlot detailPlot in ManagedObjects)
+                {
+                    detailPlot.DrawOnTop();
+                }
+
+                trans.Commit();
+            }
         }
     }
 }
