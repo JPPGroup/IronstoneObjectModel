@@ -27,7 +27,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel
         public Shrinkage SoilShrinkability
         {
             get { return _soilShrinkability; }
-            set { SetField(ref _soilShrinkability, value, "SoilShrinkability"); }
+            set { SetField(ref _soilShrinkability, value, nameof(SoilShrinkability)); }
         }
 
         private Shrinkage _soilShrinkability;
@@ -35,16 +35,24 @@ namespace Jpp.Ironstone.Structures.ObjectModel
         public Boolean Granular
         {
             get { return _granular; }
-            set { SetField(ref _granular, value, "Granular"); }
+            set { SetField(ref _granular, value, nameof(Granular)); }
         }
         private Boolean _granular;
 
         public float TargetStepSize
         {
             get { return _targetStepSize; }
-            set { SetField(ref _targetStepSize, value, "TargetStepSize"); }
+            set { SetField(ref _targetStepSize, value, nameof(TargetStepSize)); }
         }
         private float _targetStepSize;
+
+        public double GroundBearingPressure
+        {
+            get { return _groundBearingPressure; }
+            set { SetField(ref _groundBearingPressure, value, nameof(GroundBearingPressure)); }
+        }
+
+        private double _groundBearingPressure;
 
         public ObservableCollection<DepthBand> DepthBands
         {
@@ -66,7 +74,8 @@ namespace Jpp.Ironstone.Structures.ObjectModel
             _soilShrinkability = Shrinkage.Medium;
             _granular = false;
             _targetStepSize = 0.3f;
-            
+            _groundBearingPressure = 50d;
+
         }
 
         private ObservableCollection<DepthBand> LoadDefaultBands()

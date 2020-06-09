@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel.Foundations;
+using Jpp.Ironstone.Structures.ObjectModel.Ground;
 
 namespace Jpp.Ironstone.Housing.ObjectModel.Detail
 {
@@ -25,6 +26,8 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
 
         public void UpdateAllFoundations()
         {
+            SoilSurfaceContainer soilSurfaceContainer = new SoilSurfaceContainer(this.HostDocument);
+
             LayerManager layerManager = DataService.Current.GetStore<DocumentStore>(HostDocument.Name).LayerManager;
             _foundationLayerName = layerManager.GetLayerName(FoundationCentreLine.FOUNDATION_LAYER);
 
@@ -41,7 +44,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
 
             foreach (FoundationGroup foundationGroup in _foundationGroups)
             {
-                foundationGroup.Rebuild();
+                foundationGroup.Rebuild(soilSurfaceContainer);
             }
 
             RemoveCentrelines(centrelines);
