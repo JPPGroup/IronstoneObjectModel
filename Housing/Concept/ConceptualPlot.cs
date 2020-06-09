@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.Civil;
 using Autodesk.Civil.DatabaseServices;
 using Jpp.DesignCalculations.Calculations.Design.Foundations;
 using Jpp.Ironstone.Core.Autocad.DrawingObjects.Primitives;
@@ -15,7 +13,6 @@ using DBObject = Autodesk.AutoCAD.DatabaseServices.DBObject;
 using CivSurface = Autodesk.Civil.DatabaseServices.Surface;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 using Region = Autodesk.AutoCAD.DatabaseServices.Region;
-using Entity = Autodesk.AutoCAD.DatabaseServices.Entity;
 
 namespace Jpp.Ironstone.Housing.ObjectModel.Concept
 {

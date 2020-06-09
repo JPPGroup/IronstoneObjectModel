@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.ApplicationServices.Core;
-using Autodesk.AutoCAD.DatabaseServices;
-using Jpp.Ironstone.Core.Autocad;
+using Jpp.Ironstone.Structures.ObjectModel.Ground;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
 {
@@ -22,10 +19,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
             Centrelines = new List<FoundationCentreLine>();
         }
 
-        public void Rebuild()
+        public void Rebuild(SoilSurfaceContainer soilSurfaceContainer)
         {
-            DetermineWidths();
-            DetermineDepths();
+            //DetermineWidths(soilSurfaceContainer);
+            DetermineDepths(soilSurfaceContainer);
 
             // TODO: Recalc widths based on depths
 
@@ -33,6 +30,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
             AddRequiredTopSteps();
             AdjustBottomSteps();
             AdjustTopSteps();
+            DetermineWidths(soilSurfaceContainer);
         }
 
         public void Delete()
@@ -43,11 +41,11 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
             }
         }
 
-        private void DetermineWidths()
+        private void DetermineWidths(SoilSurfaceContainer soilSurfaceContainer)
         {
             foreach (FoundationCentreLine foundationCentreLine in Centrelines)
             {
-                foundationCentreLine.AddWidths();
+                foundationCentreLine.AddWidths(soilSurfaceContainer);
             }
 
             foreach (FoundationNode foundationNode in Nodes)
@@ -56,9 +54,12 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
             }
         }
 
-        private void DetermineDepths()
+        private void DetermineDepths(SoilSurfaceContainer soilSurfaceContainer)
         {
-
+            foreach (FoundationCentreLine foundationCentreLine in Centrelines)
+            {
+                foundationCentreLine.CalculateDepths(soilSurfaceContainer);
+            }
         }
 
         private void AddRequiredBottomSteps()
