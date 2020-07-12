@@ -44,10 +44,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>      
   <ItemGroup>
-    <PackageReference Include="AspectInjector">
-      <Version>2.3.1</Version>
-    </PackageReference>
-	<PackageReference Include="Jpp.Ironstone.BaseApi.2019">
+    <PackageReference Include="Jpp.Ironstone.BaseApi.2019">
       <Version>0.1.1</Version>
       <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
@@ -64,13 +61,10 @@
     <PackageReference Include="Jpp.Ironstone.Core">
       <Version>0.4.0-devb</Version>
     </PackageReference>
-    <!--<PackageReference Include="Jpp.Ironstone.Structure.ObjectModel">
-      <Version>0.4.0-devb</Version>
-    </PackageReference>-->
   </ItemGroup>
   <ItemGroup Condition=" $(Configuration.Contains('Local')) ">
-    <ProjectReference Include="..\..\ironstone-core\Ironstone Core\Ironstone Core.csproj" />
-    <ProjectReference Include="..\..\ironstone-core\Ironstone Core UI\Ironstone Core UI.csproj" />
+    <ProjectReference Include="..\..\IronstoneCore\IronstoneCore\IronstoneCore.csproj" />
+    <ProjectReference Include="..\..\IronstoneCore\IronstoneCoreUI\IronstoneCoreUI.csproj" />
     <ProjectReference Include="..\Structures\StructuresObjectModel.csproj" />
     <ProjectReference Include="..\..\DesignCalculations\src\DesignCalculations.Calculations\DesignCalculations.Calculations.csproj" />
   </ItemGroup>
