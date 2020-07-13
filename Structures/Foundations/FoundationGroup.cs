@@ -21,8 +21,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
 
         public void Rebuild(SoilSurfaceContainer soilSurfaceContainer)
         {
-            //DetermineWidths(soilSurfaceContainer);
-            DetermineDepths(soilSurfaceContainer);
+            //DetermineDepths(soilSurfaceContainer);
 
             // TODO: Recalc widths based on depths
 
