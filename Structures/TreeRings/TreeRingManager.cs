@@ -20,16 +20,20 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
     [Layer(Name = Constants.HEAVE_LAYER)]
     public class TreeRingManager : AbstractDrawingObjectManager<Tree>
     {
+        internal int[] _ringColors { get; private set; }
+
         public PersistentObjectIdCollection RingsCollection { get; set; }
 
         public TreeRingManager(Document document, ILogger<CoreExtensionApplication> log, IConfiguration config) : base(document, log, config)
         {
             RingsCollection = new PersistentObjectIdCollection();
+            _ringColors = _settings.GetObject<int[]>("structures.treeRings.RingColors");
         }
 
         public TreeRingManager() : base()
         {
             RingsCollection = new PersistentObjectIdCollection();
+            _ringColors = _settings.GetObject<int[]>("structures.treeRings.RingColors");
         }
 
         public override void UpdateDirty()
@@ -56,8 +60,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
         private void GenerateRings()
         {
             SoilProperties sp = DataService.Current.GetStore<StructureDocumentStore>(HostDocument.Name).SoilProperties;
-            
-            int[] ringColors = new int[] { 102, 80, 60, 50, 20, 12, 14, 16, 18 };
 
             float StartDepth;
 
@@ -170,13 +172,13 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     for (int ringIndex = 0; ringIndex < maxExistingSteps; ringIndex++)
                     {
                         HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.EXISTING_TREE_LAYER).ObjectId;
-                        GenerateEnclosedRing(existingRings, ringIndex, ringColors, acBlkTblRec, acTrans);
+                        GenerateEnclosedRing(existingRings, ringIndex, _ringColors, acBlkTblRec, acTrans);
                     }
 
                     for (int ringIndex = 0; ringIndex < maxProposedSteps; ringIndex++)
                     {
                         HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PROPOSED_TREE_LAYER).ObjectId;
-                        GenerateEnclosedRing(proposedRings, ringIndex, ringColors, acBlkTblRec, acTrans);
+                        GenerateEnclosedRing(proposedRings, ringIndex, _ringColors, acBlkTblRec, acTrans);
                     }
 
                     //Add hatching for piling

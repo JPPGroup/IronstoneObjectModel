@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -13,7 +14,9 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
     [TestFixture]
     public class TreeRingManagerTests : IronstoneTestFixture
     {
-        public TreeRingManagerTests() : base(Assembly.GetExecutingAssembly(), typeof(TreeRingManagerTests), Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\Test Drawings\\blank.dwg") { }
+        public TreeRingManagerTests() : base(Assembly.GetExecutingAssembly(), typeof(TreeRingManagerTests), Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\Test Drawings\\blank.dwg")
+        {
+        }
 
         [Test]
         public void VerifyManagerLoaded()
@@ -94,7 +97,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                 Assert.IsTrue(resultValid);
                 Assert.IsTrue(resultInvalid);
             });
-            
+
         }
 
         public bool VerifyAddValidHedgeRowResident()
@@ -204,6 +207,28 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
             }
         }
 
+        [Test]
+        public void CanLoadRingColorsFromSettings()
+        {
+            int[] expected = new int[] {94, 130, 160, 200, 32, 240, 10};
+            int[] result = RunTest<int[]>(nameof(CanLoadRingColorsFromSettingsResident));
+
+            Assert.AreEqual(expected, result);
+        }
+
+        public int[] CanLoadRingColorsFromSettingsResident()
+        {
+            Document acDoc = Application.DocumentManager.MdiActiveDocument;
+
+            using (var acTrans = acDoc.TransactionManager.StartTransaction())
+            {
+                var ds = DataService.Current;
+                ds.InvalidateStoreTypes();
+                var treeRingManager = ds.GetStore<StructureDocumentStore>(acDoc.Name).GetManager<TreeRingManager>();
+
+                return treeRingManager._ringColors;
+            }
+        }
     }
 }
 
