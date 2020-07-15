@@ -19,10 +19,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             set
             {
                 _ID = value;
-                /*if (Label != null)
-                {
-                    Label.Text = value;
-                }*/
             }
         }
 
@@ -39,9 +35,9 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
         public TreeType TreeType { get; set; }
 
         public Phase Phase { get; set; }
-        
-        //private TextObject Label;
 
+        public bool ExceedsNHBC { get; set; }
+        
         public Tree() : base()
         {
 
@@ -100,12 +96,18 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             BlockTableRecord acBlkTblRec;
             acBlkTblRec = acTrans.GetObject(acBlkTbl[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
 
+            string nhbcWarning = "";
+            if (ExceedsNHBC)
+            {
+                nhbcWarning = "*";
+            }
+
             //Draw label
             MText text = new MText
             {
                 Height = 2, 
                 Location = Location, 
-                Contents = $"No. {ID}\\P{Species}\\P{Height}m",
+                Contents = $"No. {ID}\\P{Species}\\P{Height}m{nhbcWarning}",
                 Layer = Constants.LABEL_LAYER
             };
 
