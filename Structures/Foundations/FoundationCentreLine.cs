@@ -101,8 +101,12 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
         public override void Erase()
         {
             Transaction trans = _document.TransactionManager.TopTransaction;
-            trans.GetObject(LeftOffset, OpenMode.ForWrite).Erase();
-            trans.GetObject(RightOffset, OpenMode.ForWrite).Erase();
+
+            if(LeftOffset != ObjectId.Null)
+                trans.GetObject(LeftOffset, OpenMode.ForWrite).Erase();
+
+            if(RightOffset != ObjectId.Null)
+                trans.GetObject(RightOffset, OpenMode.ForWrite).Erase();
             
             base.Erase();
         }

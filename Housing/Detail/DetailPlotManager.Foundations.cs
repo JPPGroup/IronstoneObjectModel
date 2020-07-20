@@ -72,10 +72,47 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
 
         private ICollection<FoundationCentreLine> DetermineOverlayedLines(ICollection<FoundationCentreLine> centrelines)
         {
-            // TODO: Actually implement this detection
+            bool unchanged = true;
+            do
+            {
+                unchanged = OverlayedIteration(centrelines);
+            } while (!unchanged);
 
-            //Determine which centrelines overlap and merge
             return centrelines;
+        }
+
+        private bool OverlayedIteration(ICollection<FoundationCentreLine> centrelines)
+        {
+            bool unchanged = true;
+
+            //Iterate overall intersecting lines and group them
+            for (int i = 0; i < centrelines.Count; i++)
+            {
+                FoundationCentreLine subject = centrelines.ElementAt(i);
+
+                for (int j = 0; j < centrelines.Count; j++)
+                {
+                    if(i == j)
+                        continue;
+
+                    FoundationCentreLine target = centrelines.ElementAt(j);
+                    if (subject.IsTargetSegmentOf(target))
+                    {
+                        unchanged = false;
+
+                        //Merge/split lines as necessary
+
+                        //Remove original lines
+                        centrelines.Remove(target);
+                        centrelines.Remove(subject);
+
+                        target.Erase();
+                        subject.Erase();
+                    }
+                }
+            }
+
+            return unchanged;
         }
 
         private void GroupCentrelines(ICollection<FoundationCentreLine> centrelines)
