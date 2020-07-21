@@ -115,10 +115,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
         {
             double groundBearingPressure = soilSurfaceContainer.GetGroundBearingPressure(this.StartPoint, this.EndPoint);
             Transaction trans = _document.TransactionManager.TopTransaction;
-            double appliedLoad = double.Parse(this[FoundationGroup.FOUNDATION_CENTRE_LOAD_KEY]);
+            double appliedLoad = UnfactoredLineLoad;
 
-            if(appliedLoad == 0)
-                throw new ArgumentOutOfRangeException("No applied load has been set.");
+            /*if(appliedLoad == 0)
+                throw new ArgumentOutOfRangeException("No applied load has been set.");*/
 
             if(groundBearingPressure == 0)
                 throw new ArgumentOutOfRangeException("No ground bearing pressure has been set.");

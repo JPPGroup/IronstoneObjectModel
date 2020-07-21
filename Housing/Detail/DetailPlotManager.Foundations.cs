@@ -8,6 +8,8 @@ using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel.Foundations;
 using Jpp.Ironstone.Structures.ObjectModel.Ground;
+using DBObject = Autodesk.AutoCAD.DatabaseServices.DBObject;
+using Entity = Autodesk.AutoCAD.DatabaseServices.Entity;
 
 namespace Jpp.Ironstone.Housing.ObjectModel.Detail
 {
@@ -63,6 +65,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
                 {
                     FoundationCentreLine foundationCentreLine = FoundationCentreLine.CreateFromLine(lineDrawingObject, _soilProperties);
                     foundationCentreLine.PlotIds.Add(detailPlot.PlotId);
+                    foundationCentreLine.UnfactoredLineLoad = double.Parse(foundationCentreLine[FoundationGroup.FOUNDATION_CENTRE_LOAD_KEY]);
                     centrelines.Add(foundationCentreLine);
                 }
             }
@@ -101,6 +104,11 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
                         unchanged = false;
 
                         //Merge/split lines as necessary
+                        ICollection<FoundationCentreLine> newLines = CalculateNewLines(subject, target);
+                        foreach (FoundationCentreLine foundationCentreLine in newLines)
+                        {
+                            centrelines.Add(foundationCentreLine);
+                        }
 
                         //Remove original lines
                         centrelines.Remove(target);
@@ -113,6 +121,53 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
             }
 
             return unchanged;
+        }
+
+        private ICollection<FoundationCentreLine> CalculateNewLines(FoundationCentreLine line1, FoundationCentreLine line2)
+        {
+            List<FoundationCentreLine> newLines = new List<FoundationCentreLine>();
+
+            List<PointDistance> points = new List<PointDistance>();
+            Point2d referencePoint = new Point2d(line1.StartPoint.X, line1.StartPoint.Y);
+            points.Add(new PointDistance() { Point = referencePoint, Distance = 0});
+
+            Point2d point1 = new Point2d(line1.EndPoint.X, line1.EndPoint.Y);
+            points.Add(new PointDistance() { Point = point1, Distance = point1.GetDistanceTo(referencePoint) });
+
+            Point2d point2 = new Point2d(line2.StartPoint.X, line2.StartPoint.Y);
+            points.Add(new PointDistance() { Point = point2, Distance = point2.GetDistanceTo(referencePoint)});
+
+            Point2d point3 = new Point2d(line2.EndPoint.X, line2.EndPoint.Y);
+            points.Add(new PointDistance() { Point = point3, Distance = point3.GetDistanceTo(referencePoint)});
+
+            var orderedPoints = points.OrderBy(pd => pd.Distance).Distinct();
+
+            for (int i = 0; i < orderedPoints.Count() - 1; i++)
+            {
+                Point2d startPoint2d = orderedPoints.ElementAt(i).Point;
+                Point3d start = new Point3d(startPoint2d.X, startPoint2d.Y, 0);
+                Point2d endPoint2d = orderedPoints.ElementAt(i + 1).Point;
+                Point3d end = new Point3d(endPoint2d.X, endPoint2d.Y, 0);
+                LineDrawingObject line = LineDrawingObject.Create(HostDocument.Database, start, end);
+                FoundationCentreLine centreLine = FoundationCentreLine.CreateFromLine(line, _soilProperties);
+
+                //Determine line loads
+                if (line1.IsTargetSegmentOf(centreLine))
+                    centreLine.UnfactoredLineLoad += line1.UnfactoredLineLoad;
+
+                if (line2.IsTargetSegmentOf(centreLine))
+                    centreLine.UnfactoredLineLoad += line2.UnfactoredLineLoad;
+
+                newLines.Add(centreLine);
+            }
+
+            return newLines;
+        }
+
+        private struct PointDistance
+        {
+            public double Distance { get; set; }
+            public Point2d Point { get; set; }
         }
 
         private void GroupCentrelines(ICollection<FoundationCentreLine> centrelines)
