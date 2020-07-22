@@ -51,8 +51,31 @@ namespace Jpp.Ironstone.Structures.ObjectModel
             get { return _groundBearingPressure; }
             set { SetField(ref _groundBearingPressure, value, nameof(GroundBearingPressure)); }
         }
-
         private double _groundBearingPressure;
+
+        public double ClimateReduction
+        {
+            get 
+            {
+                if (EnableClimateReduction)
+                {
+                    return _climateReduction;
+                }
+                else
+                {
+                    return 0;
+                }
+            }
+            set { SetField(ref _climateReduction, value, nameof(ClimateReduction)); }
+        }
+        private double _climateReduction;
+
+        public bool EnableClimateReduction
+        {
+            get { return _enableClimateReduction; }
+            set { SetField(ref _enableClimateReduction, value, nameof(_enableClimateReduction)); }
+        }
+        private bool _enableClimateReduction;
 
         public ObservableCollection<DepthBand> DepthBands
         {

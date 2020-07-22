@@ -2,11 +2,11 @@
 {
     class Constants
     {
-        public const string EXISTING_TREE_LAYER = "JPP_Foundations_TreeRings_Existing";
-        public const string PROPOSED_TREE_LAYER = "JPP_Foundations_TreeRings_Proposed";
-        public const string PILED_LAYER = "JPP_Foundations_Pilled";
-        public const string HEAVE_LAYER = "JPP_Foundations_TreeRings_Proposed";
-        public const string LABEL_LAYER = "JPP_Foundations_TreeRings_Label";
+        public const string EXISTING_TREE_LAYER = "structures.foundations.layers.treerings_existing";
+        public const string PROPOSED_TREE_LAYER = "structures.foundations.layers.treerings_proposed";
+        public const string PILED_LAYER = "structures.foundations.layers.treerings_piled";
+        public const string HEAVE_LAYER = "structures.foundations.layers.treerings_heave";
+        public const string LABEL_LAYER = "structures.foundations.layers.treerings_label";
 
         /*
          * Need to ensure layer properties are in settings file.

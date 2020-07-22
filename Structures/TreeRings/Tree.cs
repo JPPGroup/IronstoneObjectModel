@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.Autocad;
+using Jpp.Ironstone.Core.ServiceInterfaces;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
@@ -86,6 +87,8 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             Document acDoc = Application.DocumentManager.MdiActiveDocument;
             Database acCurDb = acDoc.Database;
 
+            LayerManager layerManager = DataService.Current.GetStore<DocumentStore>(acDoc.Name).LayerManager;
+
             Transaction acTrans = acCurDb.TransactionManager.TopTransaction;
 
             // Open the Block table for read
@@ -108,7 +111,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 Height = 2, 
                 Location = Location, 
                 Contents = $"No. {ID}\\P{Species}\\P{Height}m{nhbcWarning}",
-                Layer = Constants.LABEL_LAYER
+                Layer = layerManager.GetLayerName(Constants.LABEL_LAYER)
             };
 
             /*Label = new TextObject();
