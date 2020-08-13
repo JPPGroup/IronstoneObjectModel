@@ -72,7 +72,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                 Species = "EnglishElm",
                 TreeType = TreeType.Deciduous,
                 WaterDemand = WaterDemand.High,
-                Height = Tree.DeciduousHigh["EnglishElm"],
+                ActualHeight = Tree.DeciduousHigh["EnglishElm"],
                 ID = id.ToString(),
                 Location = new Point3d(Random.NextDouble(), Random.NextDouble(), 0)
             };
@@ -111,7 +111,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 
                 if (Tree.DeciduousHigh.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
+                    newTree.ActualHeight = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Deciduous;
                     newTree.WaterDemand = WaterDemand.High;
                     found = true;
@@ -120,7 +120,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 
                 if (Tree.DeciduousMedium.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
+                    newTree.ActualHeight = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Deciduous;
                     newTree.WaterDemand = WaterDemand.Medium;
                     found = true;
@@ -129,7 +129,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 
                 if (Tree.DeciduousLow.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
+                    newTree.ActualHeight = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Deciduous;
                     newTree.WaterDemand = WaterDemand.Low;
                     found = true;
@@ -138,7 +138,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 
                 if (Tree.ConiferousHigh.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
+                    newTree.ActualHeight = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Coniferous;
                     newTree.WaterDemand = WaterDemand.High;
                     found = true;
@@ -147,7 +147,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 
                 if (Tree.ConiferousMedium.ContainsKey(rtd.Tree))
                 {
-                    newTree.Height = Tree.DeciduousHigh[rtd.Tree];
+                    newTree.ActualHeight = Tree.DeciduousHigh[rtd.Tree];
                     newTree.TreeType = TreeType.Coniferous;
                     newTree.WaterDemand = WaterDemand.Medium;
                     found = true;

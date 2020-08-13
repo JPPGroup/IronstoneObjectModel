@@ -201,6 +201,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     {
                         PileRing = TreeRing.Create(HostDocument, pillingRings);
                         PileRing.Depth = 2.5d;
+                        PileRing.Hatch();
                     }
 
                     //Add heave line

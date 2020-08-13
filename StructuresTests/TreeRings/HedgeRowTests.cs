@@ -48,7 +48,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                     Species = "WHITeWillow",
                     TreeType = TreeType.Deciduous,
                     WaterDemand = WaterDemand.High,
-                    Height = Tree.DeciduousHigh["WHITeWillow"],
+                    ActualHeight = Tree.DeciduousHigh["WHITeWillow"],
                     ID = "test-hedge",
                     BaseObject = polyId
                 };
@@ -94,7 +94,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                     Species = "WHITeWillow",
                     TreeType = TreeType.Deciduous,
                     WaterDemand = WaterDemand.High,
-                    Height = Tree.DeciduousHigh["WHITeWillow"],
+                    ActualHeight = Tree.DeciduousHigh["WHITeWillow"],
                     ID = "test-hedge",
                     BaseObject = polyId
                 };
@@ -143,7 +143,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                     Species = "EnglishElm",
                     TreeType = TreeType.Deciduous,
                     WaterDemand = WaterDemand.High,
-                    Height = Tree.DeciduousHigh["EnglishElm"],
+                    ActualHeight = Tree.DeciduousHigh["EnglishElm"],
                     ID = "test-hedge",
                     BaseObject = polyId
                 };
@@ -194,7 +194,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                         Species = "EnglishElm",
                         TreeType = TreeType.Deciduous,
                         WaterDemand = WaterDemand.High,
-                        Height = Tree.DeciduousHigh["EnglishElm"],
+                        ActualHeight = Tree.DeciduousHigh["EnglishElm"],
                         ID = "test-hedge",
                         BaseObject = polyId
                     };
