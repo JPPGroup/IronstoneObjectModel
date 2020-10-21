@@ -1,64 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">    
+<Project>    
   <PropertyGroup>          
     <RootNamespace>Jpp.Ironstone.Structures.ObjectModel</RootNamespace>
-    <AssemblyName>IronstoneStructuresObjectModel</AssemblyName>
-    <TargetFramework>net472</TargetFramework>    
+    <AssemblyName>IronstoneStructuresObjectModel</AssemblyName>    
 	<Description>Housing automation library</Description>
     <Copyright>Copyright ©  2020</Copyright>
     <Company>JPP Consulting Ltd.</Company>
-	  <PackageId>Jpp.Ironstone.Structure.ObjectModel</PackageId>
+	<PackageId>Jpp.Ironstone.Structure.ObjectModel</PackageId>
     <Product>Ironstone Structure Object Model</Product>
     <Authors>JPPGroup</Authors>
     <AssemblyVersion>9.9.9.9</AssemblyVersion>
-    <FileVersion>9.9.9.9</FileVersion>
-    <Platforms>x64</Platforms>
-    <Configurations>Debug;Release;DebugLocal;ReleaseLocal</Configurations>
+    <FileVersion>9.9.9.9</FileVersion>    
   </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLocal|x64'">
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>  
-  <ItemGroup>    
-    <Reference Include="PresentationCore" />    
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />    
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Net.Http" />    
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Transactions" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />   
-  </ItemGroup>    
+  <Import Project="..\IronstoneBase\IronstoneObjectModelBaseProject.csproj" />
   <ItemGroup>
-    <PackageReference Include="AspectInjector">
-      <Version>2.3.1</Version>
-    </PackageReference>
-	<PackageReference Include="Jpp.Ironstone.BaseApi.2019">
-      <Version>0.1.1</Version>
-      <ExcludeAssets>runtime</ExcludeAssets>
-    </PackageReference>
-    <PackageReference Include="Jpp.Ironstone.C3dApi.2019">
-      <Version>0.1.1</Version>
-      <ExcludeAssets>runtime</ExcludeAssets>
-    </PackageReference>
-  </ItemGroup>   
-  <ItemGroup Condition=" $(Configuration.Contains('Local')) == false ">
-    <PackageReference Include="Jpp.Ironstone.Core">
-      <Version>0.4.0-devb</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup Condition=" $(Configuration.Contains('Local')) ">
-    <ProjectReference Include="..\..\ironstone-core\Ironstone Core\Ironstone Core.csproj" />
+    <Reference Include="PresentationCore" />
   </ItemGroup>
   <ItemGroup>
     <None Update="IronstoneConfig.xml">

@@ -1,27 +1,17 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">    
-  <PropertyGroup>          
+<Project>
+  <Import Project="..\IronstoneBase\IronstoneObjectModelBaseUiProject.csproj" />
+  <PropertyGroup>
     <RootNamespace>Jpp.Ironstone.DocumentManagement.ObjectModel</RootNamespace>
     <AssemblyName>IronstoneDocumentManagementObjectModel</AssemblyName>
-    <TargetFramework>net472</TargetFramework>    
-	<Description>Document Management automation library</Description>
+    <Description>Document Management automation library</Description>
     <Copyright>Copyright ©  2020</Copyright>
     <Company>JPP Consulting Ltd.</Company>
-	<PackageId>Jpp.Ironstone.DocumentManagement.ObjectModel</PackageId>
+    <PackageId>Jpp.Ironstone.DocumentManagement.ObjectModel</PackageId>
     <Product>Ironstone DocumentManagement Object Model</Product>
     <Authors>JPPGroup</Authors>
     <AssemblyVersion>9.9.9.9</AssemblyVersion>
     <FileVersion>9.9.9.9</FileVersion>
-    <Platforms>x64</Platforms>
-    <Configurations>Debug;Release;DebugLocal;ReleaseLocal</Configurations>    
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLocal|x64'">
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Resources\CivilTemplate.dwg" />
@@ -30,50 +20,9 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\CivilTemplate.dwg" />
     <EmbeddedResource Include="Resources\SchemeTrackerV26.xlsx" />
-  </ItemGroup>    
-  <ItemGroup>    
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />    
-    <Reference Include="System.IO.Compression" />    
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Transactions" />    
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />        
-  </ItemGroup>      
-  <ItemGroup>
-    <PackageReference Include="AspectInjector">
-      <Version>2.3.1</Version>
-    </PackageReference>
-    <PackageReference Include="DocumentFormat.OpenXml" Version="2.10.1" />
-	<PackageReference Include="Jpp.Ironstone.BaseApi.2019">
-      <Version>0.1.1</Version>
-      <ExcludeAssets>runtime</ExcludeAssets>
-    </PackageReference>
-    <PackageReference Include="Jpp.Ironstone.C3dApi.2019">
-      <Version>0.1.1</Version>
-      <ExcludeAssets>runtime</ExcludeAssets>
-    </PackageReference>
-    <PackageReference Include="Jpp.Ironstone.UiApi.2019">
-      <Version>0.1.1</Version>
-      <ExcludeAssets>runtime</ExcludeAssets>
-    </PackageReference>
-  </ItemGroup>      
-  <ItemGroup Condition=" $(Configuration.Contains('Local')) == false ">
-    <PackageReference Include="Jpp.Ironstone.Core">
-      <Version>0.4.0-devb</Version>
-    </PackageReference>
-    <!--<PackageReference Include="Jpp.Ironstone.Structure.ObjectModel">
-      <Version>0.4.0-devb</Version>
-    </PackageReference>-->
   </ItemGroup>
-  <ItemGroup Condition=" $(Configuration.Contains('Local')) ">
-    <ProjectReference Include="..\..\ironstone-core\Ironstone Core\Ironstone Core.csproj" />    
+  <ItemGroup>
+    <PackageReference Include="DocumentFormat.OpenXml" Version="2.10.1" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">

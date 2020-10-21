@@ -171,7 +171,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             Transaction acTrans = Application.DocumentManager.MdiActiveDocument.Database.TransactionManager.TopTransaction;
             BlockTableRecord btr = (BlockTableRecord)acTrans.GetObject(_layout.BlockTableRecordId, OpenMode.ForRead);
 
-            var blocks = _layout.GetBlockReferences().Select(br => new BlockRefDrawingObject(br));
+            var blocks = _layout.GetBlockReferences().Select(br => new BlockRefDrawingObject(Application.DocumentManager.MdiActiveDocument, br));
             blocks = blocks.Where(br => br.BlockName == GetTitleBlockName());
 
             if (blocks.Count() != 1)
