@@ -1,0 +1,3 @@
+[submodule "IronstoneBase"]
+	path = IronstoneBase
+	url = https://github.com/JPPGroup/IronstoneBase.git
