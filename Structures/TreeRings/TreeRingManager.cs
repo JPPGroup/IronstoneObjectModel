@@ -20,6 +20,14 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
     {
         internal int[] _ringColors { get; private set; }
 
+        public IReadOnlyCollection<int> RingColors
+        {
+            get
+            {
+                return _ringColors;
+            }
+        }
+
         //public PersistentObjectIdCollection RingsCollection { get; set; }
 
         public SerializableDictionary<double, TreeRing> RingsCollection { get; set; }

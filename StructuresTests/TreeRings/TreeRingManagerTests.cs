@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel.TreeRings;
 using NUnit.Framework;
+using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
 {
@@ -236,7 +237,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                 //This line is needed to ensure layers created by manager persist through to other tests
                 acTrans.Commit();
 
-                return treeRingManager._ringColors;
+                return treeRingManager.RingColors.ToArray();
             }
         }
     }
