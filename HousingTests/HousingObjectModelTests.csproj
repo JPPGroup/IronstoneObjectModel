@@ -1,53 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project Sdk="Microsoft.NET.Sdk">    
+<Project>
+  <Import Project="..\IronstoneBase\IronstoneBaseTestProject.csproj" />
   <PropertyGroup>
     <RootNamespace>Jpp.Ironstone.Housing.ObjectModel.Test</RootNamespace>
-    <AssemblyName>IronstoneStructuresObjectModelTests</AssemblyName>
-    <TargetFramework>net472</TargetFramework>    
-    <Configurations>Debug;Release;DebugLocal;ReleaseLocal</Configurations>
-    <Platforms>x64</Platforms>
-  </PropertyGroup>    
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugLocal|x64'">
-    <DebugType>full</DebugType>
-    <DebugSymbols>true</DebugSymbols>
+    <AssemblyName>IronstoneHousingObjectModelTests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />  
-    <Reference Include="System.IO.Compression" />
-    <Reference Include="System.Net.Http" />    
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Transactions" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />        
-  </ItemGroup>    
-  <ItemGroup>
-	<PackageReference Include="AcTestFramework">
-      <Version>2.4.47</Version>
-    </PackageReference>
-	<PackageReference Include="NUnit">
-      <Version>3.11.0</Version>
-    </PackageReference>
-  </ItemGroup>    
-  <ItemGroup>
     <Folder Include="Properties\" />
-  </ItemGroup>    
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Structures\StructuresObjectModel.csproj" />
-	<ProjectReference Include="..\Housing\HousingObjectModel.csproj" />
-  </ItemGroup>  
-  <ItemGroup Condition=" $(Configuration.Contains('Local')) == false ">
-    <PackageReference Include="Jpp.Ironstone.Core">
-      <Version>0.4.0-devb</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup Condition=" $(Configuration.Contains('Local')) ">
-    <ProjectReference Include="..\..\ironstone-core\Ironstone Core\Ironstone Core.csproj" />
+    <ProjectReference Include="..\Housing\HousingObjectModel.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="BaseConfig.json">
