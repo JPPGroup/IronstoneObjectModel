@@ -48,7 +48,7 @@
   </ItemGroup>      
   <ItemGroup>
     <PackageReference Include="AspectInjector">
-      <Version>2.4.0</Version>
+      <Version>2.4.1</Version>
     </PackageReference>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.10.1" />
 	<PackageReference Include="Jpp.Ironstone.BaseApi.2019">

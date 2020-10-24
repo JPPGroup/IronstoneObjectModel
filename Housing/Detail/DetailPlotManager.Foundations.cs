@@ -66,6 +66,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
                     FoundationCentreLine foundationCentreLine = FoundationCentreLine.CreateFromLine(lineDrawingObject, _soilProperties);
                     foundationCentreLine.PlotIds.Add(detailPlot.PlotId);
                     foundationCentreLine.UnfactoredLineLoad = double.Parse(foundationCentreLine[FoundationGroup.FOUNDATION_CENTRE_LOAD_KEY]);
+                    foundationCentreLine.UnfactoredOverlapLineLoad = double.Parse(foundationCentreLine[FoundationGroup.FOUNDATION_CENTRE_OVERLAPLOAD_KEY]);
                     centrelines.Add(foundationCentreLine);
                 }
             }
@@ -159,10 +160,10 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
 
                 //Determine line loads
                 if (line1.IsTargetSegmentOf(centreLine))
-                    centreLine.UnfactoredLineLoad += line1.UnfactoredLineLoad;
+                    centreLine.UnfactoredLineLoad += line1.UnfactoredOverlapLineLoad;
 
                 if (line2.IsTargetSegmentOf(centreLine))
-                    centreLine.UnfactoredLineLoad += line2.UnfactoredLineLoad;
+                    centreLine.UnfactoredLineLoad += line2.UnfactoredOverlapLineLoad;
 
                 newLines.Add(centreLine);
             }

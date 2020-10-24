@@ -28,6 +28,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
         private PersistentObjectIdCollection _offsets;
 
         public double UnfactoredLineLoad { get; set; }
+        public double UnfactoredOverlapLineLoad { get; set; }
 
         private SoilProperties _soilProperties;
 

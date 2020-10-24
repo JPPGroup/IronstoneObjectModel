@@ -6,6 +6,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Foundations
     public class FoundationGroup
     {
         public const string FOUNDATION_CENTRE_LOAD_KEY = "JPP_FoundationCentreline_Load";
+        public const string FOUNDATION_CENTRE_OVERLAPLOAD_KEY = "JPP_FoundationCentreline_OverlapLoad";
 
         public List<string> Plots { get; }
 
