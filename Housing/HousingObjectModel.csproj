@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <Import Project="..\IronstoneBase\IronstoneObjectModelBaseUiProject.csproj" />
   <PropertyGroup>
     <RootNamespace>Jpp.Ironstone.Housing.ObjectModel</RootNamespace>
     <AssemblyName>IronstoneHousingObjectModel</AssemblyName>
@@ -13,11 +12,9 @@
     <AssemblyVersion>9.9.9.9</AssemblyVersion>
     <FileVersion>9.9.9.9</FileVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <None Update="IronstoneConfig.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+
+  <Import Project="..\IronstoneBase\IronstoneObjectModelBaseUiProject.csproj" />
+
   <ItemGroup>
     <ProjectReference Include="..\Structures\StructuresObjectModel.csproj" />
   </ItemGroup>
