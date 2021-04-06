@@ -64,10 +64,11 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             var pLine = PolylineFromBase();
             if (pLine == null) return null;
 
+            //TODO: Review this offset section as believe its a large maxinitialoffset result that is causing errors
             var initOffset = MaxInitialOffset(pLine);
             var initOffPlus = TryOffsetCurve(pLine, initOffset);
             var initOffMinus = TryOffsetCurve(pLine, -initOffset);
-            
+
             var plusVert = new List<int>();
             var minusVert = new List<int>();
 
@@ -88,12 +89,24 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             var adjust = radius - initOffset;
             var realOffPlus = TryOffsetCurve(initOffPlus, adjust);
             var realOffMinus = TryOffsetCurve(initOffMinus, -adjust);
+            
+            if (!pLine.Closed)
+            {
+                var start = StartArc(pLine, realOffPlus, realOffMinus, radius);
+                var end = EndArc(pLine, realOffPlus, realOffMinus, radius);
 
-            var start = StartArc(pLine, realOffPlus, realOffMinus, radius);
-            var end = EndArc(pLine, realOffPlus, realOffMinus, radius);
-
-            realOffPlus.JoinEntities(new Entity[] { start, end, realOffMinus });
-            realOffPlus.Closed = true;
+                realOffPlus.JoinEntities(new Entity[] {start, end, realOffMinus});
+                realOffPlus.Closed = true;
+            }
+            else
+            {
+                realOffPlus.Closed = true;
+                realOffMinus.Closed = true;
+                if (realOffMinus.Length > realOffPlus.Length)
+                {
+                    realOffPlus = realOffMinus;
+                }
+            }
 
             return realOffPlus;
         }
