@@ -2,9 +2,11 @@
 using System.ComponentModel;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
+using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
-using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel.TreeRings;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Jpp.Ironstone.Structures.ObjectModel
 {
@@ -12,7 +14,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel
     {
         public SoilProperties SoilProperties { get; set; }
 
-        public StructureDocumentStore(Document doc, Type[] managerTypes, ILogger log, LayerManager layerManager, IUserSettings settings) : base(doc, managerTypes, log, layerManager, settings) { }
+        public StructureDocumentStore(Document doc, Type[] managerTypes, ILogger<CoreExtensionApplication> log, LayerManager layerManager, IConfiguration settings) : base(doc, managerTypes, log, layerManager, settings) { }
 
         protected override void Save()
         {
