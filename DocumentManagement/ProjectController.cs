@@ -4,8 +4,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.DocumentManagement.Objectmodel.DrawingTypes;
 using Jpp.Ironstone.DocumentManagement.ObjectModel.DrawingTypes;
-using NLog.Internal;
-using Unity;
+using Microsoft.Extensions.DependencyInjection;
 using Application = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel
@@ -15,13 +14,13 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         private string _workingDirectory;
         private string _xrefDirectory;
         private FileSystemWatcher _watcher;
-        private UnityContainer _container;
+        private IServiceProvider _container;
 
         public string ProjectNumber { get; set; }
         public string ProjectName { get; set; }
         public string Client { get; set; }
 
-        public ProjectController(UnityContainer container, string workingDirectory)
+        public ProjectController(IServiceProvider container, string workingDirectory)
         {
             _container = container;
 
@@ -43,7 +42,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         public T CreateDrawing<T>(string job, string filename = null) where T : AbstractDrawingType
         {
             //T newDrawing = (T) Activator.CreateInstance(typeof(T));
-            T newDrawing = _container.Resolve<T>();
+            T newDrawing = _container.GetRequiredService<T>();
             newDrawing.ParentController = this;
             string targetFilename = $"{job} - {newDrawing.DefaultFilename}";
             if(!string.IsNullOrEmpty(filename))
@@ -59,7 +58,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         public T GetXref<T>() where T : AbstractXrefDrawingType
         {
-            T newDrawing = _container.Resolve<T>();
+            T newDrawing = _container.GetRequiredService<T>();
             newDrawing.ParentController = this;
 
             string path = Path.Combine(_xrefDirectory, newDrawing.DefaultFilename);

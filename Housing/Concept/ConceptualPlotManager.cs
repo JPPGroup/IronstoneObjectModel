@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.Civil.ApplicationServices;
@@ -7,7 +6,9 @@ using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel;
-using Unity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using CivSurface = Autodesk.Civil.DatabaseServices.Surface;
 
 namespace Jpp.Ironstone.Housing.ObjectModel.Concept
@@ -35,16 +36,16 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
         }
 
         private SoilProperties _properties;
-        private ILogger _logger;
+        private ILogger<CoreExtensionApplication> _logger;
 
-        public ConceptualPlotManager(Document document, ILogger log) : base(document, log)
+        public ConceptualPlotManager(Document document, ILogger<CoreExtensionApplication> log, IConfiguration settings) : base(document, log, settings)
         {
-            _logger = CoreExtensionApplication._current.Container.Resolve<ILogger>();
+            _logger = CoreExtensionApplication._current.Container.GetRequiredService<ILogger<CoreExtensionApplication>>();
         }
 
         public ConceptualPlotManager() : base()
         {
-            _logger = CoreExtensionApplication._current.Container.Resolve<ILogger>();
+            _logger = CoreExtensionApplication._current.Container.GetRequiredService<ILogger<CoreExtensionApplication>>();
         }
 
         public override void UpdateDirty()

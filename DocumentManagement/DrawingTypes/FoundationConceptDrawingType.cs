@@ -1,17 +1,19 @@
 ﻿using System;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
-using Jpp.Ironstone.Core.ServiceInterfaces;
+using Jpp.Ironstone.Core;
 using Jpp.Ironstone.DocumentManagement.Objectmodel.DrawingTypes;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel.DrawingTypes
 {
     public class FoundationConceptDrawingType : AbstractDrawingType
     {
-        private ILogger _logger;
-        private IUserSettings _settings;
+        private ILogger<CoreExtensionApplication> _logger;
+        private IConfiguration _settings;
 
-        public FoundationConceptDrawingType(ILogger logger, IUserSettings settings)
+        public FoundationConceptDrawingType(ILogger<CoreExtensionApplication> logger, IConfiguration settings)
         {
             _logger = logger;
             _settings = settings;

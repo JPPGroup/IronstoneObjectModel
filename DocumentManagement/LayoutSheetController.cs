@@ -5,8 +5,11 @@ using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Common;
+using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 {
@@ -14,10 +17,10 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
     {
         public SerializableDictionary<string, LayoutSheet> Sheets;
         private Document _document;
-        private ILogger _logger;
-        private IUserSettings _settings;
+        private ILogger<CoreExtensionApplication> _logger;
+        private IConfiguration _settings;
 
-        public LayoutSheetController(ILogger logger, Document doc, IUserSettings settings)
+        public LayoutSheetController(ILogger<CoreExtensionApplication> logger, Document doc, IConfiguration settings)
         {
             Sheets = new SerializableDictionary<string, LayoutSheet>();
             _document = doc;
@@ -110,7 +113,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         private void SideLoad(Database template)
         {
-            string templatePath = _settings.GetValue("defaultTemplateFile");
+            string templatePath = _settings["defaultTemplateFile"];
             bool cleanup = false;
             if (templatePath.Equals("embedded", StringComparison.CurrentCultureIgnoreCase))
             {

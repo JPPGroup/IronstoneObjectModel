@@ -39,7 +39,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel
                 generalPanel.Source = generalSource;
 
                 RibbonControl rc = Autodesk.Windows.ComponentManager.Ribbon;
-                RibbonTab primaryTab = rc.FindTab(Jpp.Ironstone.Core.Constants.IRONSTONE_TAB_ID);
+                RibbonTab primaryTab = rc.FindTab(Jpp.Ironstone.Core.Constants.IronstoneTabId);
                 primaryTab.Panels.Add(generalPanel);
 
                 GeneralDesignCreated = true;

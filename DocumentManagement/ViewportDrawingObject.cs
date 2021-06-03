@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 {
@@ -72,9 +73,9 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             vp.CustomScale = scale;
         }
 
-        public void SetStandardScale(IUserSettings settings, double scale)
+        public void SetStandardScale(IConfiguration settings, double scale)
         {
-            double[] settingScales = settings.GetObject<double[]>("standardScales");
+            double[] settingScales = settings.GetValue<double[]>("standardScales");
             List<double> scaleValue = new List<double>();
             foreach (double setting in settingScales)
             {
@@ -99,7 +100,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             SetScale(standardScale);
         }
 
-        public void FocusOn(IUserSettings settings, Extents3d extents)
+        public void FocusOn(IConfiguration settings, Extents3d extents)
         {
             Transaction trans = _database.TransactionManager.TopTransaction;
             Viewport vp = trans.GetObject(BaseObject, OpenMode.ForWrite) as Viewport;
