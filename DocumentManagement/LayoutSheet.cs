@@ -3,8 +3,10 @@ using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.PlottingServices;
+using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
+using Microsoft.Extensions.Logging;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 {
@@ -19,12 +21,12 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         public ObjectId LayoutID { get; private set; }
 
         public PaperSize Size { get; private set; }
-        private ILogger _logger;
+        private ILogger<CoreExtensionApplication> _logger;
 
         public DrawingArea DrawingArea { get; private set; }
         public NoteArea NoteArea { get; private set; }
 
-        public LayoutSheet(ILogger logger, Layout layout, bool JPPLayout = true)
+        public LayoutSheet(ILogger<CoreExtensionApplication> logger, Layout layout, bool JPPLayout = true)
         {
             _layout = layout;
             LayoutID = layout.Id;
@@ -176,7 +178,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
             if (blocks.Count() != 1)
             {
-                _logger.Entry("No title block found for sheet");
+                _logger.LogWarning("No title block found for sheet");
                 return;
             }
 

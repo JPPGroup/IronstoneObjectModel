@@ -1,10 +1,9 @@
-﻿using System.Xml.Serialization;
-using Autodesk.AutoCAD.ApplicationServices;
+﻿using Autodesk.AutoCAD.ApplicationServices;
 using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
-using Jpp.Ironstone.Core.ServiceInterfaces;
-using Jpp.Ironstone.Structures.ObjectModel;
-using Unity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using CivSurface = Autodesk.Civil.DatabaseServices.Surface;
 
 namespace Jpp.Ironstone.Housing.ObjectModel.Detail
@@ -12,16 +11,16 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
     // TODO: Review the entire class as this has been copied wholesale
     public class DetailPlotMasterManager : AbstractDrawingObjectManager<DetailPlotMaster>
     {
-        private ILogger _logger;
+        private ILogger<CoreExtensionApplication> _logger;
 
-        public DetailPlotMasterManager(Document document, ILogger log) : base(document, log)
+        public DetailPlotMasterManager(Document document, ILogger<CoreExtensionApplication> log, IConfiguration settings) : base(document, log, settings)
         {
-            _logger = CoreExtensionApplication._current.Container.Resolve<ILogger>();
+            _logger = log;
         }
 
         public DetailPlotMasterManager() : base()
         {
-            _logger = CoreExtensionApplication._current.Container.Resolve<ILogger>();
+            _logger = CoreExtensionApplication._current.Container.GetRequiredService<ILogger<CoreExtensionApplication>>();
         }
 
         public override void UpdateDirty()

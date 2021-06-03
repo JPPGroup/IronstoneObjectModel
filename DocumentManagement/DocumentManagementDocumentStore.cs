@@ -1,7 +1,10 @@
 ﻿using System;
 using Autodesk.AutoCAD.ApplicationServices;
+using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 {
@@ -13,7 +16,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         //public LayoutSheetController LayoutSheetController { get; private set; }
 
-        public DocumentManagementDocumentStore(Document doc, Type[] managerTypes, ILogger log, LayerManager layerManager, IUserSettings settings) : base(doc, managerTypes, log, layerManager, settings) { }
+        public DocumentManagementDocumentStore(Document doc, Type[] managerTypes, ILogger<CoreExtensionApplication> log, LayerManager layerManager, IConfiguration settings) : base(doc, managerTypes, log, layerManager, settings) { }
         
         protected override void Save()
         {

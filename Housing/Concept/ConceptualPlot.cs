@@ -6,9 +6,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.Civil.DatabaseServices;
 using Jpp.DesignCalculations.Calculations.Design.Foundations;
+using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad.DrawingObjects.Primitives;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Structures.ObjectModel;
+using Microsoft.Extensions.Logging;
 using DBObject = Autodesk.AutoCAD.DatabaseServices.DBObject;
 using CivSurface = Autodesk.Civil.DatabaseServices.Surface;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
@@ -298,7 +300,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
             return true;
         }
 
-        public void RenderFoundations(IEnumerable<DepthBand> depthBands, ILogger logger)
+        public void RenderFoundations(IEnumerable<DepthBand> depthBands, ILogger<CoreExtensionApplication> logger)
         {
             if(!_depth.Calculated)
                 throw new InvalidOperationException("Please run calculation before attempting to render the depths");
@@ -306,8 +308,8 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
             double relativeDepth = _depth.ExistingGroundLevel.Value - _depth.FoundationDepth.Value;
 
             var band = depthBands.Where(db => db.StartDepth <= relativeDepth && db.EndDepth > relativeDepth);
-            if(band.Count() > 1)
-                logger.Entry("Multiple overlapping depth bands found, using first band encountered", Severity.Warning);
+            if (band.Count() > 1)
+                logger.LogWarning("Multiple overlapping depth bands found, using first band encountered");
 
             if (band.Count() == 0)
                 throw new InvalidOperationException("No matching band found");

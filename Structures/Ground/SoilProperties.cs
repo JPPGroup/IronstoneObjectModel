@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Jpp.Common;
 using Jpp.Ironstone.Core;
-using Jpp.Ironstone.Core.ServiceInterfaces;
-using Unity;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Jpp.Ironstone.Structures.ObjectModel
 {
@@ -80,11 +80,13 @@ namespace Jpp.Ironstone.Structures.ObjectModel
 
         private ObservableCollection<DepthBand> LoadDefaultBands()
         {
-            IUserSettings settings = CoreExtensionApplication._current.Container.Resolve<IUserSettings>();
+            var settings = CoreExtensionApplication._current.Container.GetRequiredService<IConfiguration>();
 
             ObservableCollection<DepthBand> bands = new ObservableCollection<DepthBand>();
 
-            var defaults = settings.GetObject<List<DepthBand>>("structures.foundations.depthBands");
+            //var defaults = settings.Get<List<DepthBand>>("structures:foundations:depthBands");//settings.GetObject<List<DepthBand>>("structures.foundations.depthBands");
+            var defaults = new List<DepthBand>();
+            settings.Bind("structures:foundations:depthBands", defaults);
             foreach (DepthBand band in defaults)
             {
                 bands.Add(band);

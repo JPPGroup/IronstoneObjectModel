@@ -2,6 +2,9 @@
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using System;
+using Jpp.Ironstone.Core;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace Jpp.Ironstone.Housing.ObjectModel
 {
@@ -10,6 +13,6 @@ namespace Jpp.Ironstone.Housing.ObjectModel
     [Layer(Name = Constants.PLOT_BOUNDARY_LAYER)]
     public class HousingDocumentStore : DocumentStore
     {
-        public HousingDocumentStore(Document doc, Type[] managerTypes, ILogger log, LayerManager layerManager, IUserSettings settings) : base(doc, managerTypes, log, layerManager, settings) { }
+        public HousingDocumentStore(Document doc, Type[] managerTypes, ILogger<CoreExtensionApplication> log, LayerManager layerManager, IConfiguration settings) : base(doc, managerTypes, log, layerManager, settings) { }
     }
 }

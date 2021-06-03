@@ -5,7 +5,10 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using System.Collections.Generic;
+using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Structures.ObjectModel.Properties;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Exception = Autodesk.AutoCAD.Runtime.Exception;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
@@ -19,7 +22,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
     {
         public PersistentObjectIdCollection RingsCollection { get; set; }
 
-        public TreeRingManager(Document document, ILogger log) : base(document, log)
+        public TreeRingManager(Document document, ILogger<CoreExtensionApplication> log, IConfiguration config) : base(document, log, config)
         {
             RingsCollection = new PersistentObjectIdCollection();
         }
@@ -147,16 +150,14 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     }
                     catch (ArgumentException e) //catch expected argument exception from DrawRings
                     {
-                        Log.LogException(e);
-                        Log.Entry(string.Format(Resources.TreeRingManager_Message_ErrorOnBaseRings, tree.ID));
+                        Log.LogError(e, string.Format(Resources.TreeRingManager_Message_ErrorOnBaseRings, tree.ID));
 
                         acTrans.Abort();
                         return;
                     }
                     catch (Exception e) //catch AutoCAD exception just in case something weird happened
                     {
-                        Log.LogException(e);
-                        Log.Entry(string.Format(Resources.TreeRingManager_Message_ErrorOnBaseRings, tree.ID));
+                        Log.LogError(e, string.Format(Resources.TreeRingManager_Message_ErrorOnBaseRings, tree.ID));
 
                         acTrans.Abort();
                         return;
@@ -190,8 +191,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 }
                 catch (Exception e) //catch AutoCAD exception just in case something weird happened
                 {
-                    Log.LogException(e);
-                    Log.Entry(Resources.TreeRingManager_Message_ErrorOnGenerateRings, Severity.Warning);
+                    Log.LogError(e, Resources.TreeRingManager_Message_ErrorOnGenerateRings);
                     acTrans.Abort();
                 }
                 finally
