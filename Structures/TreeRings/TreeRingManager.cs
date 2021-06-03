@@ -4,6 +4,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using System.Collections.Generic;
+using Jpp.Common;
+using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Structures.ObjectModel.Properties;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -18,7 +20,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
     [Layer(Name = Constants.HEAVE_LAYER)]
     public class TreeRingManager : AbstractDrawingObjectManager<Tree>
     {
-        internal int[] _ringColors { get; private set; }
+        internal List<int> _ringColors { get; private set; }
 
         public IReadOnlyCollection<int> RingColors
         {
@@ -37,13 +39,15 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
         public TreeRingManager(Document document, ILogger<CoreExtensionApplication> log, IConfiguration config) : base(document, log, config)
         {
             RingsCollection = new SerializableDictionary<double, TreeRing>();
-            _ringColors = _settings.GetObject<int[]>("structures.treeRings.RingColors");
+            _ringColors = new List<int>();
+            _settings.Bind("structures:treeRings:RingColors", _ringColors);
         }
 
         public TreeRingManager() : base()
         {
             RingsCollection = new SerializableDictionary<double, TreeRing>();
-            _ringColors = _settings.GetObject<int[]>("structures.treeRings.RingColors");
+            _ringColors = new List<int>();
+            _settings.Bind("structures:treeRings:RingColors", _ringColors);
         }
 
         public override void UpdateDirty()
@@ -310,7 +314,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             }
         }*/
 
-        private void GenerateEnclosedRing(List<DBObjectCollection> existingRings, int ringIndex, int[] ringColors, float startDepth, SoilProperties soilProperties)
+        private void GenerateEnclosedRing(List<DBObjectCollection> existingRings, int ringIndex, List<int> ringColors, float startDepth, SoilProperties soilProperties)
         {
             if (existingRings.Count > 0)
             {
@@ -336,10 +340,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 newRing.Depth = currentDepth;
 
                 //Protection for color overflow, loop around
-                if (ringIndex >= ringColors.Length)
+                if (ringIndex >= ringColors.Count)
                 {
-                    int multiple = (int)Math.Floor((double)(ringIndex / ringColors.Length));
-                    newRing.ColorIndex = ringColors[ringIndex - multiple * ringColors.Length];
+                    int multiple = (int)Math.Floor((double)(ringIndex / ringColors.Count));
+                    newRing.ColorIndex = ringColors[ringIndex - multiple * ringColors.Count];
                 }
                 else
                 {
