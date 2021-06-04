@@ -71,8 +71,7 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
                         #if !DEBUG
                         if (!SharedUIHelper.StructuresAvailable)
                         {
-                            _logger.Entry("Foundations cannot be updated while the structures modules is not present",
-                                Severity.Error);
+                            _logger.LogError("Foundations cannot be updated while the structures modules is not present");
 
                             continue;
                         }
