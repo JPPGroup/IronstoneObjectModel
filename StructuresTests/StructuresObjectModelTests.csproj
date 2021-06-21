@@ -3,7 +3,7 @@
   <Import Project="..\IronstoneBase\IronstoneBaseTestProject.csproj" />
   <PropertyGroup>
     <RootNamespace>Jpp.Ironstone.Structures.ObjectModel.Test</RootNamespace>
-    <AssemblyName>IronstoneStructuresObjectModelTests</AssemblyName>
+    <AssemblyName>StructuresObjectModelTests</AssemblyName>
   </PropertyGroup>    
   <ItemGroup>
     <Folder Include="Properties\" />
@@ -16,6 +16,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Test Drawings\blank.dwg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Test Drawings\ExampleManager.dwg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>

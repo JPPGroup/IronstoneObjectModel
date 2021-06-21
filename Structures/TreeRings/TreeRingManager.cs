@@ -4,10 +4,12 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using System.Collections.Generic;
+using System.Drawing;
 using Jpp.Common;
 using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Structures.ObjectModel.Properties;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Exception = Autodesk.AutoCAD.Runtime.Exception;
 
@@ -47,6 +49,8 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
         {
             RingsCollection = new SerializableDictionary<double, TreeRing>();
             _ringColors = new List<int>();
+
+            _settings = CoreExtensionApplication._current.Container.GetRequiredService<IConfiguration>();
             _settings.Bind("structures:treeRings:RingColors", _ringColors);
         }
 
