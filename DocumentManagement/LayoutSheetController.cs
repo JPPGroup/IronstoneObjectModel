@@ -7,7 +7,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Common;
 using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
-using Jpp.Ironstone.Core.ServiceInterfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -16,11 +15,11 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
     public class LayoutSheetController
     {
         public SerializableDictionary<string, LayoutSheet> Sheets;
-        private Document _document;
+        private Database _document;
         private ILogger<CoreExtensionApplication> _logger;
         private IConfiguration _settings;
 
-        public LayoutSheetController(ILogger<CoreExtensionApplication> logger, Document doc, IConfiguration settings)
+        public LayoutSheetController(ILogger<CoreExtensionApplication> logger, Database doc, IConfiguration settings)
         {
             Sheets = new SerializableDictionary<string, LayoutSheet>();
             _document = doc;
@@ -30,7 +29,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         public void Scan()
         {
-            Database acCurDb = _document.Database;
+            Database acCurDb = _document;
 
             Transaction acTrans = acCurDb.TransactionManager.TopTransaction;
             DBDictionary layouts = acTrans.GetObject(acCurDb.LayoutDictionaryId, OpenMode.ForRead) as DBDictionary;
@@ -73,11 +72,16 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                     }
                     IdMapping mapping = new IdMapping();
                     // TODO: Confirm ignore is correct option
-                    _document.Database.WblockCloneObjects(sourceObjects, destinationLayout.BlockTableRecordId, mapping, DuplicateRecordCloning.Ignore, false);
+                    _document.WblockCloneObjects(sourceObjects, destinationLayout.BlockTableRecordId, mapping, DuplicateRecordCloning.Ignore, false);
                 }
 
                 LayoutSheet resultSheet = new LayoutSheet(_logger, destinationLayout);
                 Sheets.Add(resultSheet.Name, resultSheet);
+
+                LayoutManager.Current.CurrentLayout = resultSheet.Name;
+                Object acadObject = Application.AcadApplication;
+                //Will this break in coreconsole?
+                acadObject.GetType().InvokeMember("ZoomExtents",BindingFlags.InvokeMethod, null, acadObject, null);
 
                 return resultSheet;
             }
@@ -87,7 +91,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         {
             Transaction trans = _document.TransactionManager.TopTransaction;
 
-            DBDictionary layoutDic = trans.GetObject(_document.Database.LayoutDictionaryId, OpenMode.ForRead, false) as DBDictionary;
+            DBDictionary layoutDic = trans.GetObject(_document.LayoutDictionaryId, OpenMode.ForRead, false) as DBDictionary;
 
             string pattern = @"\d+ - .+";
 
@@ -113,7 +117,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         private void SideLoad(Database template)
         {
-            string templatePath = _settings["defaultTemplateFile"];
+            string templatePath = _settings["documentmanagement:defaultTemplateFile"];
             bool cleanup = false;
             if (templatePath.Equals("embedded", StringComparison.CurrentCultureIgnoreCase))
             {
