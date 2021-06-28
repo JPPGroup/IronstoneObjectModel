@@ -7,7 +7,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Common;
 using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
-using Jpp.Ironstone.Core.ServiceInterfaces;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 

@@ -5,7 +5,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.PlottingServices;
 using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
-using Jpp.Ironstone.Core.ServiceInterfaces;
 using Microsoft.Extensions.Logging;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel

@@ -25,7 +25,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             _container = container;
 
             _workingDirectory = workingDirectory;
-            _xrefDirectory = Path.Combine(_workingDirectory, "xref");
+            _xrefDirectory = Path.Combine(_workingDirectory, "Xrefs");
             if (!Directory.Exists(_xrefDirectory))
             {
                 Directory.CreateDirectory(_xrefDirectory);
