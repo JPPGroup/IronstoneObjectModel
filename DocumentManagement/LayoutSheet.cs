@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Linq;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -183,18 +184,5 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
             TitleBlock = new TitleBlock(blocks.ElementAt(0));
         }
-    }
-
-    public enum PaperSize
-    {
-        A0Landscape,
-        A1Landscape,
-        A2Landscape,
-        A3Landscape,
-        A0Portrait,
-        A1Portrait,
-        A2Portrait,
-        A3Portrait,
-        A4Portrait
     }
 }
