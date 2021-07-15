@@ -62,6 +62,8 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             }
         }
 
+        public string PdfDirectory { get; set; }
+
         public Dictionary<string, LayoutSheetController> SheetControllers { get; private set; }
 
         private ProjectModel _projectModel;
@@ -80,6 +82,12 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                 Directory.CreateDirectory(_xrefDirectory);
             }
 
+            PdfDirectory = Path.Combine(_workingDirectory, "Pdf");
+            if (!Directory.Exists(PdfDirectory))
+            {
+                Directory.CreateDirectory(PdfDirectory);
+            }
+
             SheetControllers = new Dictionary<string, LayoutSheetController>();
 
             ScanFolder();
@@ -87,11 +95,19 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             // TODO: Optimise the scan to only modified objects for perofmance
             // TODO: Replace this with individual methods instead
             _watcher = new FileSystemWatcher(_workingDirectory);
-            _watcher.Created += (sender, args) => ScanFolder();
-            _watcher.Changed += (sender, args) => ScanFolder();
-            _watcher.Deleted += (sender, args) => ScanFolder();
-            _watcher.Renamed += (sender, args) => ScanFolder();
+            //_watcher.Created += (sender, args) => ScanFolder();
+            //_watcher.Changed += (sender, args) => ScanFolder();
+            _watcher.Deleted += (sender, args) => HandleDeleteWatcher(sender, args);
+            //_watcher.Renamed += (sender, args) => ScanFolder();
             _watcher.EnableRaisingEvents = true;
+        }
+
+        private void HandleDeleteWatcher(object sender, FileSystemEventArgs args)
+        {
+            if (Path.GetExtension(args.FullPath) == ".dwg")
+            {
+                ScanFolder();
+            }
         }
 
         private void LoadModel()
@@ -102,6 +118,12 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             {
                 string text = File.ReadAllText(filePath);
                 _projectModel = JsonSerializer.Deserialize<ProjectModel>(text);
+                _logger.LogDebug("Existing project config loaded and read");
+            }
+            else
+            {
+                _logger.LogDebug("No existing project config found, using defaults");
+                _projectModel = new ProjectModel();
             }
 
             OnPropertyChanged(nameof(ProjectNumber));
@@ -191,17 +213,43 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         private void ScanFolder()
         {
+            _logger.LogDebug("Doc management folder scan started...");
             LoadModel();
-
+            
+            //TODO: Add code here to retrun already open files rather than sideload
             foreach(string s in Directory.GetFiles(_workingDirectory, "*.dwg"))
             {
-                Database db = new Database(false, true);
-                db.ReadDwgFile(s, FileOpenMode.OpenForReadAndAllShare, true, null);
-                db.CloseInput(true);
+                _logger.LogDebug($"Dwg file found at {s}");
+                Database db = null;
+
+                foreach (Document d in Application.DocumentManager)
+                {
+                    if (d.Name == s)
+                    {
+                        db = d.Database;
+                        _logger.LogDebug($"Dwg file matched to open drawing");
+                    }
+                }
+
+                if (db == null)
+                {
+                    db = new Database(false, true);
+                    db.ReadDwgFile(s, FileOpenMode.OpenForReadAndAllShare, true, null);
+                    db.CloseInput(true);
+                    _logger.LogDebug($"Dwg file sideloaded successfully");
+                }
 
                 LayoutSheetController lsc = new LayoutSheetController(_logger, db, _settings);
+                using (Transaction trans = db.TransactionManager.StartTransaction())
+                {
+                    lsc.Scan();
+                    _logger.LogDebug($"Dwg file scanned");
+                }
+
                 SheetControllers.Add(Path.GetFileNameWithoutExtension(s), lsc);
             }
+
+            _logger.LogDebug("Doc management folder scan complete");
         }
     }
 }

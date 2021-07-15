@@ -1,4 +1,5 @@
 ﻿using System;
+using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel
@@ -7,7 +8,11 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
     {
         public TitleBlock(BlockRefDrawingObject reference) : base()
         {
+            this._document = reference.Document;
+            this._database = reference.Database;
             this.BaseObject = reference.BaseObject;
+
+            GetProperties();
         }
 
         public string Client
