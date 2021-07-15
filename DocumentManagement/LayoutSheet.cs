@@ -1,7 +1,5 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Linq;
-using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.PlottingServices;
 using Jpp.Ironstone.Core;
@@ -25,7 +23,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         public DrawingArea DrawingArea { get; private set; }
         public NoteArea NoteArea { get; private set; }
-
+        
         public LayoutSheet(ILogger<CoreExtensionApplication> logger, Layout layout, bool JPPLayout = true)
         {
             _layout = layout;
@@ -71,54 +69,61 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             throw new NotImplementedException();
         }
 
+        public string GetPDFName()
+        {
+            return $"{TitleBlock.ProjectNumber} - {TitleBlock.DrawingNumber}{TitleBlock.Revision} - {TitleBlock.Title}.pdf";
+        }
+
         public void Plot(string fileName, PlotEngine pe, PlotProgressDialog ppd)
         {
-            Transaction trans = LayoutID.Database.TransactionManager.TopTransaction;
-            Layout layout = (Layout) trans.GetObject(LayoutID, OpenMode.ForRead);
-            LayoutManager.Current.CurrentLayout = layout.LayoutName;
+            using (Transaction trans = LayoutID.Database.TransactionManager.StartTransaction())
+            {
+                Layout layout = (Layout) trans.GetObject(LayoutID, OpenMode.ForRead);
+                LayoutManager.Current.CurrentLayout = layout.LayoutName;
 
-            PlotInfo plotInfo = new PlotInfo();
-            plotInfo.Layout = LayoutID;
+                PlotInfo plotInfo = new PlotInfo();
+                plotInfo.Layout = LayoutID;
 
-            // Set plot settings
-            PlotSettings ps = new PlotSettings(layout.ModelType);
-            ps.CopyFrom(layout);
+                // Set plot settings
+                PlotSettings ps = new PlotSettings(layout.ModelType);
+                ps.CopyFrom(layout);
 
-            PlotSettingsValidator psv = PlotSettingsValidator.Current;
-            psv.SetPlotType(ps, Autodesk.AutoCAD.DatabaseServices.PlotType.Layout);
-            psv.SetUseStandardScale(ps, true);
-            psv.SetStdScaleType(ps, StdScaleType.StdScale1To1);
+                PlotSettingsValidator psv = PlotSettingsValidator.Current;
+                psv.SetPlotType(ps, Autodesk.AutoCAD.DatabaseServices.PlotType.Layout);
+                psv.SetUseStandardScale(ps, true);
+                psv.SetStdScaleType(ps, StdScaleType.StdScale1To1);
 
-            /*PlotConfig pConfig = PlotConfigManager.SetCurrentConfig("DWG To PDF.pc3");
-            var devices = psv.GetPlotDeviceList();*/
-            psv.SetPlotConfigurationName(ps, "DWG To PDF.pc3", null);
-            psv.RefreshLists(ps);
-            var media = psv.GetCanonicalMediaNameList(ps);
+                /*PlotConfig pConfig = PlotConfigManager.SetCurrentConfig("DWG To PDF.pc3");
+                var devices = psv.GetPlotDeviceList();*/
+                psv.SetPlotConfigurationName(ps, "DWG To PDF.pc3", null);
+                psv.RefreshLists(ps);
+                var media = psv.GetCanonicalMediaNameList(ps);
 
-            psv.SetPlotConfigurationName(ps, "DWG To PDF.pc3", GetMediaName());
+                psv.SetPlotConfigurationName(ps, "DWG To PDF.pc3", GetMediaName());
 
-            plotInfo.OverrideSettings = ps;
-            PlotInfoValidator piv = new PlotInfoValidator();
-            piv.MediaMatchingPolicy = MatchingPolicy.MatchEnabled;
-            piv.Validate(plotInfo);
+                plotInfo.OverrideSettings = ps;
+                PlotInfoValidator piv = new PlotInfoValidator();
+                piv.MediaMatchingPolicy = MatchingPolicy.MatchEnabled;
+                piv.Validate(plotInfo);
 
-            pe.BeginDocument(plotInfo, fileName, null, 1, true, fileName);
+                pe.BeginDocument(plotInfo, fileName, null, 1, true, fileName);
 
-            ppd.OnBeginSheet();
-            ppd.LowerSheetProgressRange = 0;
-            ppd.UpperSheetProgressRange = 100;
-            ppd.SheetProgressPos = 0;
+                ppd.OnBeginSheet();
+                ppd.LowerSheetProgressRange = 0;
+                ppd.UpperSheetProgressRange = 100;
+                ppd.SheetProgressPos = 0;
 
-            PlotPageInfo ppi = new PlotPageInfo();
-            pe.BeginPage(ppi, plotInfo, true, null);
-            pe.BeginGenerateGraphics(null);
-            pe.EndGenerateGraphics(null);
+                PlotPageInfo ppi = new PlotPageInfo();
+                pe.BeginPage(ppi, plotInfo, true, null);
+                pe.BeginGenerateGraphics(null);
+                pe.EndGenerateGraphics(null);
 
-            pe.EndPage(null);
-            ppd.SheetProgressPos = 100;
-            ppd.OnEndSheet();
+                pe.EndPage(null);
+                ppd.SheetProgressPos = 100;
+                ppd.OnEndSheet();
 
-            pe.EndDocument(null);
+                pe.EndDocument(null);
+            }
         }
 
         private string GetMediaName()
@@ -170,10 +175,10 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         private void FindTitleBlock()
         {
-            Transaction acTrans = Application.DocumentManager.MdiActiveDocument.Database.TransactionManager.TopTransaction;
+            Transaction acTrans = _layout.Database.TransactionManager.TopTransaction;
             BlockTableRecord btr = (BlockTableRecord)acTrans.GetObject(_layout.BlockTableRecordId, OpenMode.ForRead);
 
-            var blocks = _layout.GetBlockReferences().Select(br => new BlockRefDrawingObject(Application.DocumentManager.MdiActiveDocument, br));
+            var blocks = _layout.GetBlockReferences().Select(br => new BlockRefDrawingObject(_layout.Database, br));
             blocks = blocks.Where(br => br.BlockName == GetTitleBlockName());
 
             if (blocks.Count() != 1)

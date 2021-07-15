@@ -29,6 +29,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         public void Scan()
         {
+            _logger.LogTrace($"Layout sheet controller scanning {_document.Filename}");
             Database acCurDb = _document;
 
             Transaction acTrans = acCurDb.TransactionManager.TopTransaction;
@@ -39,13 +40,17 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             {
                 if (!Sheets.ContainsKey(item.Key) && item.Key != "Model")
                 {
+                    _logger.LogTrace($"Sheet {item.Key} found");
                     Layout acLayout = acTrans.GetObject(item.Value, OpenMode.ForRead) as Layout;
                     LayoutSheet ls = new LayoutSheet(_logger, acLayout);
 
+                    _logger.LogTrace($"Sheet {item.Key} added");
                     Sheets.Add(item.Key, ls);
                 }
             }
         }
+
+        
 
         public LayoutSheet AddLayout(string layoutName, PaperSize size)
         {
