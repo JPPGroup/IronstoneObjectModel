@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Common", "..\Common\src\Com
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IronstoneCore", "..\IronstoneCore\IronstoneCore\IronstoneCore.csproj", "{A3BFA507-A2C4-4C33-943B-6083133EE63C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DesignCalculations.Calculations", "..\DesignCalculations\src\DesignCalculations.Calculations\DesignCalculations.Calculations.csproj", "{AB4F7F3A-68FA-47FF-98E1-77EC9B6E1860}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DesignCalculations.Calculations", "DesignCalculations\src\DesignCalculations.Calculations\DesignCalculations.Calculations.csproj", "{AB4F7F3A-68FA-47FF-98E1-77EC9B6E1860}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

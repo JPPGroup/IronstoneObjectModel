@@ -17,7 +17,7 @@
     <Reference Include="PresentationCore" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DesignCalculations\src\DesignCalculations.Calculations\DesignCalculations.Calculations.csproj" />
+    <ProjectReference Include="..\DesignCalculations\src\DesignCalculations.Calculations\DesignCalculations.Calculations.csproj" />
   </ItemGroup>
   <ItemGroup>
     <None Update="IronstoneConfig.xml">
