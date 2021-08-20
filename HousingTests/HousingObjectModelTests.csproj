@@ -3,7 +3,7 @@
   <Import Project="..\IronstoneBase\IronstoneBaseTestProject.csproj" />
   <PropertyGroup>
     <RootNamespace>Jpp.Ironstone.Housing.ObjectModel.Test</RootNamespace>
-    <AssemblyName>IronstoneHousingObjectModelTests</AssemblyName>
+    <AssemblyName>HousingObjectModelTests</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
