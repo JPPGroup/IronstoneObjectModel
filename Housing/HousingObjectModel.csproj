@@ -24,7 +24,7 @@
   </ItemGroup>
   <ItemGroup Condition=" $(Configuration.Contains('Local')) ">    
     <ProjectReference Include="..\Structures\StructuresObjectModel.csproj" />
-    <ProjectReference Include="..\..\DesignCalculations\src\DesignCalculations.Calculations\DesignCalculations.Calculations.csproj" />
+    <ProjectReference Include="..\DesignCalculations\src\DesignCalculations.Calculations\DesignCalculations.Calculations.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />

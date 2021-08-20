@@ -136,7 +136,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.Test.TreeRings
                         ID = "valid-hedge",
                         BaseObject = polyId
                     };
-                    Debugger.Launch();
 
                     var ds = DataService.Current;
                     ds.InvalidateStoreTypes();

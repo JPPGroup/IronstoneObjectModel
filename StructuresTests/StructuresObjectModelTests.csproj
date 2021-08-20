@@ -12,9 +12,6 @@
     <ProjectReference Include="..\Structures\StructuresObjectModel.csproj" />
   </ItemGroup>  
   <ItemGroup>
-    <None Update="IronstoneConfig.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Update="Test Drawings\blank.dwg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
