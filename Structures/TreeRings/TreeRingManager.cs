@@ -1,13 +1,15 @@
 ﻿using System;
 using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Ironstone.Core.Autocad;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using System.Collections.Generic;
+using System.Drawing;
+using Jpp.Common;
 using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Structures.ObjectModel.Properties;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Exception = Autodesk.AutoCAD.Runtime.Exception;
 
@@ -20,16 +22,36 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
     [Layer(Name = Constants.HEAVE_LAYER)]
     public class TreeRingManager : AbstractDrawingObjectManager<Tree>
     {
-        public PersistentObjectIdCollection RingsCollection { get; set; }
+        internal List<int> _ringColors { get; private set; }
+
+        public IReadOnlyCollection<int> RingColors
+        {
+            get
+            {
+                return _ringColors;
+            }
+        }
+
+        //public PersistentObjectIdCollection RingsCollection { get; set; }
+
+        public SerializableDictionary<double, TreeRing> RingsCollection { get; set; }
+        public TreeRing HeaveRing { get; set; }
+        public TreeRing PileRing { get; set; }
 
         public TreeRingManager(Document document, ILogger<CoreExtensionApplication> log, IConfiguration config) : base(document, log, config)
         {
-            RingsCollection = new PersistentObjectIdCollection();
+            RingsCollection = new SerializableDictionary<double, TreeRing>();
+            _ringColors = new List<int>();
+            _settings.Bind("structures:treeRings:RingColors", _ringColors);
         }
 
         public TreeRingManager() : base()
         {
-            RingsCollection = new PersistentObjectIdCollection();
+            RingsCollection = new SerializableDictionary<double, TreeRing>();
+            _ringColors = new List<int>();
+
+            _settings = CoreExtensionApplication._current.Container.GetRequiredService<IConfiguration>();
+            _settings.Bind("structures:treeRings:RingColors", _ringColors);
         }
 
         public override void UpdateDirty()
@@ -55,9 +77,13 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 
         private void GenerateRings()
         {
+            LayerManager layerManager = DataService.Current.GetStore<DocumentStore>(HostDocument.Name).LayerManager;
+            string existingLayer = layerManager.GetLayerName(Constants.EXISTING_TREE_LAYER);
+            string proposedLayer = layerManager.GetLayerName(Constants.PROPOSED_TREE_LAYER);
+            string heaveLayer = layerManager.GetLayerName(Constants.HEAVE_LAYER);
+            string piledLayer = layerManager.GetLayerName(Constants.PILED_LAYER);
+
             SoilProperties sp = DataService.Current.GetStore<StructureDocumentStore>(HostDocument.Name).SoilProperties;
-            
-            int[] ringColors = new int[] { 102, 80, 60, 50, 20, 12, 14, 16, 18 };
 
             float StartDepth;
 
@@ -88,15 +114,21 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             using (Transaction acTrans = HostDocument.Database.TransactionManager.StartTransaction())
             {
                 //Delete existing rings
-                foreach (ObjectId obj in RingsCollection.Collection)
+                foreach (TreeRing obj in RingsCollection.Values)
                 {
-                    if (!obj.IsErased)
+                    if (!obj.Erased)
                     {
-                        acTrans.GetObject(obj, OpenMode.ForWrite).Erase();
+                        obj.Erase();
                     }
-
-                    RingsCollection.Clear();
                 }
+
+                RingsCollection.Clear();
+
+                PileRing?.Erase();
+                HeaveRing?.Erase();
+
+                PileRing = null;
+                HeaveRing = null;
 
                 acTrans.Commit();
 
@@ -118,7 +150,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 DBObjectCollection heaveRings = new DBObjectCollection();
 
                 //Try generate the rings for each tree
-
                 foreach (Tree tree in ActiveObjects)
                 {
                     try
@@ -126,10 +157,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                         DBObjectCollection collection = tree.DrawRings(sp.SoilShrinkability, StartDepth, sp.TargetStepSize);
                         if (collection != null && collection.Count > 0)
                         {
-                            Curve circ = tree.DrawShape(2.5f, sp.SoilShrinkability);
+                            Curve circ = tree.DrawShape(2.5f + sp.ClimateReduction, sp.SoilShrinkability);
                             if (circ != null) pillingRings.Add(circ);
 
-                            Curve heaveCirc = tree.DrawShape(1.5f, sp.SoilShrinkability);
+                            Curve heaveCirc = tree.DrawShape(1.5f + sp.ClimateReduction, sp.SoilShrinkability);
                             if (heaveCirc != null) heaveRings.Add(heaveCirc);
 
                             switch (tree.Phase)
@@ -148,6 +179,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                             }
                         }
                     }
+
                     catch (ArgumentException e) //catch expected argument exception from DrawRings
                     {
                         Log.LogError(e, string.Format(Resources.TreeRingManager_Message_ErrorOnBaseRings, tree.ID));
@@ -169,23 +201,32 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 {
                     for (int ringIndex = 0; ringIndex < maxExistingSteps; ringIndex++)
                     {
-                        HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.EXISTING_TREE_LAYER).ObjectId;
-                        GenerateEnclosedRing(existingRings, ringIndex, ringColors, acBlkTblRec, acTrans);
+                        HostDocument.Database.Clayer = HostDocument.Database.GetLayer(existingLayer).ObjectId;
+                        GenerateEnclosedRing(existingRings, ringIndex, _ringColors, StartDepth, sp);
                     }
 
                     for (int ringIndex = 0; ringIndex < maxProposedSteps; ringIndex++)
                     {
-                        HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PROPOSED_TREE_LAYER).ObjectId;
-                        GenerateEnclosedRing(proposedRings, ringIndex, ringColors, acBlkTblRec, acTrans);
+                        HostDocument.Database.Clayer = HostDocument.Database.GetLayer(proposedLayer).ObjectId;
+                        GenerateEnclosedRing(proposedRings, ringIndex, _ringColors, StartDepth, sp);
                     }
 
                     //Add hatching for piling
-                    HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.PILED_LAYER).ObjectId;
-                    GeneratePilingRings(pillingRings, acBlkTblRec, acTrans);
+                    HostDocument.Database.Clayer = HostDocument.Database.GetLayer(piledLayer).ObjectId;
+                    if (pillingRings.Count > 0)
+                    {
+                        PileRing = TreeRing.Create(HostDocument, pillingRings);
+                        PileRing.Depth = 2.5d;
+                        PileRing.Hatch();
+                    }
 
                     //Add heave line
-                    HostDocument.Database.Clayer = HostDocument.Database.GetLayer(Constants.HEAVE_LAYER).ObjectId;
-                    GenerateHeaveRings(heaveRings, acBlkTblRec, acTrans);
+                    HostDocument.Database.Clayer = HostDocument.Database.GetLayer(heaveLayer).ObjectId;
+                    if (heaveRings.Count > 0)
+                    {
+                        HeaveRing = TreeRing.Create(HostDocument, heaveRings);
+                        HeaveRing.Depth = 1.5d;
+                    }
 
                     acTrans.Commit();
                 }
@@ -201,31 +242,7 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             }
         }
 
-        private void GenerateHeaveRings(DBObjectCollection heaveRings, BlockTableRecord acBlkTblRec, Transaction acTrans)
-        {
-            List<Region> createdRegions = new List<Region>();
-            foreach (Curve c in heaveRings)
-            {
-                DBObjectCollection temp = new DBObjectCollection();
-                temp.Add(c);
-                DBObjectCollection regions = Region.CreateFromCurves(temp);
-                foreach (Region r in regions)
-                {
-                    createdRegions.Add(r);
-                }
-            }
-
-            Region heaveEnclosed = createdRegions[0];
-            for (int i = 1; i < createdRegions.Count; i++)
-            {
-                heaveEnclosed.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
-            }
-
-            RingsCollection.Add(acBlkTblRec.AppendEntity(heaveEnclosed));
-            acTrans.AddNewlyCreatedDBObject(heaveEnclosed, true);
-        }
-
-        private void GeneratePilingRings(DBObjectCollection pillingRings, BlockTableRecord acBlkTblRec, Transaction acTrans)
+        /*private void GeneratePilingRings(DBObjectCollection pillingRings, BlockTableRecord acBlkTblRec, Transaction acTrans)
         {
             List<Region> createdRegions = new List<Region>();
             foreach (Curve c in pillingRings)
@@ -299,12 +316,14 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     dot.MoveToBottom(tempCollection);
                 }
             }
-        }
+        }*/
 
-        private void GenerateEnclosedRing(List<DBObjectCollection> existingRings, int ringIndex, int[] ringColors, BlockTableRecord acBlkTblRec, Transaction acTrans)
+        private void GenerateEnclosedRing(List<DBObjectCollection> existingRings, int ringIndex, List<int> ringColors, float startDepth, SoilProperties soilProperties)
         {
             if (existingRings.Count > 0)
             {
+                double currentDepth =  Math.Round(startDepth + soilProperties.TargetStepSize * ringIndex - soilProperties.ClimateReduction, 3);
+
                 //Determine overlaps
                 List<Curve> currentStep = new List<Curve>();
 
@@ -321,40 +340,21 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                     }
                 }
 
-                List<Region> createdRegions = new List<Region>();
-
-                //Create regions
-                foreach (Curve c in currentStep)
-                {
-                    DBObjectCollection temp = new DBObjectCollection();
-                    temp.Add(c);
-                    DBObjectCollection regions = Region.CreateFromCurves(temp);
-                    foreach (Region r in regions)
-                    {
-                        createdRegions.Add(r);
-                    }
-                }
-
-                Region enclosed = createdRegions[0];
-
-                for (int i = 1; i < createdRegions.Count; i++)
-                {
-                    enclosed.BooleanOperation(BooleanOperationType.BoolUnite, createdRegions[i]);
-                }
+                TreeRing newRing = TreeRing.Create(HostDocument, currentStep);
+                newRing.Depth = currentDepth;
 
                 //Protection for color overflow, loop around
-                if (ringIndex >= ringColors.Length)
+                if (ringIndex >= ringColors.Count)
                 {
-                    int multiple = (int)Math.Floor((double)(ringIndex / ringColors.Length));
-                    enclosed.ColorIndex = ringColors[ringIndex - multiple * ringColors.Length];
+                    int multiple = (int)Math.Floor((double)(ringIndex / ringColors.Count));
+                    newRing.ColorIndex = ringColors[ringIndex - multiple * ringColors.Count];
                 }
                 else
                 {
-                    enclosed.ColorIndex = ringColors[ringIndex];
+                    newRing.ColorIndex = ringColors[ringIndex];
                 }
 
-                RingsCollection.Add(acBlkTblRec.AppendEntity(enclosed));
-                acTrans.AddNewlyCreatedDBObject(enclosed, true);
+                RingsCollection.Add(currentDepth, newRing);
             }
         }
     }

@@ -9,7 +9,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel.UnitTests
 {
     [TestFixture]
     class DrawingRegisterTests
-    {
+    {/*
         [Test]
         public void LoadTestCivilRegister()
         {
@@ -140,6 +140,6 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel.UnitTests
             Assert.AreEqual("Amended Drawing Title", modifiedc1.DrawingTitle);
             Assert.AreEqual(DrawingType.Civil, modifiedc1.Type);
             Assert.AreEqual("pdf", modifiedc1.IssueType);
-        }
+        }*/
     }
 }

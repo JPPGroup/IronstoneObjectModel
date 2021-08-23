@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
@@ -94,7 +93,6 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Tests.Concept
             Document doc = Application.DocumentManager.MdiActiveDocument;
             ConceptualPlot plot;
 
-            Debugger.Launch();
             using (Transaction trans = doc.TransactionManager.StartTransaction())
             {
                 plot = BuildConceptualPlot(input, doc, trans);

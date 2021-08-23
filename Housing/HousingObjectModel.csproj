@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <Import Project="..\IronstoneBase\IronstoneObjectModelBaseUiProject.csproj" />
   <PropertyGroup>
     <RootNamespace>Jpp.Ironstone.Housing.ObjectModel</RootNamespace>
     <AssemblyName>IronstoneHousingObjectModel</AssemblyName>
@@ -13,11 +12,9 @@
     <AssemblyVersion>9.9.9.9</AssemblyVersion>
     <FileVersion>9.9.9.9</FileVersion>
   </PropertyGroup>
-  <ItemGroup>
-    <None Update="IronstoneConfig.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+
+  <Import Project="..\IronstoneBase\IronstoneObjectModelBaseUiProject.csproj" />
+
   <ItemGroup>
     <ProjectReference Include="..\Structures\StructuresObjectModel.csproj" />
   </ItemGroup>
@@ -25,12 +22,31 @@
   <ItemGroup Condition=" $(Configuration.Contains('Local')) == false">
     <!--Add reference to design calcs-->
   </ItemGroup>
-  <ItemGroup Condition=" $(Configuration.Contains('Local')) ">
-    <ProjectReference Include="..\..\DesignCalculations\src\DesignCalculations.Calculations\DesignCalculations.Calculations.csproj" />
+  <ItemGroup Condition=" $(Configuration.Contains('Local')) ">    
+    <ProjectReference Include="..\Structures\StructuresObjectModel.csproj" />
+    <ProjectReference Include="..\DesignCalculations\src\DesignCalculations.Calculations\DesignCalculations.Calculations.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
+  <ItemGroup>
+    <None Update="IronstoneConfig.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>  
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>  
 </Project>

@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.Autocad;
+using Jpp.Ironstone.Core.ServiceInterfaces;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
@@ -19,10 +20,6 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             set
             {
                 _ID = value;
-                /*if (Label != null)
-                {
-                    Label.Text = value;
-                }*/
             }
         }
 
@@ -30,7 +27,48 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 
         public string Comments { get; set; }
 
-        public float Height { get; set; }
+        public float Height
+        {
+            get
+            {
+                if (ActualHeight > MaxSpeciesHeight)
+                {
+                    return ActualHeight;
+                }
+
+                return ActualHeight < MaxSpeciesHeight / 2 ? ActualHeight : MaxSpeciesHeight;
+            }
+        }
+
+        public float MaxSpeciesHeight
+        {
+            get
+            {
+                var speciesList = GetSpeciesList(WaterDemand, TreeType);
+                return (float)speciesList[Species];
+            }
+        }
+
+        public static Dictionary<string, int> GetSpeciesList(WaterDemand waterDemand, TreeType type)
+        {
+            switch (waterDemand)
+            {
+                case WaterDemand.High when type == TreeType.Deciduous:
+                    return Tree.DeciduousHigh;
+                case WaterDemand.High when type == TreeType.Coniferous:
+                    return Tree.ConiferousHigh;
+                case WaterDemand.Medium when type == TreeType.Deciduous:
+                    return Tree.DeciduousMedium;
+                case WaterDemand.Medium when type == TreeType.Coniferous:
+                    return Tree.ConiferousMedium;
+                case WaterDemand.Low when type == TreeType.Deciduous:
+                    return Tree.DeciduousLow;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        public float ActualHeight { get; set; }
 
         public string Species { get; set; }
 
@@ -39,8 +77,10 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
         public TreeType TreeType { get; set; }
 
         public Phase Phase { get; set; }
-        
-        //private TextObject Label;
+
+        public bool ExceedsNHBC { get; }
+
+        public bool ToBeRemoved { get; set; }
 
         public Tree() : base()
         {
@@ -90,6 +130,8 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             Document acDoc = Application.DocumentManager.MdiActiveDocument;
             Database acCurDb = acDoc.Database;
 
+            LayerManager layerManager = DataService.Current.GetStore<DocumentStore>(acDoc.Name).LayerManager;
+
             Transaction acTrans = acCurDb.TransactionManager.TopTransaction;
 
             // Open the Block table for read
@@ -100,13 +142,19 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             BlockTableRecord acBlkTblRec;
             acBlkTblRec = acTrans.GetObject(acBlkTbl[BlockTableRecord.ModelSpace], OpenMode.ForWrite) as BlockTableRecord;
 
+            string nhbcWarning = "";
+            if (ExceedsNHBC)
+            {
+                nhbcWarning = "*";
+            }
+
             //Draw label
             MText text = new MText
             {
                 Height = 2, 
                 Location = Location, 
-                Contents = $"No. {ID}\\P{Species}\\P{Height}m",
-                Layer = Constants.LABEL_LAYER
+                Contents = $"No. {ID}\\P{Species}\\PDesign Height: {Height}m{nhbcWarning}\\PActual Height: {ActualHeight}m",
+                Layer = layerManager.GetLayerName(Constants.LABEL_LAYER)
             };
 
             /*Label = new TextObject();
@@ -367,6 +415,15 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             double dh = M(shrinkage) * foundationDepth + C(shrinkage);
             double actualRadius = dh * Height;
             double roundedRadius = Math.Ceiling(actualRadius * 100) / 100;
+
+            //Check for "sapling" to avoid excessive rings
+            if (ToBeRemoved && ActualHeight < MaxSpeciesHeight / 2)
+            {
+                if (actualRadius < 2)
+                {
+                    return -1;
+                }
+            }
 
             return roundedRadius;
         }
