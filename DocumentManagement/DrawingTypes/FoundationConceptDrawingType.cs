@@ -27,7 +27,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel.DrawingTypes
             using (DocumentLock issueDocumentLock = doc.LockDocument())
             using(Transaction trans = doc.TransactionManager.StartTransaction())
             {
-                LayoutSheetController controller = new LayoutSheetController(_logger, doc, _settings);
+                LayoutSheetController controller = new LayoutSheetController(_logger, doc.Database, _settings);
                 LayoutSheet newSheet = controller.AddLayout("000 - PFA", PaperSize.A1Landscape);
                 newSheet.TitleBlock.DrawingNumber = "000";
                 newSheet.TitleBlock.Revision = "P1";
