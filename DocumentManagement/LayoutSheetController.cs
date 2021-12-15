@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.ApplicationServices;
+using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
 using Jpp.Common;
 using Jpp.Ironstone.Core;
@@ -84,9 +85,9 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                 Sheets.Add(resultSheet.Name, resultSheet);
 
                 LayoutManager.Current.CurrentLayout = resultSheet.Name;
-                Object acadObject = Application.AcadApplication;
+                //Object acadObject = Application.AcadApplication;
                 //Will this break in coreconsole?
-                acadObject.GetType().InvokeMember("ZoomExtents",BindingFlags.InvokeMethod, null, acadObject, null);
+                //acadObject.GetType().InvokeMember("ZoomExtents",BindingFlags.InvokeMethod, null, acadObject, null);
 
                 return resultSheet;
             }
