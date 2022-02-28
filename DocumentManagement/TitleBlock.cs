@@ -19,8 +19,8 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         {
             get
             {
-                string client1 = GetProperty<string>("CLIENT1");
-                string client2 = GetProperty<string>("CLIENT2");
+                string client1 = GetCachedProperty<string>("CLIENT1");
+                string client2 = GetCachedProperty<string>("CLIENT2");
 
                 return String.IsNullOrEmpty(client2) ? client1 : $"{client1}\n{client2}";
             }
@@ -39,9 +39,9 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         {
             get
             {
-                string project1 = GetProperty<string>("PROJECT1");
-                string project2 = GetProperty<string>("PROJECT2");
-                string project3 = GetProperty<string>("PROJECT3");
+                string project1 = GetCachedProperty<string>("PROJECT1");
+                string project2 = GetCachedProperty<string>("PROJECT2");
+                string project3 = GetCachedProperty<string>("PROJECT3");
 
                 return String.IsNullOrEmpty(project3)
                     ? String.IsNullOrEmpty(project2) ? project1 : $"{project1}\n{project2}"
@@ -66,9 +66,9 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         {
             get
             {
-                string title1 = GetProperty<string>("TITLE1");
-                string title2 = GetProperty<string>("TITLE2");
-                string title3 = GetProperty<string>("TITLE3");
+                string title1 = GetCachedProperty<string>("TITLE1");
+                string title2 = GetCachedProperty<string>("TITLE2");
+                string title3 = GetCachedProperty<string>("TITLE3");
 
                 return String.IsNullOrEmpty(title3)
                     ? String.IsNullOrEmpty(title2) ? title1 : $"{title1}\n{title2}"
@@ -91,38 +91,38 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         public string ProjectNumber
         {
-            get { return GetProperty<string>("PROJECTNO"); }
+            get { return GetCachedProperty<string>("PROJECTNO"); }
             set { SetProperty("PROJECTNO", value); }
         }
 
         public string DrawingNumber
         {
-            get { return GetProperty<string>("DRAWINGNO."); }
+            get { return GetCachedProperty<string>("DRAWINGNO."); }
             set { SetProperty("DRAWINGNO.", value); }
 
         }
 
         public string Revision
         {
-            get { return GetProperty<string>("REV."); }
+            get { return GetCachedProperty<string>("REV."); }
             set { SetProperty("REV.", value); }
         }
 
         public string DrawnBy
         {
-            get { return GetProperty<string>("DRAWNBY"); }
+            get { return GetCachedProperty<string>("DRAWNBY"); }
             set { SetProperty("DRAWNBY", value); }
         }
 
         public string CheckedBy
         {
-            get { return GetProperty<string>("CHECKEDBY"); }
+            get { return GetCachedProperty<string>("CHECKEDBY"); }
             set { SetProperty("CHECKEDBY", value); }
         }
 
         public string Date
         {
-            get { return GetProperty<string>("DATE"); }
+            get { return GetCachedProperty<string>("DATE"); }
             set { SetProperty("DATE", value); }
         }
 

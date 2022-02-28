@@ -33,6 +33,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         
         public LayoutSheet(ILogger<CoreExtensionApplication> logger, Layout layout, bool JPPLayout = true)
         {
+            _logger = logger;
             _layout = layout;
             LayoutID = layout.Id;
             Name = layout.LayoutName;
@@ -57,6 +58,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                     return;
 
                 case "User3082":
+                case "ISO_A1_(841.00_x_594.00_MM)":
                     Size = PaperSize.A1Landscape;
                     DrawingArea = new DrawingArea(_layout, 74.434, 579.435, 15.403, 564.653);
                     NoteArea  = new NoteArea(this, 74.434, 579.435, 564.653, 825.403);
@@ -69,12 +71,14 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                     return;
 
                 case "A3":
+                case "ISO_expand_A3_(420.00_x_297.00_MM)":
                     Size = PaperSize.A3Landscape;
                     DrawingArea = new DrawingArea(_layout, 30, 276.85,7.5,258);
                     NoteArea = new NoteArea(this, 30, 276.85, 258, 401.95);
                     return;
             }
 
+            _logger.LogError($"Unknown media size found when scanning {Name}, \"{canonicalMediaName}\"");
             throw new NotImplementedException();
         }
 
@@ -142,6 +146,9 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             {
                 case PaperSize.A1Landscape:
                     return "ISO_expand_A1_(841.00_x_594.00_MM)";
+
+                case PaperSize.A3Landscape:
+                    return "ISO_expand_A3_(420.00_x_297.00_MM)";
             }
             
             throw new ArgumentOutOfRangeException();

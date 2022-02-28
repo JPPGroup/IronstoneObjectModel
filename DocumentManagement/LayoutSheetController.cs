@@ -43,10 +43,16 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                 {
                     _logger.LogTrace($"Sheet {item.Key} found");
                     Layout acLayout = acTrans.GetObject(item.Value, OpenMode.ForRead) as Layout;
-                    LayoutSheet ls = new LayoutSheet(_logger, acLayout);
+                    try
+                    {
+                        LayoutSheet ls = new LayoutSheet(_logger, acLayout);
 
-                    _logger.LogTrace($"Sheet {item.Key} added");
-                    Sheets.Add(item.Key, ls);
+                        _logger.LogTrace($"Sheet {item.Key} added");
+                        Sheets.Add(item.Key, ls);
+                    } catch (NotImplementedException e)
+                    {
+                        _logger.LogError(e, "Unable to create sheet, skipping");
+                    }
                 }
             }
         }

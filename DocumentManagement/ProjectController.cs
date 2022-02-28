@@ -91,6 +91,8 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             SheetControllers = new Dictionary<string, LayoutSheetController>();
 
             ScanFolder();
+            if(String.IsNullOrEmpty(_projectModel.Client) || String.IsNullOrEmpty(_projectModel.ProjectName) || String.IsNullOrEmpty(_projectModel.ProjectNumber))
+                DetermineProjectInfo();
 
             // TODO: Optimise the scan to only modified objects for perofmance
             // TODO: Replace this with individual methods instead
@@ -100,6 +102,30 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             _watcher.Deleted += (sender, args) => HandleDeleteWatcher(sender, args);
             //_watcher.Renamed += (sender, args) => ScanFolder();
             _watcher.EnableRaisingEvents = true;
+        }
+
+        private void DetermineProjectInfo()
+        {
+            Consensus projectName = new Consensus();
+            Consensus projectNumber = new Consensus();
+            Consensus client = new Consensus();
+
+            foreach (LayoutSheetController controller in SheetControllers.Values)
+            {
+                foreach(LayoutSheet sheet in controller.Sheets.Values)
+                {
+                    if (sheet.TitleBlock != null)
+                    {
+                        projectName.Add(sheet.TitleBlock.Project);
+                        projectNumber.Add(sheet.TitleBlock.ProjectNumber);
+                        client.Add(sheet.TitleBlock.Client);
+                    }   
+                }
+            }
+
+            _projectModel.Client = client.GetConsensus();
+            _projectModel.ProjectName = projectName.GetConsensus();
+            _projectModel.ProjectNumber = projectNumber.GetConsensus();
         }
 
         private void HandleDeleteWatcher(object sender, FileSystemEventArgs args)
@@ -135,7 +161,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         {
             _watcher.EnableRaisingEvents = false;
             string json = JsonSerializer.Serialize(_projectModel);
-            File.WriteAllText(Path.Combine(_workingDirectory, _settings["documentmanagement::configfile"]), json);
+            File.WriteAllText(Path.Combine(_workingDirectory, _settings["documentmanagement:configfile"]), json);
             _watcher.EnableRaisingEvents = true;
         }
 
