@@ -84,7 +84,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                 LayoutSheet resultSheet = new LayoutSheet(_logger, destinationLayout);
                 Sheets.Add(resultSheet.Name, resultSheet);
 
-                LayoutManager.Current.CurrentLayout = resultSheet.Name;
+                LayoutManager.Current.CurrentLayout = resultSheet.Name;                
                 //Object acadObject = Application.AcadApplication;
                 //Will this break in coreconsole?
                 //acadObject.GetType().InvokeMember("ZoomExtents",BindingFlags.InvokeMethod, null, acadObject, null);
@@ -95,6 +95,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         public void RemoveDefaultLayouts()
         {
+            _logger.LogDebug($"Removing default sheet layouts");
             Transaction trans = _document.TransactionManager.TopTransaction;
 
             DBDictionary layoutDic = trans.GetObject(_document.LayoutDictionaryId, OpenMode.ForRead, false) as DBDictionary;
@@ -114,8 +115,11 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                     if (!m.Success)
                     {
                         acLayoutMgr.DeleteLayout(layout.LayoutName);
-                        if(Sheets.ContainsKey(layout.LayoutName))
+                        if (Sheets.ContainsKey(layout.LayoutName))
+                        {
+                            _logger.LogTrace($"Removing sheet {layout.LayoutName}.");
                             Sheets.Remove(layout.LayoutName);
+                        }
                     }
                 }
             }
