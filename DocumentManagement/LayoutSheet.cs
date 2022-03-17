@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.PlottingServices;
 using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
@@ -13,6 +15,11 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         public string Name { get; private set; }
 
         public TitleBlock TitleBlock { get; private set; }
+
+        public StatusBlock StatusBlock { get; private set; }
+
+        public IReadOnlyList<RevisionBlock> RevisionBlocks { get { return _revisionBlocks; } }
+        private List<RevisionBlock> _revisionBlocks = new List<RevisionBlock>();
 
         private Layout _layout;
 
@@ -34,6 +41,8 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             {
                 SetSize(_layout.CanonicalMediaName);
                 FindTitleBlock();
+                FindStatusBlock();
+                FindRevisionBlocks();
             }
         }
 
@@ -173,6 +182,45 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             throw new ArgumentOutOfRangeException();
         }
 
+        private string GetRevisioneBlockName()
+        {
+            switch (Size)
+            {
+                /*case PaperSize.A0Landscape:
+                    return "A0 Mask";
+
+                case PaperSize.A1Landscape:
+                    return "A1revisionblock";
+
+                case PaperSize.A2Landscape:
+                    return "A2 Mask";
+
+                case PaperSize.A3Landscape:
+                    return "A3 Mask";
+
+                case PaperSize.A0Portrait:
+                    return "A0mask (portrait)";
+
+                case PaperSize.A1Portrait:
+                    return "A1mask (portrait)";
+
+                case PaperSize.A2Portrait:
+                    return "A2mask (portrait)";
+
+                case PaperSize.A3Portrait:
+                    return "A3mask (portrait)";
+
+                case PaperSize.A4Portrait:
+                    return "A4 Mask";*/
+
+                case PaperSize.A1Landscape:
+                case PaperSize.A1Portrait:
+                    return "A1revisionblock";
+            }
+
+            throw new ArgumentOutOfRangeException();
+        }
+
         private void FindTitleBlock()
         {
             Transaction acTrans = _layout.Database.TransactionManager.TopTransaction;
@@ -188,6 +236,59 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             }
 
             TitleBlock = new TitleBlock(blocks.ElementAt(0));
+        }
+
+        private void FindStatusBlock()
+        {
+            Transaction acTrans = _layout.Database.TransactionManager.TopTransaction;
+            BlockTableRecord btr = (BlockTableRecord)acTrans.GetObject(_layout.BlockTableRecordId, OpenMode.ForRead);
+
+            var blocks = _layout.GetBlockReferences().Select(br => new BlockRefDrawingObject(_layout.Database, br));
+            blocks = blocks.Where(br => br.BlockName == "STATUS");
+
+            if (blocks.Count() != 1)
+            {
+                _logger.LogWarning("No status block found for sheet");
+                return;
+            }
+
+            StatusBlock = new StatusBlock(blocks.ElementAt(0));
+        }
+
+        private void FindRevisionBlocks()
+        {
+            _revisionBlocks = new List<RevisionBlock>();
+
+            Transaction acTrans = _layout.Database.TransactionManager.TopTransaction;
+            BlockTableRecord btr = (BlockTableRecord)acTrans.GetObject(_layout.BlockTableRecordId, OpenMode.ForRead);
+
+            var blocks = _layout.GetBlockReferences().Select(br => new BlockRefDrawingObject(_layout.Database, br));
+            blocks = blocks.Where(br => br.BlockName == GetRevisioneBlockName());
+
+            if (blocks.Count() == 0)
+            {
+                _logger.LogWarning("No revision blocks found for sheet");
+                return;
+            }
+
+            foreach(var block in blocks)
+            {
+                _revisionBlocks.Add(new RevisionBlock(block));
+            }            
+        }
+
+        public RevisionBlock AddRevision(string revision, string description, string drawn, string checker, string date)
+        {
+            const float Height = 5;
+            Point3d insertionPoint = new Point3d(NoteArea.Left, NoteArea.Bottom + RevisionBlocks.Count() * Height, 0);
+            var newBlock = RevisionBlock.Create(_layout.Database, insertionPoint, GetRevisioneBlockName());
+            newBlock.Revision = revision;
+            newBlock.Description = description;
+            newBlock.DrawnBy = drawn;
+            newBlock.CheckedBy = checker;
+            newBlock.Date = date;
+
+            return newBlock;
         }
     }
 }
