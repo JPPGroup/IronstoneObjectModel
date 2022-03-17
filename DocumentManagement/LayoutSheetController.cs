@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 using Jpp.Common;
 using Jpp.Ironstone.Core;
 using Jpp.Ironstone.Core.Autocad;
@@ -20,10 +22,13 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         private ILogger<CoreExtensionApplication> _logger;
         private IConfiguration _settings;
 
+        public string DocName { get; private set; }
+
         public LayoutSheetController(ILogger<CoreExtensionApplication> logger, Database doc, IConfiguration settings)
         {
             Sheets = new SerializableDictionary<string, LayoutSheet>();
             _document = doc;
+            DocName = Path.GetFileName(_document.Filename);
             _logger = logger;
             _settings = settings;
         }
@@ -194,6 +199,21 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        public void PrepareTransmit(string filename)
+        {
+            Database copy = _document.Wblock();
+            using (Transaction trans = copy.TransactionManager.StartTransaction())
+            {
+                copy.BindAlResolvedXrefs();
+                copy.PurgeAll();
+                copy.Audit(true, false);
+                trans.Commit();
+            }
+
+            //_document.Save();
+            copy.SaveAs(filename, DwgVersion.Current);
         }
     }
 }
