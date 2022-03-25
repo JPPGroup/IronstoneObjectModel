@@ -75,7 +75,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 
         public void SetStandardScale(IConfiguration settings, double scale)
         {
-            double[] settingScales = settings.GetValue<double[]>("standardScales");
+            double[] settingScales = settings.GetSection("standardScales").Get<double[]>();
             List<double> scaleValue = new List<double>();
             foreach (double setting in settingScales)
             {

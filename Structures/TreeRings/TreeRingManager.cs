@@ -357,5 +357,17 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
                 RingsCollection.Add(currentDepth, newRing);
             }
         }
+
+        public override Extents3d GetBoundingBox()
+        {
+            Extents3d extents = base.GetBoundingBox();
+
+            foreach(var ring in RingsCollection.Values)
+            {
+                extents.AddExtents(ring.GetBoundingBox());
+            }
+
+            return extents;
+        }
     }
 }

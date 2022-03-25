@@ -21,7 +21,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         public IReadOnlyList<RevisionBlock> RevisionBlocks { get { return _revisionBlocks; } }
         private List<RevisionBlock> _revisionBlocks = new List<RevisionBlock>();
 
-        private Layout _layout;
+        internal Layout _layout;
 
         public ObjectId LayoutID { get; private set; }
 
@@ -53,25 +53,25 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                 case "User2059":
                     Size = PaperSize.A0Landscape;
                     DrawingArea = new DrawingArea(_layout, 60, 810, 15, 880);
-                    NoteArea = new NoteArea(60, 810, 880, 1168);
+                    NoteArea = new NoteArea(this, 60, 810, 880, 1168);
                     return;
 
                 case "User3082":
                     Size = PaperSize.A1Landscape;
                     DrawingArea = new DrawingArea(_layout, 74.434, 579.435, 15.403, 564.653);
-                    NoteArea  = new NoteArea(74.434, 579.435, 564.653, 825.403);
+                    NoteArea  = new NoteArea(this, 74.434, 579.435, 564.653, 825.403);
                     return;
 
                 case "User1090":
                     Size = PaperSize.A2Landscape;
                     DrawingArea = new DrawingArea(_layout, 23.278, 386.309, 0.201, 419.701);
-                    NoteArea = new NoteArea(3.278, 386.309, 419.701, 563.701);
+                    NoteArea = new NoteArea(this, 3.278, 386.309, 419.701, 563.701);
                     return;
 
                 case "A3":
                     Size = PaperSize.A3Landscape;
                     DrawingArea = new DrawingArea(_layout, 30, 276.85,7.5,258);
-                    NoteArea = new NoteArea(30, 276.85, 258, 401.95);
+                    NoteArea = new NoteArea(this, 30, 276.85, 258, 401.95);
                     return;
             }
 
@@ -145,6 +145,12 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             }
             
             throw new ArgumentOutOfRangeException();
+        }
+
+        public BlockTableRecord GetBlockTableRecord()
+        {
+            Transaction trans = _layout.Database.TransactionManager.TopTransaction;
+            return (BlockTableRecord)trans.GetObject(_layout.BlockTableRecordId, OpenMode.ForWrite);
         }
 
         private string GetTitleBlockName()
