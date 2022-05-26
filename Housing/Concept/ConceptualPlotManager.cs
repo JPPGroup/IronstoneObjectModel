@@ -68,14 +68,15 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Concept
                 {
                     if (conceptualPlot.FoundationsEnabled)
                     {
-                        #if !DEBUG
+                        //TODO: Restore??
+                        /*#if !DEBUG
                         if (!SharedUIHelper.StructuresAvailable)
                         {
                             _logger.LogError("Foundations cannot be updated while the structures modules is not present");
 
                             continue;
                         }
-                        #endif
+                        #endif*/
 
                         if(conceptualPlot.EstimateFoundationLevel(ExistingLevels, ProposedLevels, Properties))
                             conceptualPlot.RenderFoundations(Properties.DepthBands, _logger);
