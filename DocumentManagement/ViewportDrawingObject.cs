@@ -25,13 +25,14 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
         {
             Transaction trans = layout.Database.TransactionManager.TopTransaction;
             Viewport vp = new Viewport();
-            var btr = (BlockTableRecord)trans.GetObject(layout.BlockTableRecordId, OpenMode.ForWrite);
+            var btr = (BlockTableRecord)trans.GetObject(layout.BlockTableRecordId, OpenMode.ForWrite);            
 
             btr.AppendEntity(vp);
             trans.AddNewlyCreatedDBObject(vp, true);
 
             ViewportDrawingObject result = new ViewportDrawingObject(vp);
             result.SetDimensions(Bottom, Top, Left, Right);
+            vp.On = true;
             return result;
         }
 
@@ -71,6 +72,14 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             Transaction trans = _database.TransactionManager.TopTransaction;
             Viewport vp = trans.GetObject(BaseObject, OpenMode.ForWrite) as Viewport;
             vp.CustomScale = scale;
+            vp.AnnotationScale = _database.GetOrCreateAnnotativeScale($"I 1:{scale}", 1d / scale);
+        }
+
+        public double GetScale()
+        {
+            Transaction trans = _database.TransactionManager.TopTransaction;
+            Viewport vp = trans.GetObject(BaseObject, OpenMode.ForRead) as Viewport;
+            return vp.CustomScale;
         }
 
         public void SetStandardScale(IConfiguration settings, double scale)
