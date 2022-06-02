@@ -32,7 +32,12 @@ namespace Jpp.Ironstone.Housing.ObjectModel.Detail
         {
             _logger = CoreExtensionApplication._current.Container.GetRequiredService<ILogger<CoreExtensionApplication>>();
             _foundationGroups = new List<FoundationGroup>();
-            _soilProperties = DataService.Current.GetStore<StructureDocumentStore>(HostDocument.Name).SoilProperties;
+
+            //TODO: Debug why this is failing with no doc??
+            if (HostDocument != null)
+            {
+                _soilProperties = DataService.Current.GetStore<StructureDocumentStore>(HostDocument.Name).SoilProperties;
+            }
         }
 
         public override void UpdateDirty()
