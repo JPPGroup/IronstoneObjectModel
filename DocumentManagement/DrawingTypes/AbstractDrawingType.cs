@@ -34,14 +34,16 @@ namespace Jpp.Ironstone.DocumentManagement.Objectmodel.DrawingTypes
         {
             if (_document != null)
             {
-                _document.CloseAndDiscard();
+                //TODO: Check this
+                //_document.CloseAndDiscard();
             }
         }
 
         public Document GetDocument()
         {
             if(_document == null)
-                _document = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.Open(GetPath());
+                throw new NotImplementedException();
+                //_document = Autodesk.AutoCAD.ApplicationServices.Core.Application.DocumentManager.Open(GetPath());
 
             return _document;
         }

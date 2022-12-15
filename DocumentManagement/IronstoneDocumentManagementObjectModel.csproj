@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project>
-  <Import Project="..\IronstoneBase\IronstoneObjectModelBaseUiProject.csproj" />
+  <Import Project="..\IronstoneBase\IronstoneObjectModelBaseProject.csproj" />
   <PropertyGroup>
     <RootNamespace>Jpp.Ironstone.DocumentManagement.ObjectModel</RootNamespace>
     <AssemblyName>IronstoneDocumentManagementObjectModel</AssemblyName>
@@ -23,6 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="2.10.1" />
+    <PackageReference Include="Enums.NET" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="Properties\Resources.Designer.cs">

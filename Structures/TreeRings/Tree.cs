@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Jpp.Ironstone.Core.Autocad;
+using Jpp.Ironstone.Core.Autocad.DrawingObjects.Primitives;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
@@ -82,6 +83,9 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
 
         public bool ToBeRemoved { get; set; }
 
+        //TODO: Rework to use subobjects
+        public MTextDrawingObject Label { get; set; }        
+
         public Tree() : base()
         {
 
@@ -146,21 +150,12 @@ namespace Jpp.Ironstone.Structures.ObjectModel.TreeRings
             if (ExceedsNHBC)
             {
                 nhbcWarning = "*";
-            }
+            }            
 
-            //Draw label
-            MText text = new MText
-            {
-                Height = 2, 
-                Location = Location, 
-                Contents = $"No. {ID}\\P{Species}\\PDesign Height: {Height}m{nhbcWarning}\\PActual Height: {ActualHeight}m",
-                Layer = layerManager.GetLayerName(Constants.LABEL_LAYER)
-            };
+            MTextDrawingObject mText = MTextDrawingObject.Create(this.Database, Location, $"No. {ID}\\P{Species}\\PDesign Height: {Height}m{nhbcWarning}\\PActual Height: {ActualHeight}m");
+            mText.SetLayer(Constants.LABEL_LAYER);                      
 
-            /*Label = new TextObject();
-            Label.BaseObject = acBlkTblRec.AppendEntity(text);*/
-            acBlkTblRec.AppendEntity(text);
-             acTrans.AddNewlyCreatedDBObject(text, true);
+            Label = mText;
         }
 
         public virtual DBObjectCollection DrawRings(Shrinkage shrinkage, double StartDepth, double Step)

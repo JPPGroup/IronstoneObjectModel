@@ -13,7 +13,7 @@
     <FileVersion>9.9.9.9</FileVersion>
   </PropertyGroup>
 
-  <Import Project="..\IronstoneBase\IronstoneObjectModelBaseUiProject.csproj" />
+  <Import Project="..\IronstoneBase\IronstoneObjectModelBaseProject.csproj" />
 
   <ItemGroup>
     <ProjectReference Include="..\Structures\StructuresObjectModel.csproj" />

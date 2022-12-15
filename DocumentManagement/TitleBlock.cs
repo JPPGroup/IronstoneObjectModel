@@ -125,5 +125,11 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             get { return GetProperty<string>("DATE"); }
             set { SetProperty("DATE", value); }
         }
+
+        public string Scale
+        {
+            get { return GetProperty<string>("SCALE"); }
+            set { SetProperty("SCALE", value); }
+        }
     }
 }

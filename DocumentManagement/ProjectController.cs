@@ -12,7 +12,7 @@ using Jpp.Ironstone.DocumentManagement.ObjectModel.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Application = Autodesk.AutoCAD.ApplicationServices.Application;
+using Application = Autodesk.AutoCAD.ApplicationServices.Core.Application;
 
 namespace Jpp.Ironstone.DocumentManagement.ObjectModel
 {
@@ -151,7 +151,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             using (Document newDoc = CreateDrawing(targetFilename))
             {
                 newDrawing.Initialise(newDoc);
-                newDoc.CloseAndSave(GetPath(targetFilename, false));
+                //newDoc.CloseAndSave(GetPath(targetFilename, false));
             }
             return newDrawing;
         }
@@ -169,7 +169,7 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
                 using (Document newDoc = CreateXref(newDrawing.DefaultFilename))
                 {
                     newDrawing.Initialise(newDoc);
-                    newDoc.CloseAndSave(path);
+                    //newDoc.CloseAndSave(path);
                 }
             }
 
@@ -204,11 +204,12 @@ namespace Jpp.Ironstone.DocumentManagement.ObjectModel
             _watcher.EnableRaisingEvents = false;
             //Create a new foundation xref
             DocumentCollection acDocMgr = Application.DocumentManager;
-            Document acDoc = acDocMgr.Add(null);
+            throw new NotImplementedException();
+            /*Document acDoc = acDocMgr.Add(null);
             
             acDoc.Database.SaveAs(path, DwgVersion.Current);
             _watcher.EnableRaisingEvents = true;
-            return acDoc;
+            return acDoc;*/
         }
 
         private void ScanFolder()
