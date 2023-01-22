@@ -3,7 +3,6 @@ using Autodesk.Windows;
 using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Core.UI;
 using Jpp.Ironstone.Core.UI.Autocad;
-using Jpp.Ironstone.Housing.ObjectModel.Concept;
 using Jpp.Ironstone.Housing.ObjectModel.Properties;
 
 namespace Jpp.Ironstone.Housing.ObjectModel
