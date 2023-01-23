@@ -19,9 +19,4 @@
   <ItemGroup>
     <ProjectReference Include="..\DesignCalculations\src\DesignCalculations.Calculations\DesignCalculations.Calculations.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <None Update="IronstoneConfig.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
 </Project>
