@@ -4,8 +4,9 @@ using Jpp.Ironstone.Core.ServiceInterfaces;
 using Jpp.Ironstone.Core.UI;
 using Jpp.Ironstone.Core.UI.Autocad;
 using Jpp.Ironstone.Housing.ObjectModel.Properties;
+using Jpp.Ironstone.Housing.ObjectModel.UI.Properties;
 
-namespace Jpp.Ironstone.Housing.ObjectModel
+namespace Jpp.Ironstone.Housing.ObjectModel.UI
 {
     public class SharedUIHelper
     {
